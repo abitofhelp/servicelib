@@ -117,16 +117,14 @@ func (s *JWTService) ValidateToken(tokenString string) (*Claims, error) {
 		return []byte(s.config.SecretKey), nil
 	})
 
-	if err != nil {
-		s.logger.Debug("Failed to parse token", zap.Error(err))
+	// If there was an error parsing the token or the token is not valid,
+	// return an error and no claims
+	if err != nil || !token.Valid {
+		s.logger.Debug("Invalid token", zap.Error(err))
 		return nil, fmt.Errorf("invalid token: %w", err)
 	}
 
-	if !token.Valid {
-		s.logger.Debug("Invalid token")
-		return nil, fmt.Errorf("invalid token")
-	}
-
+	// Only extract claims if the token is valid
 	claims, ok := token.Claims.(*Claims)
 	if !ok {
 		s.logger.Debug("Failed to extract claims from token")
