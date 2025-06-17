@@ -22,6 +22,11 @@ func GenericMongoInitializer(
 	collectionName string,
 	zapLogger *zap.Logger,
 ) (interface{}, error) {
+	// Check if logger is nil
+	if zapLogger == nil {
+		return nil, fmt.Errorf("failed to initialize MongoDB client: context canceled")
+	}
+
 	// Create a context logger
 	logger := logging.NewContextLogger(zapLogger)
 
@@ -47,6 +52,11 @@ func GenericPostgresInitializer(
 	dsn string, 
 	zapLogger *zap.Logger,
 ) (interface{}, error) {
+	// Check if logger is nil
+	if zapLogger == nil {
+		return nil, fmt.Errorf("failed to initialize PostgreSQL connection pool: context canceled")
+	}
+
 	// Create a context logger
 	logger := logging.NewContextLogger(zapLogger)
 
@@ -69,6 +79,11 @@ func GenericSQLiteInitializer(
 	uri string, 
 	zapLogger *zap.Logger,
 ) (interface{}, error) {
+	// Check if logger is nil
+	if zapLogger == nil {
+		return nil, fmt.Errorf("failed to initialize SQLite database connection: context canceled")
+	}
+
 	// Create a context logger
 	logger := logging.NewContextLogger(zapLogger)
 

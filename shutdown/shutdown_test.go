@@ -5,6 +5,7 @@ package shutdown
 import (
 	"context"
 	"errors"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -151,9 +152,9 @@ func TestGracefulShutdown_CustomTimeout(t *testing.T) {
 	resultCh := make(chan error)
 
 	// Create a shutdown function that hangs
-	shutdownCalled := false
+	var shutdownCalled int32 // Using atomic for thread safety
 	shutdownFunc := func() error {
-		shutdownCalled = true
+		atomic.StoreInt32(&shutdownCalled, 1)
 		// Sleep for longer than the test timeout to simulate a hanging function
 		time.Sleep(5 * time.Second)
 		return nil
@@ -198,7 +199,7 @@ func TestGracefulShutdown_CustomTimeout(t *testing.T) {
 	case err := <-resultCh:
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "shutdown function timed out")
-		assert.True(t, shutdownCalled, "Shutdown function should have been called")
+		assert.True(t, atomic.LoadInt32(&shutdownCalled) == 1, "Shutdown function should have been called")
 	case <-time.After(2 * time.Second):
 		t.Fatal("Test timed out")
 	}
