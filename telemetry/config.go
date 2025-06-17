@@ -1,6 +1,8 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Package telemetry provides functionality for monitoring and tracing application behavior.
+// It offers a unified interface for both metrics collection and distributed tracing
+// using OpenTelemetry and Prometheus.
 package telemetry
 
 import (
