@@ -235,9 +235,12 @@ config.local.yaml
 # Temporary files
 tmp/
 
-coverage/*.html
-coverage/*.out
 cmd/server/*.html
+
+# Ignore coverage files in any directory
+**/coverage.html
+**/coverage.out
+**/*.out
 
 secrets/
 
