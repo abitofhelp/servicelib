@@ -98,8 +98,9 @@ func NewMetricsProvider(ctx context.Context, logger *logging.ContextLogger, k *k
 	// Set global meter provider
 	otel.SetMeterProvider(provider)
 
-	// Create meter
-	meter := provider.Meter("github.com/abitofhelp/family-service")
+	// Create meter with the service name
+	meterName := fmt.Sprintf("github.com/abitofhelp/%s", config.ServiceName)
+	meter := provider.Meter(meterName)
 
 	logger.Info(ctx, "Metrics provider initialized",
 		zap.String("service", config.ServiceName),

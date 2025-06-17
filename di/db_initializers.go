@@ -1,29 +1,31 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
-// Package di provides repository initializers for different database types.
+// Package di provides generic database initializers that can be used across different applications.
 package di
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
 	"github.com/abitofhelp/servicelib/db"
 	"github.com/abitofhelp/servicelib/logging"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
 )
 
-// GenericMongoInitializer initializes a MongoDB collection and returns it
-// This can be used by applications to create their own repository initializers
-func GenericMongoInitializer(
-	ctx context.Context, 
-	uri string, 
+// MongoDBInitializer initializes a MongoDB client and collection
+func MongoDBInitializer(
+	ctx context.Context,
+	uri string,
 	databaseName string,
 	collectionName string,
-	zapLogger *zap.Logger,
-) (interface{}, error) {
+	logger *zap.Logger,
+) (*mongo.Collection, error) {
 	// Create a context logger
-	logger := logging.NewContextLogger(zapLogger)
+	contextLogger := logging.NewContextLogger(logger)
 
 	// Initialize MongoDB client using the db package
 	client, err := db.InitMongoClient(ctx, uri, DefaultTimeout)
@@ -32,7 +34,7 @@ func GenericMongoInitializer(
 	}
 
 	// Log successful connection
-	db.LogDatabaseConnection(ctx, logger, "MongoDB")
+	db.LogDatabaseConnection(ctx, contextLogger, "MongoDB")
 
 	// Get the collection
 	collection := client.Database(databaseName).Collection(collectionName)
@@ -40,15 +42,14 @@ func GenericMongoInitializer(
 	return collection, nil
 }
 
-// GenericPostgresInitializer initializes a PostgreSQL connection pool and returns it
-// This can be used by applications to create their own repository initializers
-func GenericPostgresInitializer(
-	ctx context.Context, 
-	dsn string, 
-	zapLogger *zap.Logger,
-) (interface{}, error) {
+// PostgresInitializer initializes a PostgreSQL connection pool
+func PostgresInitializer(
+	ctx context.Context,
+	dsn string,
+	logger *zap.Logger,
+) (*pgxpool.Pool, error) {
 	// Create a context logger
-	logger := logging.NewContextLogger(zapLogger)
+	contextLogger := logging.NewContextLogger(logger)
 
 	// Initialize PostgreSQL connection pool using the db package
 	pool, err := db.InitPostgresPool(ctx, dsn, DefaultTimeout)
@@ -57,20 +58,19 @@ func GenericPostgresInitializer(
 	}
 
 	// Log successful connection
-	db.LogDatabaseConnection(ctx, logger, "PostgreSQL")
+	db.LogDatabaseConnection(ctx, contextLogger, "PostgreSQL")
 
 	return pool, nil
 }
 
-// GenericSQLiteInitializer initializes a SQLite database connection and returns it
-// This can be used by applications to create their own repository initializers
-func GenericSQLiteInitializer(
-	ctx context.Context, 
-	uri string, 
-	zapLogger *zap.Logger,
-) (interface{}, error) {
+// SQLiteInitializer initializes a SQLite database connection
+func SQLiteInitializer(
+	ctx context.Context,
+	uri string,
+	logger *zap.Logger,
+) (*sql.DB, error) {
 	// Create a context logger
-	logger := logging.NewContextLogger(zapLogger)
+	contextLogger := logging.NewContextLogger(logger)
 
 	// Initialize SQLite database connection using the db package
 	sqliteDB, err := db.InitSQLiteDB(ctx, uri, DefaultTimeout, time.Hour, 10, 5)
@@ -79,7 +79,7 @@ func GenericSQLiteInitializer(
 	}
 
 	// Log successful connection
-	db.LogDatabaseConnection(ctx, logger, "SQLite")
+	db.LogDatabaseConnection(ctx, contextLogger, "SQLite")
 
 	return sqliteDB, nil
 }

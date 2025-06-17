@@ -3,23 +3,19 @@
 // Package health provides functionality for health checking the application.
 package health
 
-import (
-	"github.com/abitofhelp/family-service/cmd/server/graphql/di"
-)
-
-// ContainerAdapter adapts the di.Container to implement HealthCheckProvider
-type ContainerAdapter struct {
-	Container *di.Container
+// GenericContainerAdapter is a generic adapter for any container that implements RepositoryFactoryProvider
+type GenericContainerAdapter[T RepositoryFactoryProvider] struct {
+	Container T
 }
 
-// NewContainerAdapter creates a new ContainerAdapter
-func NewContainerAdapter(container *di.Container) *ContainerAdapter {
-	return &ContainerAdapter{
+// NewGenericContainerAdapter creates a new GenericContainerAdapter
+func NewGenericContainerAdapter[T RepositoryFactoryProvider](container T) *GenericContainerAdapter[T] {
+	return &GenericContainerAdapter[T]{
 		Container: container,
 	}
 }
 
 // GetRepositoryFactory returns the repository factory as an interface{}
-func (a *ContainerAdapter) GetRepositoryFactory() any {
+func (a *GenericContainerAdapter[T]) GetRepositoryFactory() any {
 	return a.Container.GetRepositoryFactory()
 }

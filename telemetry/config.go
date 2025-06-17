@@ -132,12 +132,21 @@ func LoadConfig(k *koanf.Koanf) Config {
 
 // GetTelemetryDefaults returns default values for telemetry configuration
 //
+// Parameters:
+//   - serviceName: The name of the service (optional, defaults to "service")
+//
 // Returns:
 //   - map[string]interface{}: Default values for telemetry configuration
-func GetTelemetryDefaults() map[string]interface{} {
+func GetTelemetryDefaults(serviceName ...string) map[string]interface{} {
+	// Use the provided service name or default to "service"
+	name := "service"
+	if len(serviceName) > 0 && serviceName[0] != "" {
+		name = serviceName[0]
+	}
+
 	return map[string]interface{}{
 		"telemetry.enabled":          true,
-		"telemetry.service_name":     "family-service",
+		"telemetry.service_name":     name,
 		"telemetry.environment":      "development",
 		"telemetry.version":          "1.0.0",
 		"telemetry.shutdown_timeout": 5,

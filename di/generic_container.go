@@ -7,101 +7,97 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/abitofhelp/family-service/core/application/ports"
-	application "github.com/abitofhelp/family-service/core/application/services"
-	domainports "github.com/abitofhelp/family-service/core/domain/ports"
-	domainservices "github.com/abitofhelp/family-service/core/domain/services"
-	"github.com/abitofhelp/family-service/infrastructure/adapters/config"
 	"go.uber.org/zap"
 )
 
-// RepositoryInitializer is a function type that initializes a repository
-type RepositoryInitializer[T domainports.FamilyRepository] func(ctx context.Context, connectionString string, logger *zap.Logger) (T, error)
+// AppRepositoryInitializer is a function type that initializes a repository
+type AppRepositoryInitializer[T any] func(ctx context.Context, connectionString string, logger *zap.Logger) (T, error)
 
-// GenericContainer is a generic dependency injection container for any database type
-type GenericContainer[T domainports.FamilyRepository] struct {
-	*Container
-	familyRepo          T
-	familyDomainService *domainservices.FamilyDomainService
-	familyAppService    ports.FamilyApplicationService
+// GenericDomainServiceInitializer is a function type that initializes a domain service
+type GenericDomainServiceInitializer[R any, D any] func(repository R) (D, error)
+
+// GenericApplicationServiceInitializer is a function type that initializes an application service
+type GenericApplicationServiceInitializer[R any, D any, A any] func(domainService D, repository R) (A, error)
+
+// GenericAppContainer is a generic dependency injection container for any application
+type GenericAppContainer[R any, D any, A any, C any] struct {
+	*BaseContainer[C]
+	repository         R
+	domainService      D
+	applicationService A
 }
 
-// NewGenericContainer creates a new generic dependency injection container
-func NewGenericContainer[T domainports.FamilyRepository](
+// NewGenericAppContainer creates a new generic application container
+func NewGenericAppContainer[R any, D any, A any, C any](
 	ctx context.Context,
 	logger *zap.Logger,
-	cfg *config.Config,
-	initRepo RepositoryInitializer[T],
+	cfg C,
 	connectionString string,
-) (*GenericContainer[T], error) {
+	initRepo AppRepositoryInitializer[R],
+	initDomainService GenericDomainServiceInitializer[R, D],
+	initAppService GenericApplicationServiceInitializer[R, D, A],
+) (*GenericAppContainer[R, D, A, C], error) {
 	// Create base container
-	baseContainer, err := NewContainer(ctx, logger, cfg)
+	baseContainer, err := NewBaseContainer(ctx, logger, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create base container: %w", err)
 	}
 
 	// Create generic container
-	container := &GenericContainer[T]{
-		Container: baseContainer,
+	container := &GenericAppContainer[R, D, A, C]{
+		BaseContainer: baseContainer,
 	}
 
 	// Initialize repository
-	container.familyRepo, err = initRepo(ctx, connectionString, logger)
+	container.repository, err = initRepo(ctx, connectionString, logger)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize repository: %w", err)
 	}
 
 	// Initialize domain service
-	container.familyDomainService = domainservices.NewFamilyDomainService(container.familyRepo)
+	container.domainService, err = initDomainService(container.repository)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize domain service: %w", err)
+	}
 
 	// Initialize application service
-	container.familyAppService = application.NewFamilyApplicationService(
-		container.familyDomainService,
-		container.familyRepo,
-	)
+	container.applicationService, err = initAppService(container.domainService, container.repository)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize application service: %w", err)
+	}
 
 	return container, nil
 }
 
-// GetFamilyRepository returns the family repository
-func (c *GenericContainer[T]) GetFamilyRepository() domainports.FamilyRepository {
-	return c.familyRepo
+// GetRepository returns the repository
+func (c *GenericAppContainer[R, D, A, C]) GetRepository() R {
+	return c.repository
 }
 
-// GetFamilyDomainService returns the family domain service
-func (c *GenericContainer[T]) GetFamilyDomainService() *domainservices.FamilyDomainService {
-	return c.familyDomainService
+// GetDomainService returns the domain service
+func (c *GenericAppContainer[R, D, A, C]) GetDomainService() D {
+	return c.domainService
 }
 
-// GetFamilyApplicationService returns the family application service
-func (c *GenericContainer[T]) GetFamilyApplicationService() ports.FamilyApplicationService {
-	return c.familyAppService
+// GetApplicationService returns the application service
+func (c *GenericAppContainer[R, D, A, C]) GetApplicationService() A {
+	return c.applicationService
 }
 
-// GetRepositoryFactory returns the family repository
-func (c *GenericContainer[T]) GetRepositoryFactory() interface{} {
-	return c.familyRepo
-}
-
-// For backward compatibility with the test file
-func (c *GenericContainer[T]) GetFamilyService() interface{} {
-	return c.familyAppService
-}
-
-// For backward compatibility with the test file
-func (c *GenericContainer[T]) GetAuthorizationService() interface{} {
-	return nil
+// GetRepositoryFactory returns the repository as an interface{}
+func (c *GenericAppContainer[R, D, A, C]) GetRepositoryFactory() interface{} {
+	return c.repository
 }
 
 // Close closes all resources
-func (c *GenericContainer[T]) Close() error {
+func (c *GenericAppContainer[R, D, A, C]) Close() error {
 	var errs []error
 
 	// Add resource cleanup here as needed
 	// For example, close database connections if they implement a Close method
 
 	// Close base container
-	if err := c.Container.Close(); err != nil {
+	if err := c.BaseContainer.Close(); err != nil {
 		errs = append(errs, err)
 	}
 

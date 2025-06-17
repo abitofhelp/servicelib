@@ -3,95 +3,140 @@
 // Package config provides generic configuration interfaces and adapters.
 package config
 
-import (
-	"github.com/abitofhelp/family-service/infrastructure/adapters/config"
-)
+// AppConfigProvider defines the interface for accessing application configuration
+type AppConfigProvider interface {
+	// GetAppVersion returns the application version
+	GetAppVersion() string
 
-// ConfigAdapter adapts the existing config.Config to the new Config interface
-type ConfigAdapter struct {
-	config *config.Config
+	// GetAppName returns the application name (optional)
+	GetAppName() string
+
+	// GetAppEnvironment returns the application environment (optional)
+	GetAppEnvironment() string
 }
 
-// NewConfigAdapter creates a new ConfigAdapter
-func NewConfigAdapter(cfg *config.Config) *ConfigAdapter {
-	return &ConfigAdapter{
+// DatabaseConfigProvider defines the interface for accessing database configuration
+type DatabaseConfigProvider interface {
+	// GetDatabaseType returns the database type
+	GetDatabaseType() string
+
+	// GetDatabaseConnectionString returns the database connection string
+	GetDatabaseConnectionString(dbType string) string
+}
+
+// GenericConfigAdapter is a generic adapter for any config type that provides the necessary methods
+type GenericConfigAdapter[T any] struct {
+	config T
+	appName string
+	appEnvironment string
+	dbName string
+}
+
+// NewGenericConfigAdapter creates a new GenericConfigAdapter with default values
+func NewGenericConfigAdapter[T any](cfg T) *GenericConfigAdapter[T] {
+	return &GenericConfigAdapter[T]{
 		config: cfg,
+		appName: "application",
+		appEnvironment: "development",
+		dbName: "database",
 	}
 }
 
+// WithAppName sets the application name
+func (a *GenericConfigAdapter[T]) WithAppName(name string) *GenericConfigAdapter[T] {
+	a.appName = name
+	return a
+}
+
+// WithAppEnvironment sets the application environment
+func (a *GenericConfigAdapter[T]) WithAppEnvironment(env string) *GenericConfigAdapter[T] {
+	a.appEnvironment = env
+	return a
+}
+
+// WithDatabaseName sets the database name
+func (a *GenericConfigAdapter[T]) WithDatabaseName(name string) *GenericConfigAdapter[T] {
+	a.dbName = name
+	return a
+}
+
 // GetApp returns the application configuration
-func (a *ConfigAdapter) GetApp() AppConfig {
-	return &AppConfigAdapter{
+func (a *GenericConfigAdapter[T]) GetApp() AppConfig {
+	return &GenericAppConfigAdapter[T]{
 		config: a.config,
+		appName: a.appName,
+		appEnvironment: a.appEnvironment,
 	}
 }
 
 // GetDatabase returns the database configuration
-func (a *ConfigAdapter) GetDatabase() DatabaseConfig {
-	return &DatabaseConfigAdapter{
+func (a *GenericConfigAdapter[T]) GetDatabase() DatabaseConfig {
+	return &GenericDatabaseConfigAdapter[T]{
 		config: a.config,
+		dbName: a.dbName,
 	}
 }
 
-// AppConfigAdapter adapts the existing config.Config to the new AppConfig interface
-type AppConfigAdapter struct {
-	config *config.Config
+// GenericAppConfigAdapter is a generic adapter for application configuration
+type GenericAppConfigAdapter[T any] struct {
+	config T
+	appName string
+	appEnvironment string
 }
 
 // GetVersion returns the application version
-func (a *AppConfigAdapter) GetVersion() string {
-	return a.config.App.Version
+func (a *GenericAppConfigAdapter[T]) GetVersion() string {
+	if provider, ok := any(a.config).(AppConfigProvider); ok {
+		return provider.GetAppVersion()
+	}
+	return "1.0.0" // Default version
 }
 
 // GetName returns the application name
-func (a *AppConfigAdapter) GetName() string {
-	// The existing config doesn't have a name field, so we return a default value
-	return "family-service-graphql"
+func (a *GenericAppConfigAdapter[T]) GetName() string {
+	if provider, ok := any(a.config).(AppConfigProvider); ok {
+		return provider.GetAppName()
+	}
+	return a.appName
 }
 
 // GetEnvironment returns the application environment
-func (a *AppConfigAdapter) GetEnvironment() string {
-	// The existing config doesn't have an environment field, so we return a default value
-	return "development"
+func (a *GenericAppConfigAdapter[T]) GetEnvironment() string {
+	if provider, ok := any(a.config).(AppConfigProvider); ok {
+		return provider.GetAppEnvironment()
+	}
+	return a.appEnvironment
 }
 
-// DatabaseConfigAdapter adapts the existing config.Config to the new DatabaseConfig interface
-type DatabaseConfigAdapter struct {
-	config *config.Config
+// GenericDatabaseConfigAdapter is a generic adapter for database configuration
+type GenericDatabaseConfigAdapter[T any] struct {
+	config T
+	dbName string
 }
 
 // GetType returns the database type
-func (a *DatabaseConfigAdapter) GetType() string {
-	return a.config.Database.Type
+func (a *GenericDatabaseConfigAdapter[T]) GetType() string {
+	if provider, ok := any(a.config).(DatabaseConfigProvider); ok {
+		return provider.GetDatabaseType()
+	}
+	return "unknown"
 }
 
 // GetConnectionString returns the database connection string
-func (a *DatabaseConfigAdapter) GetConnectionString() string {
-	switch a.config.Database.Type {
-	case "mongodb":
-		return a.config.Database.MongoDB.URI
-	case "postgres":
-		return a.config.Database.Postgres.DSN
-	case "sqlite":
-		return a.config.Database.SQLite.URI
-	default:
-		return ""
+func (a *GenericDatabaseConfigAdapter[T]) GetConnectionString() string {
+	if provider, ok := any(a.config).(DatabaseConfigProvider); ok {
+		return provider.GetDatabaseConnectionString(a.GetType())
 	}
+	return ""
 }
 
 // GetDatabaseName returns the database name
-func (a *DatabaseConfigAdapter) GetDatabaseName() string {
-	// This is hardcoded in the current implementation
-	return "family_service"
+func (a *GenericDatabaseConfigAdapter[T]) GetDatabaseName() string {
+	return a.dbName
 }
 
 // GetCollectionName returns the collection/table name for a given entity type
-func (a *DatabaseConfigAdapter) GetCollectionName(entityType string) string {
-	// This is hardcoded in the current implementation
-	switch entityType {
-	case "family":
-		return "families"
-	default:
-		return entityType + "s" // Simple pluralization
-	}
+func (a *GenericDatabaseConfigAdapter[T]) GetCollectionName(entityType string) string {
+	// Simple pluralization
+	return entityType + "s"
 }

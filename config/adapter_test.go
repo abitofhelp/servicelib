@@ -5,27 +5,68 @@ package config
 import (
 	"testing"
 
-	"github.com/abitofhelp/family-service/infrastructure/adapters/config"
 	"github.com/stretchr/testify/assert"
 )
 
-// createMockConfig creates a mock config.Config for testing
-func createMockConfig(appVersion, dbType, mongoURI, postgresDSN, sqliteURI string) *config.Config {
-	cfg := &config.Config{}
-
-	// Set App values
-	cfg.App.Version = appVersion
-
-	// Set Database values
-	cfg.Database.Type = dbType
-	cfg.Database.MongoDB.URI = mongoURI
-	cfg.Database.Postgres.DSN = postgresDSN
-	cfg.Database.SQLite.URI = sqliteURI
-
-	return cfg
+// MockConfig implements the necessary interfaces for testing
+type MockConfig struct {
+	AppVersion    string
+	AppName       string
+	AppEnv        string
+	DbType        string
+	MongoURI      string
+	PostgresDSN   string
+	SQLiteURI     string
 }
 
-func TestNewConfigAdapter(t *testing.T) {
+// GetAppVersion returns the application version
+func (c *MockConfig) GetAppVersion() string {
+	return c.AppVersion
+}
+
+// GetAppName returns the application name
+func (c *MockConfig) GetAppName() string {
+	return c.AppName
+}
+
+// GetAppEnvironment returns the application environment
+func (c *MockConfig) GetAppEnvironment() string {
+	return c.AppEnv
+}
+
+// GetDatabaseType returns the database type
+func (c *MockConfig) GetDatabaseType() string {
+	return c.DbType
+}
+
+// GetDatabaseConnectionString returns the database connection string
+func (c *MockConfig) GetDatabaseConnectionString(dbType string) string {
+	switch dbType {
+	case "mongodb":
+		return c.MongoURI
+	case "postgres":
+		return c.PostgresDSN
+	case "sqlite":
+		return c.SQLiteURI
+	default:
+		return ""
+	}
+}
+
+// createMockConfig creates a mock config for testing
+func createMockConfig(appVersion, dbType, mongoURI, postgresDSN, sqliteURI string) *MockConfig {
+	return &MockConfig{
+		AppVersion:  appVersion,
+		AppName:     "test-app",
+		AppEnv:      "test",
+		DbType:      dbType,
+		MongoURI:    mongoURI,
+		PostgresDSN: postgresDSN,
+		SQLiteURI:   sqliteURI,
+	}
+}
+
+func TestNewGenericConfigAdapter(t *testing.T) {
 	// Create a mock config
 	mockConfig := createMockConfig(
 		"1.0.0",
@@ -36,14 +77,14 @@ func TestNewConfigAdapter(t *testing.T) {
 	)
 
 	// Create a config adapter
-	adapter := NewConfigAdapter(mockConfig)
+	adapter := NewGenericConfigAdapter(mockConfig)
 
 	// Check that the adapter is not nil
 	assert.NotNil(t, adapter)
 	assert.NotNil(t, adapter.config)
 }
 
-func TestConfigAdapter_GetApp(t *testing.T) {
+func TestGenericConfigAdapter_GetApp(t *testing.T) {
 	// Create a mock config
 	mockConfig := createMockConfig(
 		"1.0.0",
@@ -54,7 +95,7 @@ func TestConfigAdapter_GetApp(t *testing.T) {
 	)
 
 	// Create a config adapter
-	adapter := NewConfigAdapter(mockConfig)
+	adapter := NewGenericConfigAdapter(mockConfig)
 
 	// Get the app config
 	appConfig := adapter.GetApp()
@@ -64,11 +105,11 @@ func TestConfigAdapter_GetApp(t *testing.T) {
 
 	// Check that the app config has the expected values
 	assert.Equal(t, "1.0.0", appConfig.GetVersion())
-	assert.Equal(t, "family-service-graphql", appConfig.GetName())
-	assert.Equal(t, "development", appConfig.GetEnvironment())
+	assert.Equal(t, "test-app", appConfig.GetName())
+	assert.Equal(t, "test", appConfig.GetEnvironment())
 }
 
-func TestConfigAdapter_GetDatabase(t *testing.T) {
+func TestGenericConfigAdapter_GetDatabase(t *testing.T) {
 	// Test cases for different database types
 	testCases := []struct {
 		name            string
@@ -120,7 +161,7 @@ func TestConfigAdapter_GetDatabase(t *testing.T) {
 			)
 
 			// Create a config adapter
-			adapter := NewConfigAdapter(mockConfig)
+			adapter := NewGenericConfigAdapter(mockConfig)
 
 			// Get the database config
 			dbConfig := adapter.GetDatabase()
@@ -131,26 +172,12 @@ func TestConfigAdapter_GetDatabase(t *testing.T) {
 			// Check that the database config has the expected values
 			assert.Equal(t, tc.expectedType, dbConfig.GetType())
 			assert.Equal(t, tc.expectedConnStr, dbConfig.GetConnectionString())
-			assert.Equal(t, "family_service", dbConfig.GetDatabaseName())
+			assert.Equal(t, "database", dbConfig.GetDatabaseName())
 		})
 	}
 }
 
-// TestDatabaseConfigAdapter is a special version of DatabaseConfigAdapter for testing
-type TestDatabaseConfigAdapter struct{}
-
-// GetCollectionName returns the collection/table name for a given entity type
-func (a *TestDatabaseConfigAdapter) GetCollectionName(entityType string) string {
-	// This is hardcoded in the current implementation
-	switch entityType {
-	case "family":
-		return "families"
-	default:
-		return entityType + "s" // Simple pluralization
-	}
-}
-
-func TestDatabaseConfigAdapter_GetCollectionName(t *testing.T) {
+func TestGenericDatabaseConfigAdapter_GetCollectionName(t *testing.T) {
 	// Test cases for different entity types
 	testCases := []struct {
 		name         string
@@ -160,10 +187,10 @@ func TestDatabaseConfigAdapter_GetCollectionName(t *testing.T) {
 		{
 			name:         "Family",
 			entityType:   "family",
-			expectedName: "families",
+			expectedName: "familys", // Simple pluralization
 		},
 		{
-			name:         "Other",
+			name:         "User",
 			entityType:   "user",
 			expectedName: "users",
 		},
@@ -171,11 +198,23 @@ func TestDatabaseConfigAdapter_GetCollectionName(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			// Create a test database config adapter
-			adapter := &TestDatabaseConfigAdapter{}
+			// Create a mock config
+			mockConfig := createMockConfig(
+				"1.0.0",
+				"mongodb",
+				"mongodb://localhost:27017",
+				"",
+				"",
+			)
+
+			// Create a config adapter
+			adapter := NewGenericConfigAdapter(mockConfig)
+
+			// Get the database config
+			dbConfig := adapter.GetDatabase()
 
 			// Get the collection name
-			collectionName := adapter.GetCollectionName(tc.entityType)
+			collectionName := dbConfig.GetCollectionName(tc.entityType)
 
 			// Check that the collection name is as expected
 			assert.Equal(t, tc.expectedName, collectionName)

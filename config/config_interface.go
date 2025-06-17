@@ -3,15 +3,15 @@
 // Package config provides generic configuration interfaces that can be used across different applications.
 package config
 
-import (
-	"github.com/abitofhelp/family-service/infrastructure/adapters/config"
-)
+// Note: This file is deprecated. Use the Config interface from config.go instead.
+// It's kept for backward compatibility.
 
-// ConfigInterface is an interface for the config.Config type
+// ConfigInterface is an interface for configuration
+// Deprecated: Use Config interface instead
 type ConfigInterface interface {
 	// GetApp returns the App configuration
-	GetApp() *config.AppConfig
-	
+	GetApp() interface{}
+
 	// GetDatabase returns the Database configuration
-	GetDatabase() *config.DatabaseConfig
+	GetDatabase() interface{}
 }

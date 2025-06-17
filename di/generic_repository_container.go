@@ -7,43 +7,41 @@ import (
 	"context"
 	"fmt"
 
-	domainports "github.com/abitofhelp/family-service/core/domain/ports"
-	"github.com/abitofhelp/family-service/infrastructure/adapters/config"
 	pkgconfig "github.com/abitofhelp/servicelib/config"
 	"go.uber.org/zap"
 )
 
 // GenericRepositoryInitializer is a function type that initializes a repository
-type GenericRepositoryInitializer[T domainports.FamilyRepository] func(ctx context.Context, connectionString string, logger *zap.Logger) (T, error)
+type GenericRepositoryInitializer[T any] func(ctx context.Context, connectionString string, logger *zap.Logger) (T, error)
 
 // GenericRepositoryContainer is a generic dependency injection container for any repository type
-type GenericRepositoryContainer[T domainports.FamilyRepository] struct {
-	*Container
+type GenericRepositoryContainer[T any, C any] struct {
+	*BaseContainer[C]
 	config     pkgconfig.Config
 	repository T
 }
 
 // NewGenericRepositoryContainer creates a new generic repository container
-func NewGenericRepositoryContainer[T domainports.FamilyRepository](
+func NewGenericRepositoryContainer[T any, C any](
 	ctx context.Context,
 	logger *zap.Logger,
-	cfg *config.Config,
+	cfg C,
 	entityType string,
 	initRepo GenericRepositoryInitializer[T],
-) (*GenericRepositoryContainer[T], error) {
+) (*GenericRepositoryContainer[T, C], error) {
 	// Create base container
-	baseContainer, err := NewContainer(ctx, logger, cfg)
+	baseContainer, err := NewBaseContainer(ctx, logger, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create base container: %w", err)
 	}
 
 	// Create a config adapter
-	configAdapter := pkgconfig.NewConfigAdapter(cfg)
+	configAdapter := pkgconfig.NewGenericConfigAdapter(cfg)
 
 	// Create generic container
-	container := &GenericRepositoryContainer[T]{
-		Container: baseContainer,
-		config:    configAdapter,
+	container := &GenericRepositoryContainer[T, C]{
+		BaseContainer: baseContainer,
+		config:        configAdapter,
 	}
 
 	// Get database configuration
@@ -60,24 +58,24 @@ func NewGenericRepositoryContainer[T domainports.FamilyRepository](
 }
 
 // GetRepository returns the repository
-func (c *GenericRepositoryContainer[T]) GetRepository() T {
+func (c *GenericRepositoryContainer[T, C]) GetRepository() T {
 	return c.repository
 }
 
 // GetRepositoryFactory returns the repository as an interface{}
-func (c *GenericRepositoryContainer[T]) GetRepositoryFactory() interface{} {
+func (c *GenericRepositoryContainer[T, C]) GetRepositoryFactory() interface{} {
 	return c.repository
 }
 
 // Close closes all resources
-func (c *GenericRepositoryContainer[T]) Close() error {
+func (c *GenericRepositoryContainer[T, C]) Close() error {
 	var errs []error
 
 	// Add resource cleanup here as needed
 	// For example, close database connections if they implement a Close method
 
 	// Close base container
-	if err := c.Container.Close(); err != nil {
+	if err := c.BaseContainer.Close(); err != nil {
 		errs = append(errs, err)
 	}
 

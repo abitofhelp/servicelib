@@ -7,7 +7,6 @@ package mocks
 import (
 	reflect "reflect"
 
-	config "github.com/abitofhelp/family-service/infrastructure/adapters/config"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -35,10 +34,10 @@ func (m *MockConfigInterface) EXPECT() *MockConfigInterfaceMockRecorder {
 }
 
 // GetApp mocks base method.
-func (m *MockConfigInterface) GetApp() *config.AppConfig {
+func (m *MockConfigInterface) GetApp() interface{} {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetApp")
-	ret0, _ := ret[0].(*config.AppConfig)
+	ret0, _ := ret[0].(interface{})
 	return ret0
 }
 
@@ -49,10 +48,10 @@ func (mr *MockConfigInterfaceMockRecorder) GetApp() *gomock.Call {
 }
 
 // GetDatabase mocks base method.
-func (m *MockConfigInterface) GetDatabase() *config.DatabaseConfig {
+func (m *MockConfigInterface) GetDatabase() interface{} {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetDatabase")
-	ret0, _ := ret[0].(*config.DatabaseConfig)
+	ret0, _ := ret[0].(interface{})
 	return ret0
 }
 
