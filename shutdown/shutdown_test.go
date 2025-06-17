@@ -5,6 +5,7 @@ package shutdown
 import (
 	"context"
 	"errors"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -136,93 +137,92 @@ func TestGracefulShutdown_ShutdownError(t *testing.T) {
 	assert.True(t, foundError, "Expected 'Error during shutdown' log message")
 }
 
-// FIXME: TestGracefulShutdown_CustomTimeout tests the timeout case with a custom implementation
-//func TestGracefulShutdown_CustomTimeout(t *testing.T) {
-//	// Create an observed zap logger to capture logs
-//	observedZapCore, observedLogs := observer.New(zap.InfoLevel)
-//	observedLogger := zap.New(observedZapCore)
-//	logger := logging.NewContextLogger(observedLogger)
-//
-//	// Create a context that we can cancel
-//	ctx, cancel := context.WithCancel(context.Background())
-//	defer cancel()
-//
-//	// Create a channel to receive the result
-//	resultCh := make(chan error)
-//
-//	// Create a shutdown function that hangs
-//	var shutdownCalled int32 // Using atomic for thread safety
-//	shutdownFunc := func() error {
-//		atomic.StoreInt32(&shutdownCalled, 1)
-//		// Sleep for longer than the test timeout to simulate a hanging function
-//		time.Sleep(5 * time.Second)
-//		return nil
-//	}
-//
-//	// Create a custom implementation that simulates a timeout
-//	go func() {
-//		// Wait for context cancellation
-//		<-ctx.Done()
-//
-//		// Log the shutdown reason
-//		logger.Info(ctx, "Context cancelled, shutting down", zap.Error(ctx.Err()))
-//
-//		// Log that we're executing the shutdown function
-//		logger.Info(ctx, "Executing shutdown function")
-//
-//		// Start the shutdown function in a goroutine
-//		shutdownDone := make(chan struct{})
-//		go func() {
-//			defer close(shutdownDone)
-//			shutdownFunc()
-//		}()
-//
-//		// Wait a short time and then simulate a timeout
-//		time.Sleep(100 * time.Millisecond)
-//
-//		// Log the timeout
-//		logger.Error(ctx, "Shutdown function timed out after 30 seconds")
-//
-//		// Send the error to the result channel
-//		resultCh <- errors.New("shutdown function timed out after 30 seconds")
-//	}()
-//
-//	// Wait a bit to ensure the goroutine is running
-//	time.Sleep(50 * time.Millisecond)
-//
-//	// Cancel the context to trigger shutdown
-//	cancel()
-//
-//	// Wait for the result with a timeout
-//	select {
-//	case err := <-resultCh:
-//		assert.Error(t, err)
-//		assert.Contains(t, err.Error(), "shutdown function timed out")
-//		assert.True(t, atomic.LoadInt32(&shutdownCalled) == 1, "Shutdown function should have been called")
-//	case <-time.After(2 * time.Second):
-//		t.Fatal("Test timed out")
-//	}
-//
-//	// Verify logs
-//	logs := observedLogs.All()
-//	assert.GreaterOrEqual(t, len(logs), 3, "Expected at least 3 log entries")
-//
-//	// Find specific log messages
-//	var foundCancelled, foundExecuting, foundTimeout bool
-//	for _, log := range logs {
-//		if log.Message == "Context cancelled, shutting down" {
-//			foundCancelled = true
-//		} else if log.Message == "Executing shutdown function" {
-//			foundExecuting = true
-//		} else if log.Message == "Shutdown function timed out after 30 seconds" {
-//			foundTimeout = true
-//		}
-//	}
-//
-//	assert.True(t, foundCancelled, "Expected 'Context cancelled' log message")
-//	assert.True(t, foundExecuting, "Expected 'Executing shutdown function' log message")
-//	assert.True(t, foundTimeout, "Expected 'Shutdown function timed out' log message")
-//}
+func TestGracefulShutdown_CustomTimeout(t *testing.T) {
+	// Create an observed zap logger to capture logs
+	observedZapCore, observedLogs := observer.New(zap.InfoLevel)
+	observedLogger := zap.New(observedZapCore)
+	logger := logging.NewContextLogger(observedLogger)
+
+	// Create a context that we can cancel
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Create a channel to receive the result
+	resultCh := make(chan error)
+
+	// Create a shutdown function that hangs
+	var shutdownCalled int32 // Using atomic for thread safety
+	shutdownFunc := func() error {
+		atomic.StoreInt32(&shutdownCalled, 1)
+		// Sleep for longer than the test timeout to simulate a hanging function
+		time.Sleep(5 * time.Second)
+		return nil
+	}
+
+	// Create a custom implementation that simulates a timeout
+	go func() {
+		// Wait for context cancellation
+		<-ctx.Done()
+
+		// Log the shutdown reason
+		logger.Info(ctx, "Context cancelled, shutting down", zap.Error(ctx.Err()))
+
+		// Log that we're executing the shutdown function
+		logger.Info(ctx, "Executing shutdown function")
+
+		// Start the shutdown function in a goroutine
+		shutdownDone := make(chan struct{})
+		go func() {
+			defer close(shutdownDone)
+			shutdownFunc()
+		}()
+
+		// Wait a short time and then simulate a timeout
+		time.Sleep(100 * time.Millisecond)
+
+		// Log the timeout
+		logger.Error(ctx, "Shutdown function timed out after 30 seconds")
+
+		// Send the error to the result channel
+		resultCh <- errors.New("shutdown function timed out after 30 seconds")
+	}()
+
+	// Wait a bit to ensure the goroutine is running
+	time.Sleep(50 * time.Millisecond)
+
+	// Cancel the context to trigger shutdown
+	cancel()
+
+	// Wait for the result with a timeout
+	select {
+	case err := <-resultCh:
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "shutdown function timed out")
+		assert.True(t, atomic.LoadInt32(&shutdownCalled) == 1, "Shutdown function should have been called")
+	case <-time.After(2 * time.Second):
+		t.Fatal("Test timed out")
+	}
+
+	// Verify logs
+	logs := observedLogs.All()
+	assert.GreaterOrEqual(t, len(logs), 3, "Expected at least 3 log entries")
+
+	// Find specific log messages
+	var foundCancelled, foundExecuting, foundTimeout bool
+	for _, log := range logs {
+		if log.Message == "Context cancelled, shutting down" {
+			foundCancelled = true
+		} else if log.Message == "Executing shutdown function" {
+			foundExecuting = true
+		} else if log.Message == "Shutdown function timed out after 30 seconds" {
+			foundTimeout = true
+		}
+	}
+
+	assert.True(t, foundCancelled, "Expected 'Context cancelled' log message")
+	assert.True(t, foundExecuting, "Expected 'Executing shutdown function' log message")
+	assert.True(t, foundTimeout, "Expected 'Shutdown function timed out' log message")
+}
 
 // TestSetupGracefulShutdown_NoListener tests that SetupGracefulShutdown handles the case where no one is listening to the error channel
 func TestSetupGracefulShutdown_NoListener(t *testing.T) {
