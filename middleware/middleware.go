@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"net/http"
 	"runtime/debug"
+	"sync"
 	"time"
 
 	"github.com/abitofhelp/servicelib/errors"
@@ -104,9 +105,22 @@ func WithTimeout(timeout time.Duration) func(http.Handler) http.Handler {
 			// Create a channel to detect when the request is done
 			done := make(chan struct{})
 
+			// Create a mutex to protect access to the response writer
+			var mu sync.Mutex
+
+			// Create a flag to track whether a response has been written
+			var responded bool
+
+			// Create a wrapper for the response writer that's protected by the mutex
+			syncWriter := &syncResponseWriter{
+				ResponseWriter: w,
+				mu:            &mu,
+				responded:     &responded,
+			}
+
 			// Process the request in a goroutine
 			go func() {
-				next.ServeHTTP(w, r.WithContext(ctx))
+				next.ServeHTTP(syncWriter, r.WithContext(ctx))
 				close(done)
 			}()
 
@@ -118,7 +132,8 @@ func WithTimeout(timeout time.Duration) func(http.Handler) http.Handler {
 			case <-ctx.Done():
 				// Context timed out
 				if ctx.Err() == context.DeadlineExceeded {
-					http.Error(w, "Request timeout", http.StatusGatewayTimeout)
+					// Use the synchronized writer to avoid race conditions
+					syncWriter.WriteError("Request timeout", http.StatusGatewayTimeout)
 				}
 				return
 			}
@@ -205,6 +220,49 @@ func (rw *responseWriter) Write(b []byte) (int, error) {
 		rw.statusCode = http.StatusOK
 	}
 	return rw.ResponseWriter.Write(b)
+}
+
+// syncResponseWriter is a thread-safe wrapper for http.ResponseWriter
+type syncResponseWriter struct {
+	http.ResponseWriter
+	mu        *sync.Mutex
+	responded *bool
+}
+
+// WriteHeader is a thread-safe implementation of http.ResponseWriter.WriteHeader
+func (srw *syncResponseWriter) WriteHeader(code int) {
+	srw.mu.Lock()
+	defer srw.mu.Unlock()
+
+	if !*srw.responded {
+		*srw.responded = true
+		srw.ResponseWriter.WriteHeader(code)
+	}
+}
+
+// Write is a thread-safe implementation of http.ResponseWriter.Write
+func (srw *syncResponseWriter) Write(b []byte) (int, error) {
+	srw.mu.Lock()
+	defer srw.mu.Unlock()
+
+	if !*srw.responded {
+		*srw.responded = true
+		return srw.ResponseWriter.Write(b)
+	}
+	return len(b), nil // Pretend we wrote it
+}
+
+// WriteError is a convenience method for writing an error response
+func (srw *syncResponseWriter) WriteError(msg string, statusCode int) {
+	srw.mu.Lock()
+	defer srw.mu.Unlock()
+
+	if !*srw.responded {
+		*srw.responded = true
+		srw.ResponseWriter.Header().Set("Content-Type", "text/plain")
+		srw.ResponseWriter.WriteHeader(statusCode)
+		srw.ResponseWriter.Write([]byte(msg))
+	}
 }
 
 // WithErrorHandling adds centralized error handling
