@@ -82,99 +82,209 @@ func TestNewGenericConfigAdapter(t *testing.T) {
 	// Check that the adapter is not nil
 	assert.NotNil(t, adapter)
 	assert.NotNil(t, adapter.config)
+
+	// Check default values
+	assert.Equal(t, "application", adapter.appName)
+	assert.Equal(t, "development", adapter.appEnvironment)
+	assert.Equal(t, "database", adapter.dbName)
 }
 
-func TestGenericConfigAdapter_GetApp(t *testing.T) {
+func TestGenericConfigAdapter_WithMethods(t *testing.T) {
 	// Create a mock config
 	mockConfig := createMockConfig(
 		"1.0.0",
-		"",
-		"",
-		"",
-		"",
+		"sqlite",
+		"mongodb://localhost:27017",
+		"postgres://localhost:5432",
+		"file:test.db",
 	)
 
-	// Create a config adapter
-	adapter := NewGenericConfigAdapter(mockConfig)
+	// Test WithAppName
+	t.Run("WithAppName", func(t *testing.T) {
+		adapter := NewGenericConfigAdapter(mockConfig)
+		result := adapter.WithAppName("test-app-name")
 
-	// Get the app config
-	appConfig := adapter.GetApp()
+		// Check that the method returns the adapter itself for chaining
+		assert.Equal(t, adapter, result)
 
-	// Check that the app config is not nil
-	assert.NotNil(t, appConfig)
+		// Check that the app name was updated
+		assert.Equal(t, "test-app-name", adapter.appName)
+	})
 
-	// Check that the app config has the expected values
-	assert.Equal(t, "1.0.0", appConfig.GetVersion())
-	assert.Equal(t, "test-app", appConfig.GetName())
-	assert.Equal(t, "test", appConfig.GetEnvironment())
+	// Test WithAppEnvironment
+	t.Run("WithAppEnvironment", func(t *testing.T) {
+		adapter := NewGenericConfigAdapter(mockConfig)
+		result := adapter.WithAppEnvironment("test-env")
+
+		// Check that the method returns the adapter itself for chaining
+		assert.Equal(t, adapter, result)
+
+		// Check that the app environment was updated
+		assert.Equal(t, "test-env", adapter.appEnvironment)
+	})
+
+	// Test WithDatabaseName
+	t.Run("WithDatabaseName", func(t *testing.T) {
+		adapter := NewGenericConfigAdapter(mockConfig)
+		result := adapter.WithDatabaseName("test-db")
+
+		// Check that the method returns the adapter itself for chaining
+		assert.Equal(t, adapter, result)
+
+		// Check that the database name was updated
+		assert.Equal(t, "test-db", adapter.dbName)
+	})
+
+	// Test chaining of methods
+	t.Run("ChainedMethods", func(t *testing.T) {
+		adapter := NewGenericConfigAdapter(mockConfig)
+		adapter = adapter.WithAppName("chained-app").WithAppEnvironment("chained-env").WithDatabaseName("chained-db")
+
+		// Check that all values were updated
+		assert.Equal(t, "chained-app", adapter.appName)
+		assert.Equal(t, "chained-env", adapter.appEnvironment)
+		assert.Equal(t, "chained-db", adapter.dbName)
+	})
+}
+
+func TestGenericConfigAdapter_GetApp(t *testing.T) {
+	t.Run("WithProviderImplementation", func(t *testing.T) {
+		// Create a mock config that implements AppConfigProvider
+		mockConfig := createMockConfig(
+			"1.0.0",
+			"",
+			"",
+			"",
+			"",
+		)
+
+		// Create a config adapter
+		adapter := NewGenericConfigAdapter(mockConfig)
+
+		// Get the app config
+		appConfig := adapter.GetApp()
+
+		// Check that the app config is not nil
+		assert.NotNil(t, appConfig)
+
+		// Check that the app config has the expected values
+		assert.Equal(t, "1.0.0", appConfig.GetVersion())
+		assert.Equal(t, "test-app", appConfig.GetName())
+		assert.Equal(t, "test", appConfig.GetEnvironment())
+	})
+
+	t.Run("WithoutProviderImplementation", func(t *testing.T) {
+		// Create a struct that doesn't implement AppConfigProvider
+		type NonProvider struct{}
+		nonProvider := &NonProvider{}
+
+		// Create a config adapter with custom app name and environment
+		adapter := NewGenericConfigAdapter(nonProvider).
+			WithAppName("custom-app").
+			WithAppEnvironment("custom-env")
+
+		// Get the app config
+		appConfig := adapter.GetApp()
+
+		// Check that the app config is not nil
+		assert.NotNil(t, appConfig)
+
+		// Check that the app config returns default values
+		assert.Equal(t, "1.0.0", appConfig.GetVersion()) // Default version
+		assert.Equal(t, "custom-app", appConfig.GetName()) // Custom app name
+		assert.Equal(t, "custom-env", appConfig.GetEnvironment()) // Custom environment
+	})
 }
 
 func TestGenericConfigAdapter_GetDatabase(t *testing.T) {
-	// Test cases for different database types
-	testCases := []struct {
-		name            string
-		dbType          string
-		mongoURI        string
-		postgresDSN     string
-		sqliteURI       string
-		expectedType    string
-		expectedConnStr string
-	}{
-		{
-			name:            "MongoDB",
-			dbType:          "mongodb",
-			mongoURI:        "mongodb://localhost:27017",
-			expectedType:    "mongodb",
-			expectedConnStr: "mongodb://localhost:27017",
-		},
-		{
-			name:            "PostgreSQL",
-			dbType:          "postgres",
-			postgresDSN:     "postgres://localhost:5432",
-			expectedType:    "postgres",
-			expectedConnStr: "postgres://localhost:5432",
-		},
-		{
-			name:            "SQLite",
-			dbType:          "sqlite",
-			sqliteURI:       "file:test.db",
-			expectedType:    "sqlite",
-			expectedConnStr: "file:test.db",
-		},
-		{
-			name:            "Unknown",
-			dbType:          "unknown",
-			expectedType:    "unknown",
-			expectedConnStr: "",
-		},
-	}
+	t.Run("WithProviderImplementation", func(t *testing.T) {
+		// Test cases for different database types
+		testCases := []struct {
+			name            string
+			dbType          string
+			mongoURI        string
+			postgresDSN     string
+			sqliteURI       string
+			expectedType    string
+			expectedConnStr string
+		}{
+			{
+				name:            "MongoDB",
+				dbType:          "mongodb",
+				mongoURI:        "mongodb://localhost:27017",
+				expectedType:    "mongodb",
+				expectedConnStr: "mongodb://localhost:27017",
+			},
+			{
+				name:            "PostgreSQL",
+				dbType:          "postgres",
+				postgresDSN:     "postgres://localhost:5432",
+				expectedType:    "postgres",
+				expectedConnStr: "postgres://localhost:5432",
+			},
+			{
+				name:            "SQLite",
+				dbType:          "sqlite",
+				sqliteURI:       "file:test.db",
+				expectedType:    "sqlite",
+				expectedConnStr: "file:test.db",
+			},
+			{
+				name:            "Unknown",
+				dbType:          "unknown",
+				expectedType:    "unknown",
+				expectedConnStr: "",
+			},
+		}
 
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			// Create a mock config
-			mockConfig := createMockConfig(
-				"1.0.0",
-				tc.dbType,
-				tc.mongoURI,
-				tc.postgresDSN,
-				tc.sqliteURI,
-			)
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				// Create a mock config
+				mockConfig := createMockConfig(
+					"1.0.0",
+					tc.dbType,
+					tc.mongoURI,
+					tc.postgresDSN,
+					tc.sqliteURI,
+				)
 
-			// Create a config adapter
-			adapter := NewGenericConfigAdapter(mockConfig)
+				// Create a config adapter
+				adapter := NewGenericConfigAdapter(mockConfig)
 
-			// Get the database config
-			dbConfig := adapter.GetDatabase()
+				// Get the database config
+				dbConfig := adapter.GetDatabase()
 
-			// Check that the database config is not nil
-			assert.NotNil(t, dbConfig)
+				// Check that the database config is not nil
+				assert.NotNil(t, dbConfig)
 
-			// Check that the database config has the expected values
-			assert.Equal(t, tc.expectedType, dbConfig.GetType())
-			assert.Equal(t, tc.expectedConnStr, dbConfig.GetConnectionString())
-			assert.Equal(t, "database", dbConfig.GetDatabaseName())
-		})
-	}
+				// Check that the database config has the expected values
+				assert.Equal(t, tc.expectedType, dbConfig.GetType())
+				assert.Equal(t, tc.expectedConnStr, dbConfig.GetConnectionString())
+				assert.Equal(t, "database", dbConfig.GetDatabaseName())
+			})
+		}
+	})
+
+	t.Run("WithoutProviderImplementation", func(t *testing.T) {
+		// Create a struct that doesn't implement DatabaseConfigProvider
+		type NonProvider struct{}
+		nonProvider := &NonProvider{}
+
+		// Create a config adapter with custom database name
+		adapter := NewGenericConfigAdapter(nonProvider).
+			WithDatabaseName("custom-db")
+
+		// Get the database config
+		dbConfig := adapter.GetDatabase()
+
+		// Check that the database config is not nil
+		assert.NotNil(t, dbConfig)
+
+		// Check that the database config returns default values
+		assert.Equal(t, "unknown", dbConfig.GetType()) // Default type
+		assert.Equal(t, "", dbConfig.GetConnectionString()) // Default connection string
+		assert.Equal(t, "custom-db", dbConfig.GetDatabaseName()) // Custom database name
+	})
 }
 
 func TestGenericDatabaseConfigAdapter_GetCollectionName(t *testing.T) {
