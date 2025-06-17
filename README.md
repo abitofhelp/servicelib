@@ -1040,19 +1040,6 @@ ServiceLib is designed with the following architectural principles:
 
 Each package in ServiceLib is designed to be used independently or together with other packages. This allows you to use only the components you need without bringing in unnecessary dependencies.
 
-### Hexagonal Architecture
-
-The library encourages a hexagonal (ports and adapters) architecture:
-
-- **Core Domain**: Business logic independent of external concerns
-- **Ports**: Interfaces defining how the core interacts with the outside world
-- **Adapters**: Implementations of ports for specific technologies
-
-This architecture makes it easier to:
-- Replace implementations without changing business logic
-- Test business logic in isolation
-- Adapt to changing requirements
-
 ### Design Patterns
 
 ServiceLib implements several design patterns:
