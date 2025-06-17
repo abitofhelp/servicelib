@@ -29,6 +29,21 @@ import (
 // Returns:
 //   - The error from the shutdown function, if any
 func GracefulShutdown(ctx context.Context, logger *logging.ContextLogger, shutdownFunc func() error) error {
+	// Check if the context is nil
+	if ctx == nil {
+		if logger != nil {
+			logger.Error(context.Background(), "Context is nil")
+		}
+		return fmt.Errorf("context is nil")
+	}
+
+	// Check if the shutdown function is nil
+	if shutdownFunc == nil {
+		if logger != nil {
+			logger.Error(ctx, "Shutdown function is nil")
+		}
+		return fmt.Errorf("shutdown function is nil")
+	}
 	// Create a channel to receive OS signals with buffer size 2 to avoid missing signals
 	quit := make(chan os.Signal, 2)
 
@@ -120,6 +135,27 @@ func GracefulShutdown(ctx context.Context, logger *logging.ContextLogger, shutdo
 //   - A cancel function that can be called to trigger shutdown programmatically
 //   - A channel that will receive any error that occurs during shutdown
 func SetupGracefulShutdown(ctx context.Context, logger *logging.ContextLogger, shutdownFunc func() error) (context.CancelFunc, <-chan error) {
+	// Check if the context is nil
+	if ctx == nil {
+		if logger != nil {
+			logger.Error(context.Background(), "Context is nil")
+		}
+		errCh := make(chan error, 1)
+		errCh <- fmt.Errorf("context is nil")
+		close(errCh)
+		return func() {}, errCh
+	}
+
+	// Check if the shutdown function is nil
+	if shutdownFunc == nil {
+		if logger != nil {
+			logger.Error(ctx, "Shutdown function is nil")
+		}
+		errCh := make(chan error, 1)
+		errCh <- fmt.Errorf("shutdown function is nil")
+		close(errCh)
+		return func() {}, errCh
+	}
 	// Create a context with cancellation
 	shutdownCtx, cancel := context.WithCancel(ctx)
 

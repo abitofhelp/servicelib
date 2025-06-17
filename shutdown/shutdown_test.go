@@ -1440,6 +1440,198 @@ func TestSetupGracefulShutdown_ParentContextCancellation(t *testing.T) {
 	assert.True(t, foundCompleted, "Expected 'Graceful shutdown completed successfully' log message")
 }
 
+// TestGracefulShutdown_NoopLogger tests that GracefulShutdown works with a no-op logger
+func TestGracefulShutdown_NoopLogger(t *testing.T) {
+	// Create a context that we can cancel
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Create a channel to receive the result
+	resultCh := make(chan error)
+
+	// Create a simple shutdown function
+	var shutdownCalled int32
+	shutdownFunc := func() error {
+		atomic.StoreInt32(&shutdownCalled, 1)
+		return nil
+	}
+
+	// Create a no-op logger
+	noopLogger := zap.NewNop()
+	logger := logging.NewContextLogger(noopLogger)
+
+	// Start the graceful shutdown in a goroutine with the no-op logger
+	go func() {
+		resultCh <- GracefulShutdown(ctx, logger, shutdownFunc)
+	}()
+
+	// Wait a bit to ensure the goroutine is running
+	time.Sleep(50 * time.Millisecond)
+
+	// Cancel the context to trigger shutdown
+	cancel()
+
+	// Wait for the result with a timeout
+	select {
+	case err := <-resultCh:
+		assert.NoError(t, err)
+		assert.Equal(t, int32(1), atomic.LoadInt32(&shutdownCalled), "Shutdown function should have been called")
+	case <-time.After(2 * time.Second):
+		t.Fatal("Test timed out")
+	}
+}
+
+// TestGracefulShutdown_NilContext tests that GracefulShutdown handles a nil context
+func TestGracefulShutdown_NilContext(t *testing.T) {
+	// Create a channel to receive the result
+	resultCh := make(chan error)
+
+	// Create a no-op logger
+	noopLogger := zap.NewNop()
+	logger := logging.NewContextLogger(noopLogger)
+
+	// Create a simple shutdown function
+	var shutdownCalled int32
+	shutdownFunc := func() error {
+		atomic.StoreInt32(&shutdownCalled, 1)
+		return nil
+	}
+
+	// Start the graceful shutdown in a goroutine with a nil context
+	go func() {
+		resultCh <- GracefulShutdown(nil, logger, shutdownFunc)
+	}()
+
+	// Wait for the result with a timeout
+	select {
+	case err := <-resultCh:
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "context is nil")
+	case <-time.After(2 * time.Second):
+		t.Fatal("Test timed out")
+	}
+}
+
+// TestGracefulShutdown_NilShutdownFunc tests that GracefulShutdown handles a nil shutdown function
+func TestGracefulShutdown_NilShutdownFunc(t *testing.T) {
+	// Create a context that we can cancel
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Create a channel to receive the result
+	resultCh := make(chan error)
+
+	// Create a no-op logger
+	noopLogger := zap.NewNop()
+	logger := logging.NewContextLogger(noopLogger)
+
+	// Start the graceful shutdown in a goroutine with a nil shutdown function
+	go func() {
+		resultCh <- GracefulShutdown(ctx, logger, nil)
+	}()
+
+	// Wait a bit to ensure the goroutine is running
+	time.Sleep(50 * time.Millisecond)
+
+	// Cancel the context to trigger shutdown
+	cancel()
+
+	// Wait for the result with a timeout
+	select {
+	case err := <-resultCh:
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "shutdown function is nil")
+	case <-time.After(2 * time.Second):
+		t.Fatal("Test timed out")
+	}
+}
+
+// TestSetupGracefulShutdown_NilContext tests that SetupGracefulShutdown handles a nil context
+func TestSetupGracefulShutdown_NilContext(t *testing.T) {
+	// Create a no-op logger
+	noopLogger := zap.NewNop()
+	logger := logging.NewContextLogger(noopLogger)
+
+	// Create a simple shutdown function
+	var shutdownCalled int32
+	shutdownFunc := func() error {
+		atomic.StoreInt32(&shutdownCalled, 1)
+		return nil
+	}
+
+	// Call SetupGracefulShutdown with a nil context
+	cancel, errCh := SetupGracefulShutdown(nil, logger, shutdownFunc)
+
+	// Trigger shutdown
+	cancel()
+
+	// Wait for the error with a timeout
+	select {
+	case err := <-errCh:
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "context is nil")
+	case <-time.After(2 * time.Second):
+		t.Fatal("Test timed out waiting for error channel")
+	}
+}
+
+// TestSetupGracefulShutdown_NilShutdownFunc tests that SetupGracefulShutdown handles a nil shutdown function
+func TestSetupGracefulShutdown_NilShutdownFunc(t *testing.T) {
+	// Create a context
+	ctx := context.Background()
+
+	// Create a no-op logger
+	noopLogger := zap.NewNop()
+	logger := logging.NewContextLogger(noopLogger)
+
+	// Call SetupGracefulShutdown with a nil shutdown function
+	cancel, errCh := SetupGracefulShutdown(ctx, logger, nil)
+
+	// Trigger shutdown
+	cancel()
+
+	// Wait for the error with a timeout
+	select {
+	case err := <-errCh:
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "shutdown function is nil")
+	case <-time.After(2 * time.Second):
+		t.Fatal("Test timed out waiting for error channel")
+	}
+}
+
+// TestSetupGracefulShutdown_NoopLogger tests that SetupGracefulShutdown works with a no-op logger
+func TestSetupGracefulShutdown_NoopLogger(t *testing.T) {
+	// Create a context
+	ctx := context.Background()
+
+	// Create a simple shutdown function
+	var shutdownCalled int32
+	shutdownFunc := func() error {
+		atomic.StoreInt32(&shutdownCalled, 1)
+		return nil
+	}
+
+	// Create a no-op logger
+	noopLogger := zap.NewNop()
+	logger := logging.NewContextLogger(noopLogger)
+
+	// Call SetupGracefulShutdown with the no-op logger
+	cancel, errCh := SetupGracefulShutdown(ctx, logger, shutdownFunc)
+
+	// Trigger shutdown
+	cancel()
+
+	// Wait for the error with a timeout
+	select {
+	case err := <-errCh:
+		assert.NoError(t, err)
+		assert.Equal(t, int32(1), atomic.LoadInt32(&shutdownCalled), "Shutdown function should have been called")
+	case <-time.After(2 * time.Second):
+		t.Fatal("Test timed out waiting for error channel")
+	}
+}
+
 // TestGracefulShutdown_DirectSignal tests GracefulShutdown with a direct signal
 func TestGracefulShutdown_DirectSignal(t *testing.T) {
 	// Create an observed zap logger to capture logs
