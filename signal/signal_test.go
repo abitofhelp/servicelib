@@ -231,17 +231,28 @@ func TestWaitForShutdown(t *testing.T) {
 	// Create a test logger
 	logger := logging.NewContextLogger(zaptest.NewLogger(t))
 
-	// Call WaitForShutdown in a goroutine
-	var ctx context.Context
+	// Create a channel to safely pass the context from the goroutine to the main test
+	ctxChan := make(chan context.Context, 1)
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		ctx = WaitForShutdown(100*time.Millisecond, logger)
+		// Get the context from WaitForShutdown and send it through the channel
+		ctx := WaitForShutdown(100*time.Millisecond, logger)
+		ctxChan <- ctx
 	}()
 
 	// Wait a bit for WaitForShutdown to set up
 	time.Sleep(50 * time.Millisecond)
+
+	// Get the context from the channel with a timeout to avoid blocking indefinitely
+	var ctx context.Context
+	select {
+	case ctx = <-ctxChan:
+		// Successfully received the context
+	case <-time.After(100 * time.Millisecond):
+		t.Fatal("Timed out waiting for context from WaitForShutdown")
+	}
 
 	// Verify that the function returns a non-nil context
 	assert.NotNil(t, ctx)
