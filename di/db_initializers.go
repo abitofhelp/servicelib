@@ -24,6 +24,11 @@ func MongoDBInitializer(
 	collectionName string,
 	logger *zap.Logger,
 ) (*mongo.Collection, error) {
+	// Check if logger is nil
+	if logger == nil {
+		return nil, fmt.Errorf("failed to initialize MongoDB client: logger cannot be nil")
+	}
+
 	// Create a context logger
 	contextLogger := logging.NewContextLogger(logger)
 
@@ -48,6 +53,11 @@ func PostgresInitializer(
 	dsn string,
 	logger *zap.Logger,
 ) (*pgxpool.Pool, error) {
+	// Check if logger is nil
+	if logger == nil {
+		return nil, fmt.Errorf("failed to initialize PostgreSQL connection pool: logger cannot be nil")
+	}
+
 	// Create a context logger
 	contextLogger := logging.NewContextLogger(logger)
 
@@ -69,6 +79,11 @@ func SQLiteInitializer(
 	uri string,
 	logger *zap.Logger,
 ) (*sql.DB, error) {
+	// Check if logger is nil
+	if logger == nil {
+		return nil, fmt.Errorf("failed to initialize SQLite database connection: logger cannot be nil")
+	}
+
 	// Create a context logger
 	contextLogger := logging.NewContextLogger(logger)
 

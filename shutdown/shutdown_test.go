@@ -5,7 +5,6 @@ package shutdown
 import (
 	"context"
 	"errors"
-	"os"
 	"testing"
 	"time"
 

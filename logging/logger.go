@@ -95,12 +95,17 @@ type ContextLogger struct {
 }
 
 // NewContextLogger creates a new context-aware logger wrapping the provided base logger.
+// If base is nil, a no-op logger will be used to prevent nil pointer panics.
 // Parameters:
 //   - base: The base zap logger to wrap
 //
 // Returns:
 //   - *ContextLogger: A new context logger instance
 func NewContextLogger(base *zap.Logger) *ContextLogger {
+	// If base logger is nil, use a no-op logger to prevent nil pointer panics
+	if base == nil {
+		base = zap.NewNop()
+	}
 	return &ContextLogger{
 		base: base,
 	}
