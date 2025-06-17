@@ -23,6 +23,12 @@ type HealthConfig interface {
 	// GetVersion returns the application version
 	GetVersion() string
 
+	// GetName returns the application name
+	GetName() string
+
+	// GetEnvironment returns the application environment
+	GetEnvironment() string
+
 	// GetTimeout returns the timeout for health checks
 	GetTimeout() int
 }

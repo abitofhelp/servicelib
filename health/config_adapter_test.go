@@ -73,6 +73,14 @@ func TestNewConfigAdapter(t *testing.T) {
 	version := adapter.GetVersion()
 	assert.Equal(t, "1.0.0", version)
 
+	// Verify that the adapter's GetName method returns the expected value
+	name := adapter.GetName()
+	assert.Equal(t, "test-app", name)
+
+	// Verify that the adapter's GetEnvironment method returns the expected value
+	env := adapter.GetEnvironment()
+	assert.Equal(t, "test", env)
+
 	// Verify that the adapter's GetTimeout method returns the expected value
 	timeout := adapter.GetTimeout()
 	assert.Equal(t, 5, timeout)

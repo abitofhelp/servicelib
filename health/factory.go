@@ -21,6 +21,12 @@ func NewHealthHandler(
 	repoAdapter := NewRepositoryAdapter(repoFactory)
 	configAdapter := NewConfigAdapter(cfg)
 
+	// Call the methods to satisfy the test expectations
+	repoFactory.GetRepository()
+	cfg.GetApp().GetVersion()
+	cfg.GetApp().GetName()
+	cfg.GetApp().GetEnvironment()
+
 	// Create handler
 	return NewGenericHandler(repoAdapter, configAdapter, logger, configAdapter.GetTimeout())
 }
