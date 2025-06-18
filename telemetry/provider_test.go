@@ -10,6 +10,7 @@ import (
 	"github.com/abitofhelp/servicelib/logging"
 	"github.com/knadh/koanf/v2"
 	"github.com/stretchr/testify/assert"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap/zaptest"
 )
 
@@ -64,35 +65,70 @@ func TestTelemetryProviderShutdown(t *testing.T) {
 }
 
 func TestTelemetryProviderMeter(t *testing.T) {
+	// Create a test logger
+	logger := logging.NewContextLogger(zaptest.NewLogger(t))
+
 	// Create a test provider with nil metrics provider
 	provider := &TelemetryProvider{
 		metricsProvider: nil,
 		tracingProvider: nil,
-		logger:          logging.NewContextLogger(zaptest.NewLogger(t)),
+		logger:          logger,
 	}
 
 	// Test meter with nil metrics provider
 	meter := provider.Meter()
 	assert.NotNil(t, meter)
 
-	// We can't easily test with a non-nil metrics provider because
-	// we can't create a real meter in a test environment
+	// Create a metrics provider with a nil meter
+	metricsProvider := &MetricsProvider{
+		provider: nil,
+		meter:    nil,
+		logger:   logger,
+	}
+
+	// Create a test provider with non-nil metrics provider but nil meter
+	providerWithMetricsProvider := &TelemetryProvider{
+		metricsProvider: metricsProvider,
+		tracingProvider: nil,
+		logger:          logger,
+	}
+
+	// Test meter with non-nil metrics provider but nil meter
+	meter = providerWithMetricsProvider.Meter()
+	assert.NotNil(t, meter)
 }
 
 func TestTelemetryProviderTracer(t *testing.T) {
+	// Create a test logger
+	logger := logging.NewContextLogger(zaptest.NewLogger(t))
+
 	// Create a test provider with nil tracing provider
 	provider := &TelemetryProvider{
 		metricsProvider: nil,
 		tracingProvider: nil,
-		logger:          logging.NewContextLogger(zaptest.NewLogger(t)),
+		logger:          logger,
 	}
 
 	// Test tracer with nil tracing provider
 	tracer := provider.Tracer()
 	assert.NotNil(t, tracer)
 
-	// We can't easily test with a non-nil tracing provider because
-	// we can't create a real tracer in a test environment
+	// Create a tracing provider
+	tracingProvider := &TracingProvider{
+		tracer: nil,
+		logger: logger,
+	}
+
+	// Create a test provider with non-nil tracing provider but nil tracer
+	providerWithTracingProvider := &TelemetryProvider{
+		metricsProvider: nil,
+		tracingProvider: tracingProvider,
+		logger:          logger,
+	}
+
+	// Test tracer with non-nil tracing provider but nil tracer
+	tracer = providerWithTracingProvider.Tracer()
+	assert.NotNil(t, tracer)
 }
 
 func TestTelemetryProviderCreatePrometheusHandler(t *testing.T) {
@@ -143,8 +179,11 @@ func TestWithSpan(t *testing.T) {
 	// Create a context
 	ctx := context.Background()
 
-	// Test with span
+	// Test with span that succeeds
 	err := WithSpan(ctx, "test-span", func(ctx context.Context) error {
+		// Verify that the context has a span
+		span := trace.SpanFromContext(ctx)
+		assert.NotNil(t, span)
 		return nil
 	})
 	assert.NoError(t, err)
@@ -152,6 +191,9 @@ func TestWithSpan(t *testing.T) {
 	// Test with span that returns an error
 	testErr := errors.New("test error")
 	err = WithSpan(ctx, "test-span", func(ctx context.Context) error {
+		// Verify that the context has a span
+		span := trace.SpanFromContext(ctx)
+		assert.NotNil(t, span)
 		return testErr
 	})
 	assert.Equal(t, testErr, err)
@@ -163,6 +205,10 @@ func TestWithSpanTimed(t *testing.T) {
 
 	// Test with span timed
 	duration, err := WithSpanTimed(ctx, "test-span", func(ctx context.Context) error {
+		// Verify that the context has a span
+		span := trace.SpanFromContext(ctx)
+		assert.NotNil(t, span)
+
 		time.Sleep(10 * time.Millisecond)
 		return nil
 	})
@@ -172,6 +218,10 @@ func TestWithSpanTimed(t *testing.T) {
 	// Test with span timed that returns an error
 	testErr := errors.New("test error")
 	duration, err = WithSpanTimed(ctx, "test-span", func(ctx context.Context) error {
+		// Verify that the context has a span
+		span := trace.SpanFromContext(ctx)
+		assert.NotNil(t, span)
+
 		time.Sleep(10 * time.Millisecond)
 		return testErr
 	})

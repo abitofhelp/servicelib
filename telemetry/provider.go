@@ -107,7 +107,10 @@ func (tp *TelemetryProvider) Shutdown(ctx context.Context) error {
 //   - metric.Meter: The OpenTelemetry meter
 func (tp *TelemetryProvider) Meter() metric.Meter {
 	if tp.metricsProvider != nil {
-		return tp.metricsProvider.Meter()
+		meter := tp.metricsProvider.Meter()
+		if meter != nil {
+			return meter
+		}
 	}
 	return otel.Meter("github.com/abitofhelp/servicelib/telemetry")
 }
@@ -117,7 +120,7 @@ func (tp *TelemetryProvider) Meter() metric.Meter {
 // Returns:
 //   - trace.Tracer: The OpenTelemetry tracer
 func (tp *TelemetryProvider) Tracer() trace.Tracer {
-	if tp.tracingProvider != nil {
+	if tp.tracingProvider != nil && tp.tracingProvider.tracer != nil {
 		return tp.tracingProvider.tracer
 	}
 	return otel.Tracer("github.com/abitofhelp/servicelib/telemetry")

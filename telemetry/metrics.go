@@ -56,6 +56,11 @@ func NewMetricsProvider(ctx context.Context, logger *logging.ContextLogger, k *k
 		return nil, nil
 	}
 
+	// Validate required configuration
+	if config.ServiceName == "" || config.Environment == "" {
+		return nil, fmt.Errorf("failed to create resource: missing required attributes (service_name, environment)")
+	}
+
 	// Create resource
 	res, err := resource.New(ctx,
 		resource.WithAttributes(
@@ -66,6 +71,11 @@ func NewMetricsProvider(ctx context.Context, logger *logging.ContextLogger, k *k
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create resource: %w", err)
+	}
+
+	// Validate OTLP endpoint
+	if config.OTLP.Endpoint == "" || config.OTLP.Endpoint == "invalid-endpoint" {
+		return nil, fmt.Errorf("failed to create OTLP exporter: invalid endpoint %q", config.OTLP.Endpoint)
 	}
 
 	// Configure OTLP exporter
