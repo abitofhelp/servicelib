@@ -219,6 +219,25 @@ func createAroundOperationsFunc(logger *logging.ContextLogger, requestTimeout ti
 				}
 
 			case <-timeoutCtx.Done():
+				// Check if the parent context was also cancelled
+				if ctx.Err() != nil {
+					// Parent context was cancelled (client disconnected)
+					logger.Debug(ctx, "Parent context was cancelled during processing",
+						zap.String("request_id", middleware.RequestID(ctx)),
+						zap.Error(ctx.Err()),
+					)
+					return &graphql.Response{
+						Errors: gqlerror.List{{
+							Message: "The request was interrupted. This could be due to a client disconnect.",
+							Extensions: map[string]interface{}{
+								"code":       "CLIENT_DISCONNECTED",
+								"timestamp":  time.Now().UTC().Format(time.RFC3339),
+								"request_id": middleware.RequestID(ctx),
+							},
+						}},
+					}
+				}
+
 				// Our timeout context expired
 				logger.Debug(ctx, "Request timed out",
 					zap.String("request_id", middleware.RequestID(ctx)),
