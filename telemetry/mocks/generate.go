@@ -1,3 +1,5 @@
+// Copyright (c) 2025 A Bit of Help, Inc.
+
 // Package mocks contains mock implementations for telemetry package testing
 package mocks
 

@@ -1,3 +1,5 @@
+// Copyright (c) 2025 A Bit of Help, Inc.
+
 // Package signal provides utilities for testing signal handling.
 package signal
 

@@ -63,15 +63,24 @@ The authentication and authorization system will be implemented as middleware th
 |  Client          |---->|  Auth Middleware |---->|  GraphQL Server  |
 |                  |     |                  |     |                  |
 +------------------+     +------------------+     +------------------+
-                               |
-                               v
-                         +------------------+
-                         |                  |
-                         |  Auth Services   |
-                         |  - JWT Service   |
-                         |  - OIDC Service  |
-                         |                  |
-                         +------------------+
+                              |
+                              v
+                        +------------------+
+                        |                  |
+                        |  Auth Services   |
+                        |  - JWT Service   |
+                        |  - OIDC Service  |
+                        |                  |
+                        +------------------+
+                              |
+                              v
+                        +------------------+
+                        |                  |
+                        |  Auth Server     |
+                        |  (Remote         |
+                        |   Validation)    |
+                        |                  |
+                        +------------------+
 ```
 
 ### 3.3 Sequence Diagram
@@ -79,36 +88,47 @@ The authentication and authorization system will be implemented as middleware th
 #### 3.3.1 Authentication Flow
 
 ```
-+--------+                  +----------------+              +-------------+              +-------------+
-| Client |                  | Auth Middleware |              | JWT Service |              | GraphQL API |
-+--------+                  +----------------+              +-------------+              +-------------+
-    |                               |                              |                            |
-    | 1. Request with JWT token     |                              |                            |
-    |------------------------------>|                              |                            |
-    |                               |                              |                            |
-    |                               | 2. Extract token             |                            |
-    |                               |------------------------      |                            |
-    |                               |                       |      |                            |
-    |                               |<-----------------------      |                            |
-    |                               |                              |                            |
-    |                               | 3. Validate token            |                            |
-    |                               |----------------------------->|                            |
-    |                               |                              |                            |
-    |                               | 4. Return claims             |                            |
-    |                               |<-----------------------------|                            |
-    |                               |                              |                            |
-    |                               | 5. Add user info to context  |                            |
-    |                               |------------------------      |                            |
-    |                               |                       |      |                            |
-    |                               |<-----------------------      |                            |
-    |                               |                              |                            |
-    |                               | 6. Forward request           |                            |
-    |                               |---------------------------------------------------------->|
-    |                               |                              |                            |
-    |                               |                              |                            |
-    | 7. Response                   |                              |                            |
-    |<-------------------------------------------------------------------------------------------
-    |                               |                              |                            |
++--------+                  +----------------+              +-------------+              +----------------+              +-------------+
+| Client |                  | Auth Middleware |              | JWT Service |              | Auth Server    |              | GraphQL API |
++--------+                  +----------------+              +-------------+              +----------------+              +-------------+
+    |                               |                              |                              |                            |
+    | 1. Request with JWT token     |                              |                              |                            |
+    |------------------------------>|                              |                              |                            |
+    |                               |                              |                              |                            |
+    |                               | 2. Extract token             |                              |                            |
+    |                               |------------------------      |                              |                            |
+    |                               |                       |      |                              |                            |
+    |                               |<-----------------------      |                              |                            |
+    |                               |                              |                              |                            |
+    |                               | 3. Validate token            |                              |                            |
+    |                               |----------------------------->|                              |                            |
+    |                               |                              |                              |                            |
+    |                               |                              | 4. Remote validation (if enabled)                         |
+    |                               |                              |----------------------------->|                            |
+    |                               |                              |                              |                            |
+    |                               |                              | 5. Return validation result  |                            |
+    |                               |                              |<-----------------------------|                            |
+    |                               |                              |                              |                            |
+    |                               |                              | 6. Local validation (if remote fails or not enabled)      |
+    |                               |                              |------------------------      |                            |
+    |                               |                              |                       |      |                            |
+    |                               |                              |<-----------------------      |                            |
+    |                               |                              |                              |                            |
+    |                               | 7. Return claims             |                              |                            |
+    |                               |<-----------------------------|                              |                            |
+    |                               |                              |                              |                            |
+    |                               | 8. Add user info to context  |                              |                            |
+    |                               |------------------------      |                              |                            |
+    |                               |                       |      |                              |                            |
+    |                               |<-----------------------      |                              |                            |
+    |                               |                              |                              |                            |
+    |                               | 9. Forward request           |                              |                            |
+    |                               |--------------------------------------------------------------------------------->|
+    |                               |                              |                              |                            |
+    |                               |                              |                              |                            |
+    | 10. Response                  |                              |                              |                            |
+    |<--------------------------------------------------------------------------------------------------------------
+    |                               |                              |                              |                            |
 ```
 
 #### 3.3.2 Authorization Flow
@@ -148,25 +168,34 @@ The authentication and authorization system will be implemented as middleware th
 +-------------------+       +-------------------+       +-------------------+
 | - jwtService      |------>| - config          |       | - provider        |
 | - oidcService     |------>| - logger          |       | - verifier        |
-| - logger          |       +-------------------+       | - oauth2Config    |
-| - tracer          |       | + GenerateToken() |       | - adminRoleName   |
-+-------------------+       | + ValidateToken() |       | - logger          |
-| + Middleware()    |       +-------------------+       | - tracer          |
-+-------------------+                                   +-------------------+
-        |                                               | + ValidateToken() |
-        |                                               | + IsAdmin()       |
-        v                                               +-------------------+
-+-------------------+
-| AuthService       |
-+-------------------+
-| - logger          |
-| - tracer          |
-+-------------------+
-| + IsAuthorized()  |
-| + IsAdmin()       |
-| + GetUserID()     |
-| + GetUserRoles()  |
-+-------------------+
+| - logger          |       | - localValidator  |------>| - oauth2Config    |
+| - tracer          |       | - remoteValidator |------>| - adminRoleName   |
++-------------------+       +-------------------+       | - logger          |
+| + Middleware()    |       | + GenerateToken() |       | - tracer          |
++-------------------+       | + ValidateToken() |       +-------------------+
+        |                   +-------------------+       | + ValidateToken() |
+        |                           ^                   | + IsAdmin()       |
+        v                           |                   +-------------------+
++-------------------+       +-------------------+
+| AuthService       |       | TokenValidator    |
++-------------------+       +-------------------+
+| - logger          |       | + ValidateToken() |
+| - tracer          |       +-------------------+
++-------------------+               ^
+| + IsAuthorized()  |               |
+| + IsAdmin()       |    +----------+-----------+
+| + GetUserID()     |    |                      |
+| + GetUserRoles()  |    v                      v
++-------------------+  +-------------------+  +-------------------+
+                       | LocalValidator    |  | RemoteValidator   |
+                       +-------------------+  +-------------------+
+                       | - config          |  | - config          |
+                       | - logger          |  | - logger          |
+                       | - tracer          |  | - tracer          |
+                       +-------------------+  | - httpClient      |
+                       | + ValidateToken() |  +-------------------+
+                       +-------------------+  | + ValidateToken() |
+                                              +-------------------+
 ```
 
 ## 4. Implementation Details
@@ -192,8 +221,33 @@ The JWT token will have the following structure:
 2. Client includes the token in the Authorization header of requests
 3. AuthMiddleware extracts the token from the header
 4. AuthMiddleware validates the token using JWTService or OIDCService
+   - For JWT tokens, validation can be performed locally or remotely
+   - For OIDC tokens, validation is always performed remotely
 5. If valid, user information is added to the request context
 6. If invalid, the request is rejected with an appropriate error
+
+### 4.3 Token Validation
+
+#### 4.3.1 Local Validation
+
+Local validation of JWT tokens involves:
+1. Verifying the token's signature using the configured secret key
+2. Checking the token's expiration time
+3. Validating the token's issuer
+4. Extracting the user ID and roles from the token claims
+
+#### 4.3.2 Remote Validation
+
+Remote validation of JWT tokens involves:
+1. Sending the token to a remote authorization server for validation
+2. The authorization server verifies the token's validity, including:
+   - Signature verification
+   - Expiration check
+   - Revocation check (which cannot be done locally)
+3. If the token is valid, the authorization server returns the token claims
+4. If the token is invalid, the authorization server returns an error
+
+Remote validation provides additional security by checking if a token has been revoked, which cannot be determined through local validation alone. This is particularly important for long-lived tokens or in scenarios where token revocation is a requirement.
 
 ### 4.3 Authorization Flow
 
@@ -239,6 +293,12 @@ auth:
     secretKey: ${JWT_SECRET_KEY}
     tokenDuration: 24h
     issuer: family-service
+    remote:
+      enabled: ${JWT_REMOTE_ENABLED:-false}
+      validationURL: ${JWT_REMOTE_VALIDATION_URL}
+      clientID: ${JWT_REMOTE_CLIENT_ID}
+      clientSecret: ${JWT_REMOTE_CLIENT_SECRET}
+      timeout: 5s
   oidc:
     issuerURL: ${OIDC_ISSUER_URL}
     clientID: ${OIDC_CLIENT_ID}

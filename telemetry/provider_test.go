@@ -1,3 +1,5 @@
+// Copyright (c) 2025 A Bit of Help, Inc.
+
 package telemetry
 
 import (
@@ -63,7 +65,6 @@ func TestTelemetryProviderShutdown(t *testing.T) {
 	err = provider.Shutdown(context.Background())
 	assert.NoError(t, err)
 }
-
 
 func TestTelemetryProviderMeter(t *testing.T) {
 	// Create a test logger
@@ -229,4 +230,3 @@ func TestWithSpanTimed(t *testing.T) {
 	assert.Equal(t, testErr, err)
 	assert.True(t, duration >= 10*time.Millisecond)
 }
-

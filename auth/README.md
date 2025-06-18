@@ -91,6 +91,13 @@ config.JWT.SecretKey = "your-secret-key"
 config.JWT.TokenDuration = 24 * time.Hour
 config.JWT.Issuer = "your-issuer"
 
+// JWT Remote validation configuration
+config.JWT.Remote.Enabled = true
+config.JWT.Remote.ValidationURL = "https://your-auth-server.com/validate"
+config.JWT.Remote.ClientID = "your-client-id"
+config.JWT.Remote.ClientSecret = "your-client-secret"
+config.JWT.Remote.Timeout = 5 * time.Second
+
 // OIDC configuration
 config.OIDC.IssuerURL = "https://your-oidc-provider.com"
 config.OIDC.ClientID = "your-client-id"

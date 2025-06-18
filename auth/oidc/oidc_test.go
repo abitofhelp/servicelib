@@ -1,3 +1,5 @@
+// Copyright (c) 2025 A Bit of Help, Inc.
+
 package oidc_test
 
 import (

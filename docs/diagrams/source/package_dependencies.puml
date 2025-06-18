@@ -1,0 +1,66 @@
+@startuml Package Dependencies
+
+skinparam componentStyle uml2
+skinparam component {
+  BackgroundColor White
+  BorderColor Black
+  ArrowColor Black
+}
+
+package "auth" as auth {
+}
+
+package "logging" as logging {
+}
+
+package "telemetry" as telemetry {
+}
+
+package "middleware" as middleware {
+}
+
+package "context" as context {
+}
+
+package "health" as health {
+}
+
+package "errors" as errors {
+}
+
+package "config" as config {
+}
+
+package "db" as db {
+}
+
+package "di" as di {
+}
+
+auth --> logging
+auth --> middleware
+auth --> errors
+
+telemetry --> logging
+telemetry --> context
+
+middleware --> logging
+middleware --> context
+middleware --> errors
+
+health --> logging
+health --> config
+health --> db
+
+errors --> context
+
+db --> config
+db --> errors
+db --> context
+
+di --> config
+di --> logging
+
+config --> errors
+
+@enduml

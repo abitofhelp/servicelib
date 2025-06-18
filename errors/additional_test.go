@@ -1,3 +1,5 @@
+// Copyright (c) 2025 A Bit of Help, Inc.
+
 package errors
 
 import (
@@ -67,17 +69,17 @@ func TestWrapEdgeCases(t *testing.T) {
 		}
 		result := Wrap(originalErr, "new_op", "new message")
 		assert.NotNil(t, result)
-		
+
 		// Check that it's a domain error
 		domainErr, ok := result.(*Error)
 		assert.True(t, ok)
-		
+
 		// Check that the original error is preserved
 		assert.Equal(t, originalErr.Original, domainErr.Original)
-		
+
 		// Check that the code is preserved
 		assert.Equal(t, "original_code", domainErr.Code)
-		
+
 		// Check that the message and op are updated
 		assert.Equal(t, "new message", domainErr.Message)
 		assert.Equal(t, "new_op", domainErr.Op)

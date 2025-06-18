@@ -37,6 +37,9 @@ var (
 
 	// ErrInternal is returned when an internal error occurs
 	ErrInternal = errors.New("internal error")
+
+	// ErrNotImplemented is returned when a feature is not implemented
+	ErrNotImplemented = errors.New("not implemented")
 )
 
 // AuthError represents an authentication or authorization error with context

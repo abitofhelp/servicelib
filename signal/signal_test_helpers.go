@@ -1,3 +1,5 @@
+// Copyright (c) 2025 A Bit of Help, Inc.
+
 // Package signal provides utilities for handling OS signals and graceful shutdown.
 package signal
 

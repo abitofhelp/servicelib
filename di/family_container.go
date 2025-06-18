@@ -1,6 +1,4 @@
-// // Copyright (c) 2025 A Bit of Help, Inc.
-//
-// // Package di provides a generic dependency injection container that can be used across different applications.
+// Copyright (c) 2025 A Bit of Help, Inc.
 package di
 
 //

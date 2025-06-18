@@ -1,0 +1,38 @@
+@startuml Layered Architecture
+
+skinparam componentStyle uml2
+skinparam component {
+  BackgroundColor White
+  BorderColor Black
+  ArrowColor Black
+}
+
+package "Application Layer" as application {
+  component "validation" as validation
+  component "other" as other
+}
+
+package "Service Layer" as service {
+  component "auth" as auth
+  component "health" as health
+  component "middleware" as middleware
+}
+
+package "Infrastructure Layer" as infrastructure {
+  component "database" as db
+  component "config" as config
+  component "telemetry" as telemetry
+  component "di" as di
+}
+
+package "Core Layer" as core {
+  component "context" as context
+  component "errors" as errors
+  component "logging" as logging
+}
+
+application ..> service
+service ..> infrastructure
+infrastructure ..> core
+
+@enduml

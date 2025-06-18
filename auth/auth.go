@@ -14,6 +14,10 @@ import (
 	"github.com/abitofhelp/servicelib/auth/middleware"
 	"github.com/abitofhelp/servicelib/auth/oidc"
 	"github.com/abitofhelp/servicelib/auth/service"
+	"github.com/abitofhelp/servicelib/logging"
+	"github.com/abitofhelp/servicelib/telemetry"
+	"github.com/abitofhelp/servicelib/validation"
+	"go.opentelemetry.io/otel/attribute"
 	"go.uber.org/zap"
 )
 
@@ -29,6 +33,24 @@ type Config struct {
 
 		// Issuer identifies the entity that issued the token
 		Issuer string
+
+		// Remote validation configuration
+		Remote struct {
+			// Enabled determines if remote validation should be used
+			Enabled bool
+
+			// ValidationURL is the URL of the remote validation endpoint
+			ValidationURL string
+
+			// ClientID is the client ID for the remote validation service
+			ClientID string
+
+			// ClientSecret is the client secret for the remote validation service
+			ClientSecret string
+
+			// Timeout is the timeout for remote validation operations
+			Timeout time.Duration
+		}
 	}
 
 	// OIDC configuration
@@ -82,6 +104,10 @@ func DefaultConfig() Config {
 	config.JWT.TokenDuration = 24 * time.Hour
 	config.JWT.Issuer = "auth"
 
+	// JWT Remote validation defaults
+	config.JWT.Remote.Enabled = false
+	config.JWT.Remote.Timeout = 10 * time.Second
+
 	// OIDC defaults
 	config.OIDC.Timeout = 10 * time.Second
 	config.OIDC.Scopes = []string{"openid", "profile", "email"}
@@ -104,6 +130,44 @@ func DefaultConfig() Config {
 	return config
 }
 
+// ValidateConfig validates the configuration for the auth module.
+func ValidateConfig(config Config) *validation.ValidationResult {
+	result := validation.NewValidationResult()
+
+	// Validate JWT configuration
+	validation.Required(config.JWT.SecretKey, "JWT.SecretKey", result)
+	if config.JWT.TokenDuration <= 0 {
+		result.AddError("must be positive", "JWT.TokenDuration")
+	}
+	validation.Required(config.JWT.Issuer, "JWT.Issuer", result)
+
+	// Validate JWT Remote configuration if enabled
+	if config.JWT.Remote.Enabled {
+		validation.Required(config.JWT.Remote.ValidationURL, "JWT.Remote.ValidationURL", result)
+		if config.JWT.Remote.Timeout <= 0 {
+			result.AddError("must be positive", "JWT.Remote.Timeout")
+		}
+	}
+
+	// Validate OIDC configuration if provided
+	if config.OIDC.IssuerURL != "" || config.OIDC.ClientID != "" {
+		validation.Required(config.OIDC.IssuerURL, "OIDC.IssuerURL", result)
+		validation.Required(config.OIDC.ClientID, "OIDC.ClientID", result)
+		if config.OIDC.Timeout <= 0 {
+			result.AddError("must be positive", "OIDC.Timeout")
+		}
+	}
+
+	// Validate Service configuration
+	validation.Required(config.Service.AdminRoleName, "Service.AdminRoleName", result)
+	validation.Required(config.Service.ReadOnlyRoleName, "Service.ReadOnlyRoleName", result)
+	if len(config.Service.ReadOperationPrefixes) == 0 {
+		result.AddError("must not be empty", "Service.ReadOperationPrefixes")
+	}
+
+	return result
+}
+
 // Auth provides authentication and authorization functionality.
 type Auth struct {
 	// jwtService is the JWT service for token handling
@@ -119,18 +183,42 @@ type Auth struct {
 	authService *service.Service
 
 	// logger is used for logging operations and errors
-	logger *zap.Logger
+	logger logging.Logger
+
+	// metrics for tracking authentication and authorization operations
+	metrics struct {
+		tokenGenerations   int64
+		tokenValidations   int64
+		authorizationChecks int64
+	}
 }
 
 // New creates a new Auth instance with the provided configuration and logger.
 func New(ctx context.Context, config Config, logger *zap.Logger) (*Auth, error) {
+	// Create a span for the initialization process
+	ctx, span := telemetry.StartSpan(ctx, "auth.New")
+	defer span.End()
+
 	if logger == nil {
 		logger = zap.NewNop()
 	}
 
-	// Validate JWT configuration
-	if config.JWT.SecretKey == "" {
-		return nil, errors.WithMessage(errors.ErrInvalidConfig, "JWT secret key cannot be empty")
+	// Create a context logger
+	ctxLogger := logging.NewContextLogger(logger)
+
+	// Add attributes to the span
+	telemetry.AddSpanAttributes(ctx,
+		attribute.String("jwt.issuer", config.JWT.Issuer),
+		attribute.Bool("jwt.remote.enabled", config.JWT.Remote.Enabled),
+		attribute.Bool("middleware.require_auth", config.Middleware.RequireAuth),
+	)
+
+	// Validate configuration
+	validationResult := ValidateConfig(config)
+	if !validationResult.IsValid() {
+		err := errors.WithMessage(errors.ErrInvalidConfig, validationResult.Error().Error())
+		telemetry.RecordErrorSpan(ctx, err)
+		return nil, err
 	}
 
 	// Create JWT service
@@ -139,6 +227,20 @@ func New(ctx context.Context, config Config, logger *zap.Logger) (*Auth, error) 
 		TokenDuration: config.JWT.TokenDuration,
 		Issuer:        config.JWT.Issuer,
 	}, logger)
+
+	// Add remote validator if enabled
+	if config.JWT.Remote.Enabled {
+		jwtService.WithRemoteValidator(jwt.RemoteConfig{
+			ValidationURL: config.JWT.Remote.ValidationURL,
+			ClientID:      config.JWT.Remote.ClientID,
+			ClientSecret:  config.JWT.Remote.ClientSecret,
+			Timeout:       config.JWT.Remote.Timeout,
+		})
+
+		ctxLogger.Info(ctx, "JWT remote validation enabled", 
+			zap.String("validation_url", config.JWT.Remote.ValidationURL),
+			zap.Duration("timeout", config.JWT.Remote.Timeout))
+	}
 
 	// Create OIDC service if configured
 	var oidcService *oidc.Service
@@ -184,7 +286,7 @@ func New(ctx context.Context, config Config, logger *zap.Logger) (*Auth, error) 
 		oidcService:    oidcService,
 		authMiddleware: authMiddleware,
 		authService:    authService,
-		logger:         logger,
+		logger:         ctxLogger,
 	}, nil
 }
 
@@ -195,22 +297,116 @@ func (a *Auth) Middleware() func(http.Handler) http.Handler {
 
 // GenerateToken generates a new JWT token for a user with the specified roles.
 func (a *Auth) GenerateToken(ctx context.Context, userID string, roles []string) (string, error) {
-	return a.jwtService.GenerateToken(ctx, userID, roles)
+	ctx, span := telemetry.StartSpan(ctx, "auth.GenerateToken")
+	defer span.End()
+
+	// Record metrics
+	a.metrics.tokenGenerations++
+	telemetry.RecordErrorMetric(ctx, "auth", "token_generation")
+
+	// Add span attributes
+	telemetry.AddSpanAttributes(ctx,
+		attribute.String("user.id", userID),
+		attribute.StringSlice("user.roles", roles),
+	)
+
+	// Generate token
+	start := time.Now()
+	token, err := a.jwtService.GenerateToken(ctx, userID, roles)
+	duration := time.Since(start)
+
+	// Record result
+	if err != nil {
+		telemetry.RecordErrorSpan(ctx, err)
+		telemetry.RecordErrorMetric(ctx, "auth", "token_generation_error")
+	}
+
+	// Add duration attribute
+	telemetry.AddSpanAttributes(ctx,
+		attribute.Float64("duration_ms", float64(duration.Milliseconds())),
+	)
+
+	return token, err
 }
 
 // ValidateToken validates a JWT token and returns the claims if valid.
 func (a *Auth) ValidateToken(ctx context.Context, tokenString string) (*jwt.Claims, error) {
-	return a.jwtService.ValidateToken(ctx, tokenString)
+	ctx, span := telemetry.StartSpan(ctx, "auth.ValidateToken")
+	defer span.End()
+
+	// Record metrics
+	a.metrics.tokenValidations++
+	telemetry.RecordErrorMetric(ctx, "auth", "token_validation")
+
+	// Validate token
+	start := time.Now()
+	claims, err := a.jwtService.ValidateToken(ctx, tokenString)
+	duration := time.Since(start)
+
+	// Record result
+	if err != nil {
+		telemetry.RecordErrorSpan(ctx, err)
+		telemetry.RecordErrorMetric(ctx, "auth", "token_validation_error")
+	} else if claims != nil {
+		telemetry.AddSpanAttributes(ctx,
+			attribute.String("user.id", claims.UserID),
+			attribute.StringSlice("user.roles", claims.Roles),
+		)
+	}
+
+	// Add duration attribute
+	telemetry.AddSpanAttributes(ctx,
+		attribute.Float64("duration_ms", float64(duration.Milliseconds())),
+	)
+
+	return claims, err
 }
 
 // IsAuthorized checks if the user is authorized to perform the operation.
 func (a *Auth) IsAuthorized(ctx context.Context, operation string) (bool, error) {
-	return a.authService.IsAuthorized(ctx, operation)
+	ctx, span := telemetry.StartSpan(ctx, "auth.IsAuthorized")
+	defer span.End()
+
+	// Record metrics
+	a.metrics.authorizationChecks++
+	telemetry.RecordErrorMetric(ctx, "auth", "authorization_check")
+
+	// Add span attributes
+	telemetry.AddSpanAttributes(ctx,
+		attribute.String("operation", operation),
+	)
+
+	// Check authorization
+	start := time.Now()
+	authorized, err := a.authService.IsAuthorized(ctx, operation)
+	duration := time.Since(start)
+
+	// Record result
+	if err != nil {
+		telemetry.RecordErrorSpan(ctx, err)
+		telemetry.RecordErrorMetric(ctx, "auth", "authorization_check_error")
+	}
+	telemetry.AddSpanAttributes(ctx,
+		attribute.Bool("authorized", authorized),
+		attribute.Float64("duration_ms", float64(duration.Milliseconds())),
+	)
+
+	return authorized, err
 }
 
 // IsAdmin checks if the user has admin role.
 func (a *Auth) IsAdmin(ctx context.Context) (bool, error) {
-	return a.authService.IsAdmin(ctx)
+	ctx, span := telemetry.StartSpan(ctx, "auth.IsAdmin")
+	defer span.End()
+
+	isAdmin, err := a.authService.IsAdmin(ctx)
+	if err != nil {
+		telemetry.RecordErrorSpan(ctx, err)
+	}
+	telemetry.AddSpanAttributes(ctx,
+		attribute.Bool("is_admin", isAdmin),
+	)
+	return isAdmin, err
 }
 
 // HasRole checks if the user has a specific role.

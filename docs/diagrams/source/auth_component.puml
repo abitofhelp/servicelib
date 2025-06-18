@@ -1,0 +1,52 @@
+@startuml Authentication Component
+
+skinparam componentStyle uml2
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+  ArrowColor Black
+}
+
+class Auth {
+  - jwtService: jwt.Service
+  - oidcService: oidc.Service
+  - authService: service.Service
+  - middleware: middleware.Middleware
+  - logger: *zap.Logger
+  + New(ctx, config, logger): (*Auth, error)
+  + Middleware(): func(http.Handler) http.Handler
+  + GenerateToken(ctx, userID, roles): (string, error)
+  + ValidateToken(ctx, tokenString): (*jwt.Claims, error)
+  + IsAuthorized(ctx, operation): (bool, error)
+  + IsAdmin(ctx): (bool, error)
+  + HasRole(ctx, role): (bool, error)
+  + GetUserID(ctx): (string, error)
+  + GetUserRoles(ctx): ([]string, error)
+}
+
+class "jwt.Service" as JWTService {
+  - config: Config
+  - logger: Logger
+  + GenerateToken(): (string, error)
+  + ValidateToken(): (*Claims, error)
+}
+
+class "oidc.Service" as OIDCService {
+  - config: Config
+  - logger: Logger
+  + ValidateToken(): (*Claims, error)
+  + GetUserInfo(): (*UserInfo, error)
+}
+
+class "service.Service" as AuthService {
+  - config: Config
+  - logger: Logger
+  + IsAuthorized(): (bool, error)
+  + IsAdmin(): (bool, error)
+}
+
+Auth --> JWTService
+Auth --> OIDCService
+Auth --> AuthService
+
+@enduml

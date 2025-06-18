@@ -16,6 +16,16 @@ The library follows modern Go practices and design patterns, with a focus on:
 - **Reliability**: Built-in error handling and recovery mechanisms
 - **Observability**: Integrated logging, metrics, and tracing
 
+## Documentation
+
+For comprehensive documentation, please see the [Developer Guide](docs/ServiceLib_Developer_Guide.md) which includes:
+
+- Detailed component descriptions
+- UML diagrams of the architecture and key components
+- Usage examples
+- Best practices
+- Troubleshooting guidance
+
 ## Features
 
 - **Authentication** - JWT, OAuth2, and OIDC implementations for secure service-to-service and user authentication
