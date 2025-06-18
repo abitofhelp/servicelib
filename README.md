@@ -1,7 +1,7 @@
 # ServiceLib
 
 [![codecov](https://codecov.io/gh/abitofhelp/servicelib/graph/badge.svg)](https://codecov.io/gh/abitofhelp/servicelib)
-## Coverage (clickable for details)
+## Coverage (click for details)
 [![codecov](https://codecov.io/gh/abitofhelp/servicelib/graphs/sunburst.svg)](https://codecov.io/gh/abitofhelp/servicelib)
 
 ## Overview

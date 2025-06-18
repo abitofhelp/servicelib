@@ -1,0 +1,4 @@
+github.com/abitofhelp/servicelib/auth/jwt.go:46:	NewJWTService	100.0%
+github.com/abitofhelp/servicelib/auth/jwt.go:76:	GenerateToken	77.8%
+github.com/abitofhelp/servicelib/auth/jwt.go:110:	ValidateToken	73.3%
+total:							(statements)	76.0%

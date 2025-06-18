@@ -1,7 +1,6 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
-// Package oidc provides OpenID Connect (OIDC) authorization functionality for the family-service-graphql.
-// This functionality is currently not enabled but will be in the future.
+// Package oidc provides OpenID Connect (OIDC) authorization functionality for the servicelib.
 package oidc
 
 // Config represents the configuration for OIDC authorization.

@@ -1,7 +1,6 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
-// Package oauth2 provides OAuth2 authentication functionality for the family-service-graphql.
-// This functionality is currently not enabled but will be in the future.
+// Package oauth2 provides OAuth2 authentication functionality for the v.
 package oauth2
 
 // Config represents the configuration for OAuth2 authentication.
