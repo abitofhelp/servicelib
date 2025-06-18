@@ -10,6 +10,7 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
@@ -27,7 +28,15 @@ import (
 // Returns:
 //   - http.Handler: The instrumented HTTP handler
 func InstrumentHandler(handler http.Handler, operation string, opts ...otelhttp.Option) http.Handler {
-	return otelhttp.NewHandler(handler, operation, opts...)
+	// Ensure we have the default propagator to propagate trace context in headers
+	defaultOpts := []otelhttp.Option{
+		otelhttp.WithPropagators(otel.GetTextMapPropagator()),
+	}
+
+	// Combine default options with user-provided options
+	allOpts := append(defaultOpts, opts...)
+
+	return otelhttp.NewHandler(handler, operation, allOpts...)
 }
 
 // InstrumentClient wraps an http.Client with OpenTelemetry instrumentation.
@@ -44,12 +53,43 @@ func InstrumentClient(client *http.Client, opts ...otelhttp.Option) *http.Client
 		client = http.DefaultClient
 	}
 
-	client.Transport = otelhttp.NewTransport(
-		client.Transport,
-		opts...,
+	// Create a new client to avoid modifying the original
+	newClient := &http.Client{
+		CheckRedirect: client.CheckRedirect,
+		Jar:           client.Jar,
+		Timeout:       client.Timeout,
+	}
+
+	// Get the base transport
+	baseTransport := client.Transport
+	if baseTransport == nil {
+		baseTransport = http.DefaultTransport
+	}
+
+	// Ensure we have the default propagator to propagate trace context in headers
+	defaultOpts := []otelhttp.Option{
+		otelhttp.WithPropagators(otel.GetTextMapPropagator()),
+	}
+
+	// Add additional default options to ensure trace headers are propagated
+	defaultOpts = append(defaultOpts, 
+		otelhttp.WithSpanOptions(trace.WithAttributes(attribute.String("http.client", "instrumented"))),
+		otelhttp.WithFilter(func(r *http.Request) bool {
+			// Always trace all requests
+			return true
+		}),
 	)
 
-	return client
+	// Combine default options with user-provided options
+	allOpts := append(defaultOpts, opts...)
+
+	// Create a new transport with OpenTelemetry instrumentation
+	newClient.Transport = otelhttp.NewTransport(
+		baseTransport,
+		allOpts...,
+	)
+
+	return newClient
 }
 
 // NewHTTPMiddleware creates a new middleware for HTTP request tracing.
@@ -61,10 +101,12 @@ func InstrumentClient(client *http.Client, opts ...otelhttp.Option) *http.Client
 // Returns:
 //   - func(http.Handler) http.Handler: The middleware function
 func NewHTTPMiddleware(logger *logging.ContextLogger) func(http.Handler) http.Handler {
+	// Use the global tracer provider
 	tracer := otel.Tracer("infrastructure.telemetry.http")
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Start a new span for this request
 			ctx, span := tracer.Start(r.Context(), r.Method+" "+r.URL.Path)
 			defer span.End()
 
@@ -80,6 +122,9 @@ func NewHTTPMiddleware(logger *logging.ContextLogger) func(http.Handler) http.Ha
 			traceID := span.SpanContext().TraceID().String()
 			w.Header().Set("X-Trace-ID", traceID)
 
+			// Add trace context to request headers for propagation
+			otel.GetTextMapPropagator().Inject(ctx, propagation.HeaderCarrier(r.Header))
+
 			// Log request with trace ID
 			logger.Info(ctx, "HTTP request",
 				zap.String("method", r.Method),
@@ -87,8 +132,11 @@ func NewHTTPMiddleware(logger *logging.ContextLogger) func(http.Handler) http.Ha
 				zap.String("trace_id", traceID),
 			)
 
-			// Call the next handler with the updated context
-			next.ServeHTTP(w, r.WithContext(ctx))
+			// Create a new request with the updated context
+			r = r.WithContext(ctx)
+
+			// Call the next handler with the updated request
+			next.ServeHTTP(w, r)
 		})
 	}
 }

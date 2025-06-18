@@ -1,5 +1,6 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
+//go:build integration
 // +build integration
 
 package db
@@ -8,7 +9,6 @@ import (
 	"context"
 	"database/sql"
 	"testing"
-	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
