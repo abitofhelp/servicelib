@@ -110,8 +110,8 @@ func TestValidateToken(t *testing.T) {
 
 // TestIsAdmin tests the IsAdmin function
 func TestIsAdmin(t *testing.T) {
-	// Create a real service for testing IsAdmin
-	service, err := oidc.NewService(context.Background(), oidc.Config{
+	// Create a real service for testing IsAdmin with "admin" role
+	adminService, err := oidc.NewService(context.Background(), oidc.Config{
 		IssuerURL:     "https://example.com", // Not used for IsAdmin
 		ClientID:      "test-client",         // Not used for IsAdmin
 		AdminRoleName: "admin",
@@ -124,18 +124,44 @@ func TestIsAdmin(t *testing.T) {
 
 	// Test with admin role
 	roles := []string{"user", "admin", "editor"}
-	isAdmin := service.IsAdmin(roles)
+	isAdmin := adminService.IsAdmin(roles)
 	assert.True(t, isAdmin)
 
 	// Test without admin role
 	roles = []string{"user", "editor"}
-	isAdmin = service.IsAdmin(roles)
+	isAdmin = adminService.IsAdmin(roles)
 	assert.False(t, isAdmin)
 
 	// Test with empty roles
 	roles = []string{}
-	isAdmin = service.IsAdmin(roles)
+	isAdmin = adminService.IsAdmin(roles)
 	assert.False(t, isAdmin)
+
+	// Test with nil roles
+	isAdmin = adminService.IsAdmin(nil)
+	assert.False(t, isAdmin)
+
+	// Create another service with a different admin role name
+	superuserService, err := oidc.NewService(context.Background(), oidc.Config{
+		IssuerURL:     "https://example.com", // Not used for IsAdmin
+		ClientID:      "test-client",         // Not used for IsAdmin
+		AdminRoleName: "superuser",
+	}, zap.NewNop())
+
+	// Skip the test if we can't create the service
+	if err != nil {
+		t.Skip("Skipping test due to service creation error:", err)
+	}
+
+	// Test with admin role but different admin role name
+	roles = []string{"user", "admin", "editor"}
+	isAdmin = superuserService.IsAdmin(roles)
+	assert.False(t, isAdmin)
+
+	// Test with superuser role
+	roles = []string{"user", "superuser", "editor"}
+	isAdmin = superuserService.IsAdmin(roles)
+	assert.True(t, isAdmin)
 }
 
 // TestGetAuthURL tests the GetAuthURL function

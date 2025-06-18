@@ -53,6 +53,24 @@ func TestGenerateToken(t *testing.T) {
 	assert.Error(t, err)
 	assert.Empty(t, token)
 	assert.True(t, errors.Is(err, autherrors.ErrInvalidClaims))
+
+	// Test with nil roles (should still work)
+	token, err = service.GenerateToken(ctx, userID, nil)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, token)
+
+	// Test with empty roles (should still work)
+	token, err = service.GenerateToken(ctx, userID, []string{})
+	assert.NoError(t, err)
+	assert.NotEmpty(t, token)
+
+	// Since it's difficult to force a signing error in a unit test,
+	// we'll skip testing that specific error case.
+	// In a real-world scenario, signing errors could occur due to:
+	// - Invalid secret key format
+	// - Memory allocation issues
+	// - System-level errors
+	// These are difficult to simulate in a unit test environment.
 }
 
 func TestValidateToken(t *testing.T) {
@@ -147,6 +165,44 @@ func TestExtractTokenFromHeader(t *testing.T) {
 	assert.Error(t, err)
 	assert.Empty(t, token)
 	assert.True(t, errors.Is(err, autherrors.ErrInvalidToken))
+}
+
+// TestWithRemoteValidator tests the WithRemoteValidator function
+func TestWithRemoteValidator(t *testing.T) {
+	logger := zap.NewNop()
+	config := jwt.Config{
+		SecretKey:     "test-secret",
+		TokenDuration: 1 * time.Hour,
+		Issuer:        "test-issuer",
+	}
+	service := jwt.NewService(config, logger)
+
+	// Add a remote validator
+	remoteConfig := jwt.RemoteConfig{
+		ValidationURL: "https://test.com/validate",
+		ClientID:      "test-client-id",
+		ClientSecret:  "test-client-secret",
+		Timeout:       15 * time.Second,
+	}
+	result := service.WithRemoteValidator(remoteConfig)
+
+	// Check that the method returns the service itself for chaining
+	assert.Equal(t, service, result)
+
+	// Test ValidateToken with remote validator
+	// Since the remote validator is not implemented, it should fall back to local validation
+	ctx := context.Background()
+	userID := "user123"
+	roles := []string{"admin", "user"}
+	token, err := service.GenerateToken(ctx, userID, roles)
+	require.NoError(t, err)
+	require.NotEmpty(t, token)
+
+	claims, err := service.ValidateToken(ctx, token)
+	assert.NoError(t, err)
+	assert.NotNil(t, claims)
+	assert.Equal(t, userID, claims.UserID)
+	assert.Equal(t, roles, claims.Roles)
 }
 
 // TestTokenWithMalformedClaims tests validation of a token with malformed claims
