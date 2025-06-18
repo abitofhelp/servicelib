@@ -64,6 +64,7 @@ func TestTelemetryProviderShutdown(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+
 func TestTelemetryProviderMeter(t *testing.T) {
 	// Create a test logger
 	logger := logging.NewContextLogger(zaptest.NewLogger(t))
@@ -228,3 +229,4 @@ func TestWithSpanTimed(t *testing.T) {
 	assert.Equal(t, testErr, err)
 	assert.True(t, duration >= 10*time.Millisecond)
 }
+

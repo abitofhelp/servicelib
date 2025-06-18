@@ -110,7 +110,11 @@ func TestAddSpanAttributes(t *testing.T) {
 	// Add attributes to the span
 	AddSpanAttributes(ctx, attribute.String("key", "value"))
 
-	// No assertion needed as we can't easily verify the attributes were added
+	// We can't directly verify the attributes were added in the test,
+	// but we can verify that the function doesn't panic
+	assert.NotPanics(t, func() {
+		AddSpanAttributes(ctx, attribute.String("key2", "value2"))
+	})
 }
 
 func TestRecordErrorSpan(t *testing.T) {
@@ -125,5 +129,9 @@ func TestRecordErrorSpan(t *testing.T) {
 	// Test with nil error
 	RecordErrorSpan(ctx, nil)
 
-	// No assertion needed as we can't easily verify the error was recorded
+	// We can't directly verify the error was recorded in the test,
+	// but we can verify that the function doesn't panic
+	assert.NotPanics(t, func() {
+		RecordErrorSpan(ctx, errors.New("another error"))
+	})
 }
