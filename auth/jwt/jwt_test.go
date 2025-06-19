@@ -44,23 +44,25 @@ func TestGenerateToken(t *testing.T) {
 	ctx := context.Background()
 	userID := "user123"
 	roles := []string{"admin", "user"}
-	token, err := service.GenerateToken(ctx, userID, roles)
+	scopes := []string{}
+	resources := []string{}
+	token, err := service.GenerateToken(ctx, userID, roles, scopes, resources)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, token)
 
 	// Test with empty user ID
-	token, err = service.GenerateToken(ctx, "", roles)
+	token, err = service.GenerateToken(ctx, "", roles, []string{}, []string{})
 	assert.Error(t, err)
 	assert.Empty(t, token)
 	assert.True(t, errors.Is(err, autherrors.ErrInvalidClaims))
 
 	// Test with nil roles (should still work)
-	token, err = service.GenerateToken(ctx, userID, nil)
+	token, err = service.GenerateToken(ctx, userID, nil, []string{}, []string{})
 	assert.NoError(t, err)
 	assert.NotEmpty(t, token)
 
 	// Test with empty roles (should still work)
-	token, err = service.GenerateToken(ctx, userID, []string{})
+	token, err = service.GenerateToken(ctx, userID, []string{}, []string{}, []string{})
 	assert.NoError(t, err)
 	assert.NotEmpty(t, token)
 
@@ -86,7 +88,7 @@ func TestValidateToken(t *testing.T) {
 	// Generate a valid token for testing
 	userID := "user123"
 	roles := []string{"admin", "user"}
-	token, err := service.GenerateToken(ctx, userID, roles)
+	token, err := service.GenerateToken(ctx, userID, roles, []string{}, []string{})
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 
@@ -117,7 +119,7 @@ func TestValidateToken(t *testing.T) {
 		Issuer:        "test-issuer",
 	}
 	expiredService := jwt.NewService(expiredConfig, logger)
-	expiredToken, err := expiredService.GenerateToken(ctx, userID, roles)
+	expiredToken, err := expiredService.GenerateToken(ctx, userID, roles, []string{}, []string{})
 	require.NoError(t, err)
 
 	claims, err = service.ValidateToken(ctx, expiredToken)
@@ -132,7 +134,7 @@ func TestValidateToken(t *testing.T) {
 		Issuer:        "test-issuer",
 	}
 	differentService := jwt.NewService(differentConfig, logger)
-	differentToken, err := differentService.GenerateToken(ctx, userID, roles)
+	differentToken, err := differentService.GenerateToken(ctx, userID, roles, []string{}, []string{})
 	require.NoError(t, err)
 
 	claims, err = service.ValidateToken(ctx, differentToken)
@@ -194,7 +196,7 @@ func TestWithRemoteValidator(t *testing.T) {
 	ctx := context.Background()
 	userID := "user123"
 	roles := []string{"admin", "user"}
-	token, err := service.GenerateToken(ctx, userID, roles)
+	token, err := service.GenerateToken(ctx, userID, roles, []string{}, []string{})
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 
@@ -223,7 +225,7 @@ func TestTokenWithMalformedClaims(t *testing.T) {
 	// First generate a valid token
 	userID := "user123"
 	roles := []string{"admin", "user"}
-	token, err := service.GenerateToken(ctx, userID, roles)
+	token, err := service.GenerateToken(ctx, userID, roles, []string{}, []string{})
 	require.NoError(t, err)
 
 	// Now validate it to ensure it's valid

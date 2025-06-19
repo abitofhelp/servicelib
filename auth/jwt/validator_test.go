@@ -47,7 +47,7 @@ func TestLocalValidator_ValidateToken(t *testing.T) {
 	// Test with valid token
 	userID := "user123"
 	roles := []string{"admin", "user"}
-	token, err := service.GenerateToken(ctx, userID, roles)
+	token, err := service.GenerateToken(ctx, userID, roles, []string{}, []string{})
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 
@@ -77,7 +77,7 @@ func TestLocalValidator_ValidateToken(t *testing.T) {
 		Issuer:        "test-issuer",
 	}
 	expiredService := jwt.NewService(expiredConfig, logger)
-	expiredToken, err := expiredService.GenerateToken(ctx, userID, roles)
+	expiredToken, err := expiredService.GenerateToken(ctx, userID, roles, []string{}, []string{})
 	require.NoError(t, err)
 
 	claims, err = validator.ValidateToken(ctx, expiredToken)
@@ -92,7 +92,7 @@ func TestLocalValidator_ValidateToken(t *testing.T) {
 		Issuer:        "test-issuer",
 	}
 	differentService := jwt.NewService(differentConfig, logger)
-	differentToken, err := differentService.GenerateToken(ctx, userID, roles)
+	differentToken, err := differentService.GenerateToken(ctx, userID, roles, []string{}, []string{})
 	require.NoError(t, err)
 
 	claims, err = validator.ValidateToken(ctx, differentToken)

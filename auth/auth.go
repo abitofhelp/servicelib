@@ -117,7 +117,7 @@ func DefaultConfig() Config {
 
 	// Service defaults
 	config.Service.AdminRoleName = "admin"
-	config.Service.ReadOnlyRoleName = "viewer"
+	config.Service.ReadOnlyRoleName = "authuser"
 	config.Service.ReadOperationPrefixes = []string{
 		"read:",
 		"list:",

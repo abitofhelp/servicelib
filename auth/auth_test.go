@@ -129,12 +129,14 @@ func TestGenerateToken(t *testing.T) {
 	// Test generating a token
 	userID := "user123"
 	roles := []string{"admin", "user"}
-	token, err := authInstance.GenerateToken(ctx, userID, roles)
+	scopes := []string{}
+	resources := []string{}
+	token, err := authInstance.GenerateToken(ctx, userID, roles, scopes, resources)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, token)
 
 	// Test with empty user ID
-	token, err = authInstance.GenerateToken(ctx, "", roles)
+	token, err = authInstance.GenerateToken(ctx, "", roles, []string{}, []string{})
 	assert.Error(t, err)
 	assert.Empty(t, token)
 }
@@ -156,7 +158,7 @@ func TestValidateToken(t *testing.T) {
 	// Generate a valid token for testing
 	userID := "user123"
 	roles := []string{"admin", "user"}
-	token, err := authInstance.GenerateToken(ctx, userID, roles)
+	token, err := authInstance.GenerateToken(ctx, userID, roles, []string{}, []string{})
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 
