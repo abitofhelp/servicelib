@@ -117,7 +117,7 @@ func DefaultConfig() Config {
 
 	// Service defaults
 	config.Service.AdminRoleName = "admin"
-	config.Service.ReadOnlyRoleName = "authuser"
+	config.Service.ReadOnlyRoleName = "viewer"
 	config.Service.ReadOperationPrefixes = []string{
 		"read:",
 		"list:",
@@ -295,8 +295,8 @@ func (a *Auth) Middleware() func(http.Handler) http.Handler {
 	return a.authMiddleware.Handler
 }
 
-// GenerateToken generates a new JWT token for a user with the specified roles.
-func (a *Auth) GenerateToken(ctx context.Context, userID string, roles []string) (string, error) {
+// GenerateToken generates a new JWT token for a user with the specified roles, scopes, and resources.
+func (a *Auth) GenerateToken(ctx context.Context, userID string, roles []string, scopes []string, resources []string) (string, error) {
 	ctx, span := telemetry.StartSpan(ctx, "auth.GenerateToken")
 	defer span.End()
 
@@ -308,11 +308,13 @@ func (a *Auth) GenerateToken(ctx context.Context, userID string, roles []string)
 	telemetry.AddSpanAttributes(ctx,
 		attribute.String("user.id", userID),
 		attribute.StringSlice("user.roles", roles),
+		attribute.StringSlice("user.scopes", scopes),
+		attribute.StringSlice("user.resources", resources),
 	)
 
 	// Generate token
 	start := time.Now()
-	token, err := a.jwtService.GenerateToken(ctx, userID, roles)
+	token, err := a.jwtService.GenerateToken(ctx, userID, roles, scopes, resources)
 	duration := time.Since(start)
 
 	// Record result

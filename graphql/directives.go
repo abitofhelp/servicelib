@@ -40,19 +40,21 @@ func init() {
 }
 
 // IsAuthorizedDirective implements the @isAuthorized directive for GraphQL
-// It checks if the user has any of the allowed roles
+// It checks if the user has any of the allowed roles and all of the required scopes for the specified resource
 //
 // Parameters:
 //   - ctx: The context of the request
 //   - obj: The object being resolved
 //   - next: The next resolver in the chain
 //   - allowedRoles: The roles that are allowed to access this field
+//   - requiredScopes: The scopes that are required to access this field (optional)
+//   - resource: The resource being accessed (optional)
 //   - logger: A context logger for logging (optional, can be nil)
 //
 // Returns:
 //   - The result of the next resolver if authorized
 //   - An error if not authorized
-func IsAuthorizedDirective(ctx context.Context, obj interface{}, next graphql.Resolver, allowedRoles []string, logger *logging.ContextLogger) (interface{}, error) {
+func IsAuthorizedDirective(ctx context.Context, obj interface{}, next graphql.Resolver, allowedRoles []string, requiredScopes []string, resource string, logger *logging.ContextLogger) (interface{}, error) {
 	// Start timing the authorization check
 	start := time.Now()
 	defer func() {
@@ -67,6 +69,8 @@ func IsAuthorizedDirective(ctx context.Context, obj interface{}, next graphql.Re
 	// Add span attributes
 	telemetry.AddSpanAttributes(ctx,
 		attribute.StringSlice("auth.allowed_roles", allowedRoles),
+		attribute.StringSlice("auth.required_scopes", requiredScopes),
+		attribute.String("auth.resource", resource),
 	)
 
 	// Get the operation name from the GraphQL context
@@ -79,8 +83,8 @@ func IsAuthorizedDirective(ctx context.Context, obj interface{}, next graphql.Re
 		}
 	}
 
-	// Check if the user has any of the allowed roles
-	if !middleware.IsAuthorized(ctx, allowedRoles) {
+	// Check if the user has any of the allowed roles and all of the required scopes for the specified resource
+	if !middleware.IsAuthorizedWithScopes(ctx, allowedRoles, requiredScopes, resource) {
 		// Record the authorization failure
 		AuthorizationFailures.Inc()
 		telemetry.RecordErrorMetric(ctx, "graphql", "authorization_failure")
@@ -90,6 +94,8 @@ func IsAuthorizedDirective(ctx context.Context, obj interface{}, next graphql.Re
 			logger.Warn(ctx, "Unauthorized access attempt",
 				zap.String("operation", operationName),
 				zap.Strings("allowed_roles", allowedRoles),
+				zap.Strings("required_scopes", requiredScopes),
+				zap.String("resource", resource),
 			)
 		}
 
@@ -109,12 +115,14 @@ func IsAuthorizedDirective(ctx context.Context, obj interface{}, next graphql.Re
 // Parameters:
 //   - ctx: The context of the request
 //   - allowedRoles: The roles that are allowed to perform the operation
+//   - requiredScopes: The scopes that are required to perform the operation (optional)
+//   - resource: The resource being accessed (optional)
 //   - operation: The name of the operation being performed
 //   - logger: A context logger for logging (optional, can be nil)
 //
 // Returns:
 //   - An error if not authorized, nil if authorized
-func CheckAuthorization(ctx context.Context, allowedRoles []string, operation string, logger *logging.ContextLogger) error {
+func CheckAuthorization(ctx context.Context, allowedRoles []string, requiredScopes []string, resource string, operation string, logger *logging.ContextLogger) error {
 	// Start timing the authorization check
 	start := time.Now()
 	defer func() {
@@ -129,11 +137,13 @@ func CheckAuthorization(ctx context.Context, allowedRoles []string, operation st
 	// Add span attributes
 	telemetry.AddSpanAttributes(ctx,
 		attribute.StringSlice("auth.allowed_roles", allowedRoles),
+		attribute.StringSlice("auth.required_scopes", requiredScopes),
+		attribute.String("auth.resource", resource),
 		attribute.String("operation", operation),
 	)
 
-	// Check if the user has any of the allowed roles
-	if !middleware.IsAuthorized(ctx, allowedRoles) {
+	// Check if the user has any of the allowed roles and all of the required scopes for the specified resource
+	if !middleware.IsAuthorizedWithScopes(ctx, allowedRoles, requiredScopes, resource) {
 		// Record the authorization failure
 		AuthorizationFailures.Inc()
 		telemetry.RecordErrorMetric(ctx, "graphql", "authorization_failure")
@@ -143,6 +153,8 @@ func CheckAuthorization(ctx context.Context, allowedRoles []string, operation st
 			logger.Warn(ctx, "Unauthorized access attempt", 
 				zap.String("operation", operation),
 				zap.Strings("allowed_roles", allowedRoles),
+				zap.Strings("required_scopes", requiredScopes),
+				zap.String("resource", resource),
 			)
 		}
 

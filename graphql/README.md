@@ -21,22 +21,49 @@ The package provides a generic implementation of the `@isAuthorized` directive f
 ```graphql
 enum Role {
   ADMIN
-  AUTHUSER
+  EDITOR
+  VIEWER
   # Add more roles as needed
 }
 
-directive @isAuthorized(allowedRoles: [Role!]!) on FIELD_DEFINITION
+enum Scope {
+  READ
+  WRITE
+  DELETE
+  CREATE
+}
+
+enum Resource {
+  FAMILY
+  PARENT
+  CHILD
+  ITEM
+}
+
+directive @isAuthorized(
+  allowedRoles: [Role!]!, 
+  requiredScopes: [Scope!] = [READ], 
+  resource: Resource = FAMILY
+) on FIELD_DEFINITION
 ```
 
 2. Apply the directive to your queries and mutations:
 
 ```graphql
 type Query {
-  getItem(id: ID!): Item @isAuthorized(allowedRoles: [ADMIN, AUTHUSER])
+  getItem(id: ID!): Item @isAuthorized(
+    allowedRoles: [ADMIN, EDITOR, VIEWER], 
+    requiredScopes: [READ], 
+    resource: ITEM
+  )
 }
 
 type Mutation {
-  createItem(input: ItemInput!): Item! @isAuthorized(allowedRoles: [ADMIN])
+  createItem(input: ItemInput!): Item! @isAuthorized(
+    allowedRoles: [ADMIN, EDITOR], 
+    requiredScopes: [CREATE], 
+    resource: ITEM
+  )
 }
 ```
 
@@ -46,8 +73,8 @@ type Mutation {
 schema := generated.NewExecutableSchema(generated.Config{
     Resolvers: resolverInstance,
     Directives: generated.DirectiveRoot{
-        IsAuthorized: func(ctx context.Context, obj interface{}, next graphql.Resolver, allowedRoles []string) (interface{}, error) {
-            return graphql.IsAuthorizedDirective(ctx, obj, next, allowedRoles, logger)
+        IsAuthorized: func(ctx context.Context, obj interface{}, next graphql.Resolver, allowedRoles []string, requiredScopes []string, resource string) (interface{}, error) {
+            return graphql.IsAuthorizedDirective(ctx, obj, next, allowedRoles, requiredScopes, resource, logger)
         },
     },
 })
@@ -55,7 +82,7 @@ schema := generated.NewExecutableSchema(generated.Config{
 
 ### JWT Authentication
 
-The RBAC implementation works with the JWT authentication middleware from the `servicelib/auth` package. The middleware extracts the user's roles from the JWT token and adds them to the request context, which is then used by the `@isAuthorized` directive to check if the user has the required roles.
+The RBAC implementation works with the JWT authentication middleware from the `servicelib/auth` package. The middleware extracts the user's roles, scopes, and resources from the JWT token and adds them to the request context, which is then used by the `@isAuthorized` directive to check if the user has the required roles, scopes, and access to the specified resource.
 
 To set up JWT authentication:
 
@@ -84,9 +111,12 @@ handler = authService.Middleware()(handler)
 
 The package provides several helper functions for working with RBAC:
 
-- `IsAuthorizedDirective`: The implementation of the `@isAuthorized` directive
-- `CheckAuthorization`: A helper function for checking authorization in resolvers
-- `ConvertRolesToStrings`: A helper function for converting enum roles to strings
+- `IsAuthorizedDirective`: The implementation of the `@isAuthorized` directive that checks roles, scopes, and resources
+- `CheckAuthorization`: A helper function for checking authorization in resolvers with roles, scopes, and resources
+- `ConvertRolesToStrings`: A generic helper function for converting enum types to strings
+- `IsAuthorizedWithScopes`: A function that checks if a user has the required roles, scopes, and access to a resource
+- `HasScope`: A function that checks if a user has a specific scope
+- `HasResource`: A function that checks if a user has access to a specific resource
 
 ## Example Usage
 
@@ -94,13 +124,34 @@ The package provides several helper functions for working with RBAC:
 // In your resolver
 func (r *Resolver) CreateItem(ctx context.Context, input model.ItemInput) (*model.Item, error) {
     // Check authorization manually if needed
-    if err := graphql.CheckAuthorization(ctx, []string{"ADMIN"}, "CreateItem", r.logger); err != nil {
+    if err := graphql.CheckAuthorization(ctx, []string{"ADMIN", "EDITOR"}, []string{"CREATE"}, "ITEM", "CreateItem", r.logger); err != nil {
         return nil, err
     }
 
     // Proceed with the operation
     // ...
 }
+```
+
+## Generating JWT Tokens
+
+To test the RBAC implementation, you can use the `genjwt` tool to generate JWT tokens with different roles, scopes, and resources:
+
+```go
+// Generate admin token with all scopes for all resources
+adminScopes := []string{"READ", "WRITE", "DELETE", "CREATE"}
+adminResources := []string{"FAMILY", "PARENT", "CHILD"}
+adminToken, err := authInstance.GenerateToken(ctx, "admin", []string{"ADMIN"}, adminScopes, adminResources)
+
+// Generate editor token with all scopes for all resources
+editorScopes := []string{"READ", "WRITE", "DELETE", "CREATE"}
+editorResources := []string{"FAMILY", "PARENT", "CHILD"}
+editorToken, err := authInstance.GenerateToken(ctx, "editor", []string{"EDITOR"}, editorScopes, editorResources)
+
+// Generate viewer token with only READ scope for all resources
+viewerScopes := []string{"READ"}
+viewerResources := []string{"FAMILY", "PARENT", "CHILD"}
+viewerToken, err := authInstance.GenerateToken(ctx, "viewer", []string{"VIEWER"}, viewerScopes, viewerResources)
 ```
 
 ## Metrics

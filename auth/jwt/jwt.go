@@ -79,18 +79,26 @@ type Claims struct {
 	// Roles contains the user's assigned roles for authorization
 	Roles []string `json:"roles"`
 
+	// Scopes contains the user's assigned permission scopes
+	Scopes []string `json:"scopes"`
+
+	// Resources contains the resources the user has access to
+	Resources []string `json:"resources"`
+
 	// RegisteredClaims contains the standard JWT claims like expiration time
 	jwt.RegisteredClaims
 }
 
-// GenerateToken generates a new JWT token for a user with the specified roles.
-func (s *Service) GenerateToken(ctx context.Context, userID string, roles []string) (string, error) {
+// GenerateToken generates a new JWT token for a user with the specified roles, scopes, and resources.
+func (s *Service) GenerateToken(ctx context.Context, userID string, roles []string, scopes []string, resources []string) (string, error) {
 	ctx, span := s.tracer.Start(ctx, "jwt.Service.GenerateToken")
 	defer span.End()
 
 	span.SetAttributes(
 		attribute.String("user.id", userID),
 		attribute.StringSlice("user.roles", roles),
+		attribute.StringSlice("user.scopes", scopes),
+		attribute.StringSlice("user.resources", resources),
 	)
 
 	if userID == "" {
@@ -105,8 +113,10 @@ func (s *Service) GenerateToken(ctx context.Context, userID string, roles []stri
 	expiresAt := now.Add(s.config.TokenDuration)
 
 	claims := Claims{
-		UserID: userID,
-		Roles:  roles,
+		UserID:    userID,
+		Roles:     roles,
+		Scopes:    scopes,
+		Resources: resources,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expiresAt),
 			IssuedAt:  jwt.NewNumericDate(now),
