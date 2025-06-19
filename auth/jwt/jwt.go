@@ -71,6 +71,12 @@ func (s *Service) WithRemoteValidator(config RemoteConfig) *Service {
 	return s
 }
 
+// SetRemoteValidatorForTesting sets the remote validator for testing purposes.
+// This method should only be used in tests.
+func (s *Service) SetRemoteValidatorForTesting(validator TokenValidator) {
+	s.remoteValidator = validator
+}
+
 // Claims represents the JWT claims contained in a token.
 type Claims struct {
 	// UserID is the unique identifier of the user (stored in the 'sub' claim)
