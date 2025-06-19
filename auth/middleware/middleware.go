@@ -210,3 +210,45 @@ func IsAuthenticated(ctx context.Context) bool {
 	_, ok := GetUserID(ctx)
 	return ok
 }
+
+// HasRole checks if the user has a specific role.
+func HasRole(ctx context.Context, role string) bool {
+	roles, ok := GetUserRoles(ctx)
+	if !ok {
+		return false
+	}
+
+	for _, r := range roles {
+		if r == role {
+			return true
+		}
+	}
+
+	return false
+}
+
+// IsAuthorized checks if the user is authorized to perform a specific action based on their roles.
+// It takes a list of allowed roles and returns true if the user has at least one of them.
+func IsAuthorized(ctx context.Context, allowedRoles []string) bool {
+	// If no roles are specified, deny access
+	if len(allowedRoles) == 0 {
+		return false
+	}
+
+	// Get user roles from context
+	userRoles, ok := GetUserRoles(ctx)
+	if !ok {
+		return false
+	}
+
+	// Check if the user has any of the allowed roles
+	for _, allowedRole := range allowedRoles {
+		for _, userRole := range userRoles {
+			if userRole == allowedRole {
+				return true
+			}
+		}
+	}
+
+	return false
+}
