@@ -409,29 +409,9 @@ if err != nil {
 
 The following diagram shows the dependencies between the main packages in ServiceLib:
 
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│    auth     │────>│   logging   │<────│  telemetry  │
-└─────────────┘     └─────────────┘     └─────────────┘
-      │                    ^                   │
-      │                    │                   │
-      v                    │                   v
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│  middleware │────>│   context   │<────│    health   │
-└─────────────┘     └─────────────┘     └─────────────┘
-      │                    ^                   │
-      │                    │                   │
-      v                    │                   v
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   errors    │────>│    config   │<────│     db      │
-└─────────────┘     └─────────────┘     └─────────────┘
-                          ^
-                          │
-                          v
-                    ┌─────────────┐
-                    │     di      │
-                    └─────────────┘
-```
+![Package Dependencies Diagram](diagrams/svg/package_dependencies.svg)
+
+For the source PlantUML file, see [package_dependencies.puml](diagrams/source/package_dependencies.puml).
 
 ### Authentication Component
 
