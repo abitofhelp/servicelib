@@ -404,7 +404,7 @@ For detailed request tracing:
 
 - **Unit Tests**: Test each component in isolation using mocks
 
-- **Integration Tests**: Test the integration between components
+- **[Integration Tests](docs/Integration_Tests.md)**: Test the integration between components
 
 - **End-to-End Tests**: Test the complete service flow
 
@@ -463,7 +463,7 @@ ServiceLib has the following major dependencies:
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please feel free to submit a Pull Request. See the [CONTRIBUTING.md](CONTRIBUTING.md) file for detailed guidelines and instructions.
 
 ### Development Workflow
 

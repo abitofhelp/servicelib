@@ -4,7 +4,19 @@ This directory contains complete example applications that demonstrate how to us
 
 ## Available Examples
 
-Currently, there are no complete example applications in this directory. Examples for individual packages can be found in their respective README.md files:
+### Standalone Examples
+
+- **money_example.go** - Demonstrates how to use the Money value object from the valueobject package, including creating Money objects, performing arithmetic operations, comparing values, parsing from strings, and handling precision issues.
+
+To run the money example:
+
+```bash
+go run money_example.go
+```
+
+### Package-Specific Examples
+
+Examples for individual packages can be found in their respective README.md files:
 
 - [Authentication Examples](../auth/README.md)
 - [Configuration Examples](../config/README.md)

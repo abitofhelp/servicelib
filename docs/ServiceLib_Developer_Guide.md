@@ -800,7 +800,7 @@ db.SetConnMaxLifetime(5 * time.Minute)
 
 - **Unit Tests**: Test each component in isolation using mocks
 
-- **Integration Tests**: Test the integration between components
+- **[Integration Tests](Integration_Tests.md)**: Test the integration between components. See the [Integration Tests Guide](Integration_Tests.md) for detailed instructions.
 
 - **End-to-End Tests**: Test the complete service flow
 
@@ -867,7 +867,7 @@ For detailed request tracing:
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please feel free to submit a Pull Request. See the [CONTRIBUTING.md](../CONTRIBUTING.md) file for detailed guidelines and instructions.
 
 ### Development Workflow
 
