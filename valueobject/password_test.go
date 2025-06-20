@@ -92,13 +92,13 @@ func TestPassword_String(t *testing.T) {
 
 func TestPassword_Equals(t *testing.T) {
 	password1, _ := NewPassword("Password1!")
-	
+
 	// Create a copy with the same hash and salt
 	password2 := Password{
 		hashedPassword: password1.hashedPassword,
 		salt:           password1.salt,
 	}
-	
+
 	// Different password
 	password3, _ := NewPassword("DifferentPassword1!")
 
@@ -126,20 +126,20 @@ func TestPassword_IsEmpty(t *testing.T) {
 
 func TestPassword_Salt(t *testing.T) {
 	password, _ := NewPassword("Password1!")
-	
+
 	// Get the salt
 	salt := password.Salt()
-	
+
 	// Verify it's a copy, not the original
 	if &salt[0] == &password.salt[0] {
 		t.Errorf("Expected Salt() to return a copy, not the original")
 	}
-	
+
 	// Verify the content is the same
 	if !bytes.Equal(salt, password.salt) {
 		t.Errorf("Expected salt to be equal to the original")
 	}
-	
+
 	// Modify the returned salt and verify the original is unchanged
 	salt[0] = salt[0] + 1
 	if bytes.Equal(salt, password.salt) {
@@ -149,10 +149,10 @@ func TestPassword_Salt(t *testing.T) {
 
 func TestPassword_HashedPassword(t *testing.T) {
 	password, _ := NewPassword("Password1!")
-	
+
 	// Get the hashed password
 	hashedPassword := password.HashedPassword()
-	
+
 	// Verify it's the same as the internal value
 	if hashedPassword != password.hashedPassword {
 		t.Errorf("Expected HashedPassword() to return the internal hashed password")
@@ -194,26 +194,26 @@ func Test_hashPassword(t *testing.T) {
 	// Test that the same password and salt always produces the same hash
 	password := "Password1!"
 	salt := []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
-	
+
 	hash1 := hashPassword(password, salt)
 	hash2 := hashPassword(password, salt)
-	
+
 	if hash1 != hash2 {
 		t.Errorf("Expected the same password and salt to produce the same hash")
 	}
-	
+
 	// Test that different passwords produce different hashes
 	differentPassword := "DifferentPassword1!"
 	hash3 := hashPassword(differentPassword, salt)
-	
+
 	if hash1 == hash3 {
 		t.Errorf("Expected different passwords to produce different hashes")
 	}
-	
+
 	// Test that different salts produce different hashes
 	differentSalt := []byte{16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1}
 	hash4 := hashPassword(password, differentSalt)
-	
+
 	if hash1 == hash4 {
 		t.Errorf("Expected different salts to produce different hashes")
 	}

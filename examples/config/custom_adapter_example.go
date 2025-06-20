@@ -8,7 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	
+
 	"github.com/abitofhelp/servicelib/config"
 )
 
@@ -51,7 +51,7 @@ func (c *EnvConfig) GetDatabaseConnectionString(dbType string) string {
 	user := c.getEnv("DB_USER", "postgres")
 	pass := c.getEnv("DB_PASS", "postgres")
 	name := c.getEnv("DB_NAME", "postgres")
-	
+
 	switch dbType {
 	case "postgres":
 		return fmt.Sprintf("postgres://%s:%s@%s:%s/%s", user, pass, host, port, name)
@@ -77,12 +77,12 @@ func (c *EnvConfig) GetInt(key string, defaultValue int) int {
 	if strValue == "" {
 		return defaultValue
 	}
-	
+
 	intValue, err := strconv.Atoi(strValue)
 	if err != nil {
 		return defaultValue
 	}
-	
+
 	return intValue
 }
 
@@ -91,7 +91,7 @@ func (c *EnvConfig) GetBool(key string, defaultValue bool) bool {
 	if strValue == "" {
 		return defaultValue
 	}
-	
+
 	return strValue == "true" || strValue == "yes" || strValue == "1"
 }
 
@@ -109,33 +109,33 @@ func main() {
 	os.Setenv("APP_DB_NAME", "myapp")
 	os.Setenv("APP_DEBUG", "true")
 	os.Setenv("APP_MAX_CONNECTIONS", "50")
-	
+
 	// Create an environment-based configuration
 	envConfig := NewEnvConfig("APP")
-	
+
 	// Create a config adapter
 	adapter := config.NewGenericConfigAdapter(envConfig).
 		WithDatabaseName(envConfig.getEnv("DB_NAME", "default"))
-	
+
 	// Get the app configuration
 	appConfig := adapter.GetApp()
 	fmt.Println("=== Application Configuration (from Environment) ===")
 	fmt.Println("Version:", appConfig.GetVersion())
 	fmt.Println("Name:", appConfig.GetName())
 	fmt.Println("Environment:", appConfig.GetEnvironment())
-	
+
 	// Get the database configuration
 	dbConfig := adapter.GetDatabase()
 	fmt.Println("\n=== Database Configuration (from Environment) ===")
 	fmt.Println("Type:", dbConfig.GetType())
 	fmt.Println("Connection String:", dbConfig.GetConnectionString())
 	fmt.Println("Database Name:", dbConfig.GetDatabaseName())
-	
+
 	// Use additional methods from the custom config
 	fmt.Println("\n=== Additional Settings (from Environment) ===")
 	fmt.Println("Debug Mode:", envConfig.GetBool("DEBUG", false))
 	fmt.Println("Max Connections:", envConfig.GetInt("MAX_CONNECTIONS", 10))
-	
+
 	// Clean up environment variables
 	os.Unsetenv("APP_VERSION")
 	os.Unsetenv("APP_NAME")
@@ -148,7 +148,7 @@ func main() {
 	os.Unsetenv("APP_DB_NAME")
 	os.Unsetenv("APP_DEBUG")
 	os.Unsetenv("APP_MAX_CONNECTIONS")
-	
+
 	// Expected output:
 	// === Application Configuration (from Environment) ===
 	// Version: 3.0.0

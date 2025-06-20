@@ -162,7 +162,7 @@ func TestMockInitSQLiteDB(t *testing.T) {
 	// Test case 1: Successful initialization
 	t.Run("Successful initialization", func(t *testing.T) {
 		// Set up expectations
-		mockDB.EXPECT().SetConnMaxLifetime(1*time.Hour).Times(1)
+		mockDB.EXPECT().SetConnMaxLifetime(1 * time.Hour).Times(1)
 		mockDB.EXPECT().SetMaxOpenConns(10).Times(1)
 		mockDB.EXPECT().SetMaxIdleConns(5).Times(1)
 

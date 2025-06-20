@@ -18,10 +18,10 @@ func TestNewValidationResult(t *testing.T) {
 
 func TestValidationResult_AddError(t *testing.T) {
 	result := NewValidationResult()
-	
+
 	// Add an error
 	result.AddError("test error", "field1")
-	
+
 	// Check that the result is now invalid
 	assert.False(t, result.IsValid())
 	assert.NotNil(t, result.Error())
@@ -29,26 +29,26 @@ func TestValidationResult_AddError(t *testing.T) {
 
 func TestValidationResult_IsValid(t *testing.T) {
 	result := NewValidationResult()
-	
+
 	// Initially valid
 	assert.True(t, result.IsValid())
-	
+
 	// Add an error
 	result.AddError("test error", "field1")
-	
+
 	// Now invalid
 	assert.False(t, result.IsValid())
 }
 
 func TestValidationResult_Error(t *testing.T) {
 	result := NewValidationResult()
-	
+
 	// Initially no error
 	assert.Nil(t, result.Error())
-	
+
 	// Add an error
 	result.AddError("test error", "field1")
-	
+
 	// Now has error
 	assert.NotNil(t, result.Error())
 }

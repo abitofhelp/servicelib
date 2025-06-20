@@ -156,7 +156,7 @@ func TestUsername_ContainsSubstring(t *testing.T) {
 			contains := username.ContainsSubstring(tt.substring)
 
 			if contains != tt.expected {
-				t.Errorf("Expected ContainsSubstring('%s') to be %v, got %v", 
+				t.Errorf("Expected ContainsSubstring('%s') to be %v, got %v",
 					tt.substring, tt.expected, contains)
 			}
 		})

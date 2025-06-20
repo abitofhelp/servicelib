@@ -83,7 +83,7 @@ func GetHTTPStatusFromError(err error) int {
 	if httpErr, ok := err.(ErrorWithHTTPStatus); ok {
 		return httpErr.HTTPStatus()
 	}
-	
+
 	// Check specific error types
 	if IsValidationError(err) {
 		return http.StatusBadRequest
@@ -94,7 +94,7 @@ func GetHTTPStatusFromError(err error) int {
 	if IsApplicationError(err) || IsRepositoryError(err) {
 		return http.StatusInternalServerError
 	}
-	
+
 	// Default status code
 	return http.StatusInternalServerError
 }

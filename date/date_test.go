@@ -52,7 +52,7 @@ func TestParseOptionalDate(t *testing.T) {
 	validDateStr := "2023-01-02T15:04:05Z"
 	invalidDateStr := "2023-01-02"
 	emptyStr := ""
-	
+
 	expectedTime := time.Date(2023, 1, 2, 15, 4, 5, 0, time.UTC)
 
 	tests := []struct {

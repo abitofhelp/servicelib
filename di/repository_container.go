@@ -13,10 +13,10 @@ import (
 
 // RepositoryInitializerFunc is a function type that initializes a repository
 type RepositoryInitializerFunc[T any] func(
-	ctx context.Context, 
-	connectionString string, 
-	databaseName string, 
-	collectionName string, 
+	ctx context.Context,
+	connectionString string,
+	databaseName string,
+	collectionName string,
 	logger *zap.Logger,
 ) (T, error)
 

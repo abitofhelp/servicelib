@@ -69,25 +69,25 @@ func (c Color) RGB() (r, g, b int, err error) {
 	}
 
 	hexColor := string(c)[1:] // Remove #
-	
+
 	// Parse red component
 	r64, err := strconv.ParseInt(hexColor[0:2], 16, 0)
 	if err != nil {
 		return 0, 0, 0, errors.New("invalid red component")
 	}
-	
+
 	// Parse green component
 	g64, err := strconv.ParseInt(hexColor[2:4], 16, 0)
 	if err != nil {
 		return 0, 0, 0, errors.New("invalid green component")
 	}
-	
+
 	// Parse blue component
 	b64, err := strconv.ParseInt(hexColor[4:6], 16, 0)
 	if err != nil {
 		return 0, 0, 0, errors.New("invalid blue component")
 	}
-	
+
 	return int(r64), int(g64), int(b64), nil
 }
 
@@ -96,11 +96,11 @@ func (c Color) WithAlpha(alpha int) (string, error) {
 	if c.IsEmpty() {
 		return "", errors.New("color is empty")
 	}
-	
+
 	if alpha < 0 || alpha > 255 {
 		return "", errors.New("alpha must be between 0 and 255")
 	}
-	
+
 	return fmt.Sprintf("%s%02X", string(c), alpha), nil
 }
 
@@ -110,11 +110,11 @@ func (c Color) IsDark() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	
+
 	// Calculate perceived brightness using the formula:
 	// (0.299*R + 0.587*G + 0.114*B)
 	brightness := 0.299*float64(r) + 0.587*float64(g) + 0.114*float64(b)
-	
+
 	// If brightness is less than 128, the color is considered dark
 	return brightness < 128, nil
 }
@@ -124,17 +124,17 @@ func (c Color) Invert() (Color, error) {
 	if c.IsEmpty() {
 		return "", errors.New("color is empty")
 	}
-	
+
 	r, g, b, err := c.RGB()
 	if err != nil {
 		return "", err
 	}
-	
+
 	// Invert each component
 	r = 255 - r
 	g = 255 - g
 	b = 255 - b
-	
+
 	// Create new color
 	return Color(fmt.Sprintf("#%02X%02X%02X", r, g, b)), nil
 }

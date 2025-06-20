@@ -49,8 +49,8 @@ func NewSQLUserRepository() *SQLUserRepository {
 func (r *SQLUserRepository) GetByID(ctx context.Context, id string) (*User, error) {
 	// In a real application, this would be:
 	// var user User
-	// err := r.db.QueryRowContext(ctx, 
-	//     "SELECT id, username, email, active FROM users WHERE id = ?", 
+	// err := r.db.QueryRowContext(ctx,
+	//     "SELECT id, username, email, active FROM users WHERE id = ?",
 	//     id,
 	// ).Scan(&user.ID, &user.Username, &user.Email, &user.Active)
 	//
@@ -221,7 +221,7 @@ func NewMongoUserRepository() *MongoUserRepository {
 func (r *MongoUserRepository) GetByID(ctx context.Context, id string) (*User, error) {
 	// In a real application, this would be:
 	// collection := r.client.Database(r.database).Collection(r.collection)
-	// 
+	//
 	// var user User
 	// filter := bson.M{"_id": id}
 	// err := collection.FindOne(ctx, filter).Decode(&user)

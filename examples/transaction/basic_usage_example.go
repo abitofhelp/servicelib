@@ -6,7 +6,7 @@ package main
 import (
 	"context"
 	"fmt"
-	
+
 	"github.com/abitofhelp/servicelib/transaction/saga"
 	"go.uber.org/zap"
 )
@@ -19,10 +19,10 @@ func main() {
 		return
 	}
 	defer logger.Sync()
-	
+
 	// Create a context
 	ctx := context.Background()
-	
+
 	// Execute operations within a transaction using WithTransaction
 	err = saga.WithTransaction(ctx, logger, func(tx *saga.Transaction) error {
 		// Add operations with their corresponding rollback operations
@@ -40,7 +40,7 @@ func main() {
 				return nil
 			},
 		)
-		
+
 		tx.AddOperation(
 			// Operation to create an order
 			func(ctx context.Context) error {
@@ -55,7 +55,7 @@ func main() {
 				return nil
 			},
 		)
-		
+
 		tx.AddOperation(
 			// Operation to process payment
 			func(ctx context.Context) error {
@@ -70,16 +70,16 @@ func main() {
 				return nil
 			},
 		)
-		
+
 		return nil
 	})
-	
+
 	if err != nil {
 		fmt.Printf("Transaction failed: %v\n", err)
 	} else {
 		fmt.Println("Transaction completed successfully")
 	}
-	
+
 	// Expected output:
 	// Creating user...
 	// Creating order...

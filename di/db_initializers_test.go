@@ -66,8 +66,8 @@ func TestDBInitializersWithNilLogger(t *testing.T) {
 	t.Run("MongoDBInitializer with nil logger", func(t *testing.T) {
 		_, err := MongoDBInitializer(ctx, "mongodb://localhost:27017", "testdb", "testcollection", nil)
 		assert.Error(t, err)
-		assert.True(t, errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) || 
-			err.Error() == "failed to initialize MongoDB client: context canceled" || 
+		assert.True(t, errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) ||
+			err.Error() == "failed to initialize MongoDB client: context canceled" ||
 			err.Error() == "failed to initialize MongoDB client: context deadline exceeded")
 	})
 
@@ -75,8 +75,8 @@ func TestDBInitializersWithNilLogger(t *testing.T) {
 	t.Run("PostgresInitializer with nil logger", func(t *testing.T) {
 		_, err := PostgresInitializer(ctx, "postgres://localhost:5432", nil)
 		assert.Error(t, err)
-		assert.True(t, errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) || 
-			err.Error() == "failed to initialize PostgreSQL connection pool: context canceled" || 
+		assert.True(t, errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) ||
+			err.Error() == "failed to initialize PostgreSQL connection pool: context canceled" ||
 			err.Error() == "failed to initialize PostgreSQL connection pool: context deadline exceeded")
 	})
 
@@ -84,8 +84,8 @@ func TestDBInitializersWithNilLogger(t *testing.T) {
 	t.Run("SQLiteInitializer with nil logger", func(t *testing.T) {
 		_, err := SQLiteInitializer(ctx, ":memory:", nil)
 		assert.Error(t, err)
-		assert.True(t, errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) || 
-			err.Error() == "failed to initialize SQLite database connection: context canceled" || 
+		assert.True(t, errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) ||
+			err.Error() == "failed to initialize SQLite database connection: context canceled" ||
 			err.Error() == "failed to initialize SQLite database connection: context deadline exceeded")
 	})
 }

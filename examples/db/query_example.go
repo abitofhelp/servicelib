@@ -6,7 +6,7 @@ package main
 import (
 	"context"
 	"fmt"
-	
+
 	// These imports are used in the commented-out code below
 	// that would be used in a real application
 	// Using blank imports to suppress unused import warnings
@@ -35,13 +35,13 @@ func main() {
 	// Note: ctx is only used in the commented-out code below
 	// that would be used in a real application
 	ctx := context.Background()
-	
+
 	// Suppress unused variable warnings
 	_ = ctx
-	
+
 	// Example 1: Basic Query with PostgreSQL
 	fmt.Println("=== Basic Query with PostgreSQL Example ===")
-	
+
 	// In a real application, you would use this code:
 	// postgresPool, err := db.InitPostgresPool(ctx, "postgres://postgres:password@localhost:5432/testdb", db.DefaultTimeout)
 	// if err != nil {
@@ -75,17 +75,17 @@ func main() {
 	// }
 	//
 	// fmt.Printf("Found %d active users\n", len(users))
-	
+
 	// For the example, we'll just print what would happen
 	fmt.Println("Would execute a query to find active users:")
 	fmt.Println("SQL: SELECT id, username, email, active FROM users WHERE active = $1")
 	fmt.Println("Parameters: true")
 	fmt.Println("Would process results by scanning each row into a User struct")
 	fmt.Println("Would handle any errors during query execution or result processing")
-	
+
 	// Example 2: Query with SQLite
 	fmt.Println("\n=== Query with SQLite Example ===")
-	
+
 	// In a real application, you would use this code:
 	// sqliteDB, err := db.InitSQLiteDB(
 	//     ctx,
@@ -126,17 +126,17 @@ func main() {
 	// }
 	//
 	// fmt.Printf("Found %d products with price > $100\n", len(products))
-	
+
 	// For the example, we'll just print what would happen
 	fmt.Println("Would execute a query to find products with price > $100:")
 	fmt.Println("SQL: SELECT id, name, price FROM products WHERE price > ?")
 	fmt.Println("Parameters: 100.0")
 	fmt.Println("Would process results by scanning each row into a Product struct")
 	fmt.Println("SQLite uses ? as parameter placeholder instead of $1")
-	
+
 	// Example 3: Query Single Row
 	fmt.Println("\n=== Query Single Row Example ===")
-	
+
 	// In a real application, you would use this code:
 	// var user User
 	// err = sqliteDB.QueryRowContext(ctx, "SELECT id, username, email, active FROM users WHERE id = ?", "user123").
@@ -151,29 +151,29 @@ func main() {
 	// }
 	//
 	// fmt.Printf("Found user: %s (%s)\n", user.Username, user.Email)
-	
+
 	// For the example, we'll just print what would happen
 	fmt.Println("Would execute a query to find a single user by ID:")
 	fmt.Println("SQL: SELECT id, username, email, active FROM users WHERE id = ?")
 	fmt.Println("Parameters: \"user123\"")
 	fmt.Println("Would use QueryRowContext for queries that return a single row")
 	fmt.Println("Would handle sql.ErrNoRows specifically to detect when no rows are found")
-	
+
 	// Example 4: Parameterized Queries
 	fmt.Println("\n=== Parameterized Queries Example ===")
 	fmt.Println("Always use parameterized queries to prevent SQL injection:")
-	
+
 	// Safe:
 	fmt.Println("Safe: db.QueryContext(ctx, \"SELECT * FROM users WHERE username = ?\", userInput)")
-	
+
 	// Unsafe:
 	fmt.Println("Unsafe: db.QueryContext(ctx, \"SELECT * FROM users WHERE username = '\" + userInput + \"'\")")
-	
+
 	fmt.Println("Parameterized queries ensure user input is properly escaped")
-	
+
 	// Example 5: Working with NULL Values
 	fmt.Println("\n=== Working with NULL Values Example ===")
-	
+
 	// In a real application, you would use this code:
 	// type UserWithNullable struct {
 	//     ID       string
@@ -203,13 +203,13 @@ func main() {
 	// } else {
 	//     fmt.Println("Last login is NULL")
 	// }
-	
+
 	// For the example, we'll just print what would happen
 	fmt.Println("Would use sql.NullString, sql.NullInt64, sql.NullFloat64, sql.NullTime, etc.")
 	fmt.Println("These types handle NULL values from the database")
 	fmt.Println("Each has a Valid field to check if the value is NULL")
 	fmt.Println("And a field of the appropriate type to access the value if not NULL")
-	
+
 	// Expected output:
 	// === Basic Query with PostgreSQL Example ===
 	// Would execute a query to find active users:

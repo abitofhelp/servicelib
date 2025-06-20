@@ -89,7 +89,7 @@ func TestName_Equals(t *testing.T) {
 func TestName_IsEmpty(t *testing.T) {
 	// Create a valid name
 	validName, _ := NewName("John Doe")
-	
+
 	// Create an empty name (this would normally fail validation, but we can test with the type directly)
 	emptyName := Name("")
 

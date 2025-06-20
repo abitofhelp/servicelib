@@ -106,9 +106,9 @@ func TestPercentage_String(t *testing.T) {
 
 func TestPercentage_Equals(t *testing.T) {
 	tests := []struct {
-		name       string
-		p1         float64
-		p2         float64
+		name        string
+		p1          float64
+		p2          float64
 		shouldEqual bool
 	}{
 		{"Same Value", 75.5, 75.5, true},
@@ -233,11 +233,11 @@ func TestPercentage_Inverse(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			percentage, _ := NewPercentage(tt.percentage)
 			inverse, err := percentage.Inverse()
-			
+
 			if err != nil {
 				t.Errorf("Unexpected error: %v", err)
 			}
-			
+
 			if float64(inverse) != tt.expected {
 				t.Errorf("Expected %.2f, got %.2f", tt.expected, float64(inverse))
 			}
@@ -247,10 +247,10 @@ func TestPercentage_Inverse(t *testing.T) {
 
 func TestPercentage_Add(t *testing.T) {
 	tests := []struct {
-		name       string
-		p1         float64
-		p2         float64
-		expected   float64
+		name        string
+		p1          float64
+		p2          float64
+		expected    float64
 		expectError bool
 	}{
 		{"Normal Addition", 25, 50, 75, false},
@@ -264,9 +264,9 @@ func TestPercentage_Add(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			p1, _ := NewPercentage(tt.p1)
 			p2, _ := NewPercentage(tt.p2)
-			
+
 			result, err := p1.Add(p2)
-			
+
 			if tt.expectError {
 				if err == nil {
 					t.Errorf("Expected error but got none")
@@ -275,7 +275,7 @@ func TestPercentage_Add(t *testing.T) {
 				if err != nil {
 					t.Errorf("Unexpected error: %v", err)
 				}
-				
+
 				if float64(result) != tt.expected {
 					t.Errorf("Expected %.2f, got %.2f", tt.expected, float64(result))
 				}
@@ -286,10 +286,10 @@ func TestPercentage_Add(t *testing.T) {
 
 func TestPercentage_Subtract(t *testing.T) {
 	tests := []struct {
-		name       string
-		p1         float64
-		p2         float64
-		expected   float64
+		name     string
+		p1       float64
+		p2       float64
+		expected float64
 	}{
 		{"Normal Subtraction", 75, 25, 50},
 		{"Subtraction from Zero", 0, 25, 0},
@@ -302,13 +302,13 @@ func TestPercentage_Subtract(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			p1, _ := NewPercentage(tt.p1)
 			p2, _ := NewPercentage(tt.p2)
-			
+
 			result, err := p1.Subtract(p2)
-			
+
 			if err != nil {
 				t.Errorf("Unexpected error: %v", err)
 			}
-			
+
 			if float64(result) != tt.expected {
 				t.Errorf("Expected %.2f, got %.2f", tt.expected, float64(result))
 			}

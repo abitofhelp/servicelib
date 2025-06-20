@@ -50,11 +50,11 @@ func TestNewTemperature(t *testing.T) {
 
 func TestParseTemperature(t *testing.T) {
 	tests := []struct {
-		name        string
-		input       string
-		expectedVal float64
+		name         string
+		input        string
+		expectedVal  float64
 		expectedUnit TemperatureUnit
-		expectError bool
+		expectError  bool
 	}{
 		{"Valid Celsius", "25°C", 25, Celsius, false},
 		{"Valid Fahrenheit", "77°F", 77, Fahrenheit, false},
@@ -118,8 +118,8 @@ func TestTemperature_String(t *testing.T) {
 
 func TestTemperature_Equals(t *testing.T) {
 	temp1, _ := NewTemperature(25, Celsius)
-	temp2, _ := NewTemperature(77, Fahrenheit)  // 25°C = 77°F
-	temp3, _ := NewTemperature(298.15, Kelvin)  // 25°C = 298.15K
+	temp2, _ := NewTemperature(77, Fahrenheit) // 25°C = 77°F
+	temp3, _ := NewTemperature(298.15, Kelvin) // 25°C = 298.15K
 	temp4, _ := NewTemperature(30, Celsius)
 
 	if !temp1.Equals(temp2) {
@@ -168,13 +168,13 @@ func TestTemperature_Conversions(t *testing.T) {
 
 	fahrenheitFromC := celsiusTemp.ToFahrenheit()
 	expectedF := 77.0
-	if math.Abs(fahrenheitFromC.value - expectedF) > 0.01 {
+	if math.Abs(fahrenheitFromC.value-expectedF) > 0.01 {
 		t.Errorf("Expected 25°C to be %.2f°F, got %.2f°F", expectedF, fahrenheitFromC.value)
 	}
 
 	kelvinFromC := celsiusTemp.ToKelvin()
 	expectedK := 298.15
-	if math.Abs(kelvinFromC.value - expectedK) > 0.01 {
+	if math.Abs(kelvinFromC.value-expectedK) > 0.01 {
 		t.Errorf("Expected 25°C to be %.2fK, got %.2fK", expectedK, kelvinFromC.value)
 	}
 
@@ -183,12 +183,12 @@ func TestTemperature_Conversions(t *testing.T) {
 
 	celsiusFromF := fahrenheitTemp.ToCelsius()
 	expectedC := 25.0
-	if math.Abs(celsiusFromF.value - expectedC) > 0.01 {
+	if math.Abs(celsiusFromF.value-expectedC) > 0.01 {
 		t.Errorf("Expected 77°F to be %.2f°C, got %.2f°C", expectedC, celsiusFromF.value)
 	}
 
 	kelvinFromF := fahrenheitTemp.ToKelvin()
-	if math.Abs(kelvinFromF.value - expectedK) > 0.01 {
+	if math.Abs(kelvinFromF.value-expectedK) > 0.01 {
 		t.Errorf("Expected 77°F to be %.2fK, got %.2fK", expectedK, kelvinFromF.value)
 	}
 
@@ -196,12 +196,12 @@ func TestTemperature_Conversions(t *testing.T) {
 	kelvinTemp, _ := NewTemperature(298.15, Kelvin)
 
 	celsiusFromK := kelvinTemp.ToCelsius()
-	if math.Abs(celsiusFromK.value - expectedC) > 0.01 {
+	if math.Abs(celsiusFromK.value-expectedC) > 0.01 {
 		t.Errorf("Expected 298.15K to be %.2f°C, got %.2f°C", expectedC, celsiusFromK.value)
 	}
 
 	fahrenheitFromK := kelvinTemp.ToFahrenheit()
-	if math.Abs(fahrenheitFromK.value - expectedF) > 0.01 {
+	if math.Abs(fahrenheitFromK.value-expectedF) > 0.01 {
 		t.Errorf("Expected 298.15K to be %.2f°F, got %.2f°F", expectedF, fahrenheitFromK.value)
 	}
 
@@ -225,7 +225,7 @@ func TestTemperature_Add(t *testing.T) {
 
 	// Add different unit
 	result2 := temp1.Add(temp3)
-	if math.Abs(result2.value - 35) > 0.01 || result2.unit != Celsius {
+	if math.Abs(result2.value-35) > 0.01 || result2.unit != Celsius {
 		t.Errorf("Expected 25°C + 50°F = 35°C, got %.2f°%s", result2.value, result2.unit)
 	}
 }
@@ -249,7 +249,7 @@ func TestTemperature_Subtract(t *testing.T) {
 	if err2 != nil {
 		t.Errorf("Unexpected error: %v", err2)
 	}
-	if math.Abs(result2.value - 15) > 0.01 || result2.unit != Celsius {
+	if math.Abs(result2.value-15) > 0.01 || result2.unit != Celsius {
 		t.Errorf("Expected 25°C - 50°F = 15°C, got %.2f°%s", result2.value, result2.unit)
 	}
 

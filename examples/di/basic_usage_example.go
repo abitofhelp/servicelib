@@ -37,15 +37,15 @@ func main() {
 
 	// Use the container
 	fmt.Println("Container created successfully")
-	
+
 	// Get the context from the container
 	containerCtx := container.GetContext()
 	fmt.Println("Context retrieved from container")
-	
+
 	// Get the logger from the container
 	containerLogger := container.GetLogger()
 	containerLogger.Info("Logger retrieved from container")
-	
+
 	// Get the configuration from the container
 	containerConfig := container.GetConfig()
 	fmt.Printf("Config retrieved from container: %v\n", containerConfig)

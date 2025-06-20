@@ -3,7 +3,6 @@
 // Package health provides functionality for health checking applications.
 package health
 
-
 // ConfigVersionAdapter adapts a config to the VersionProvider interface
 type ConfigVersionAdapter struct {
 	version string

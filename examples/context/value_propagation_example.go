@@ -61,11 +61,11 @@ func main() {
 	fmt.Println("\n4. Using WithValues for Arbitrary Key-Value Pairs:")
 	type customKey string
 	const (
-		appVersionKey customKey = "app_version"
+		appVersionKey  customKey = "app_version"
 		featureFlagKey customKey = "feature_flag"
 	)
 
-	customCtx := svcctx.WithValues(baseCtx, 
+	customCtx := svcctx.WithValues(baseCtx,
 		appVersionKey, "1.2.3",
 		featureFlagKey, true,
 	)

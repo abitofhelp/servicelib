@@ -591,7 +591,7 @@ func TestGracefulShutdown_SignalBased(t *testing.T) {
 			select {
 			case sig := <-quit:
 				// Log the signal
-				logger.Info(ctx, "Received termination signal", 
+				logger.Info(ctx, "Received termination signal",
 					zap.String("signal", sig.String()),
 					zap.String("type", "first"))
 			case <-ctx.Done():
@@ -722,7 +722,7 @@ func TestGracefulShutdown_SecondSignal(t *testing.T) {
 		sig := <-quit
 
 		// Log the first signal
-		logger.Info(ctx, "Received termination signal", 
+		logger.Info(ctx, "Received termination signal",
 			zap.String("signal", sig.String()),
 			zap.String("type", "first"))
 

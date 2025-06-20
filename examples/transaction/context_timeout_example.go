@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 	"time"
-	
+
 	"github.com/abitofhelp/servicelib/transaction/saga"
 	"go.uber.org/zap"
 )
@@ -20,11 +20,11 @@ func main() {
 		return
 	}
 	defer logger.Sync()
-	
+
 	// Create a context with timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	
+
 	// Execute operations within a transaction
 	err = saga.WithTransaction(ctx, logger, func(tx *saga.Transaction) error {
 		// Add operations with their corresponding rollback operations
@@ -32,7 +32,7 @@ func main() {
 			// Operation to process data
 			func(ctx context.Context) error {
 				fmt.Println("Processing data...")
-				
+
 				// Check if context is done (timeout or cancellation)
 				select {
 				case <-ctx.Done():
@@ -48,12 +48,12 @@ func main() {
 				return nil
 			},
 		)
-		
+
 		tx.AddOperation(
 			// Operation that takes longer than the timeout
 			func(ctx context.Context) error {
 				fmt.Println("Starting long operation...")
-				
+
 				// Check if context is done (timeout or cancellation)
 				select {
 				case <-ctx.Done():
@@ -69,16 +69,16 @@ func main() {
 				return nil
 			},
 		)
-		
+
 		return nil
 	})
-	
+
 	if err != nil {
 		fmt.Printf("Transaction failed: %v\n", err)
 	} else {
 		fmt.Println("Transaction completed successfully")
 	}
-	
+
 	// Expected output:
 	// Processing data...
 	// Data processing completed

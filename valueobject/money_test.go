@@ -89,11 +89,11 @@ func TestNewMoneyFromString(t *testing.T) {
 
 func TestNewMoneyFromUint64(t *testing.T) {
 	tests := []struct {
-		name           string
-		amount         uint64
-		currency       string
+		name             string
+		amount           uint64
+		currency         string
 		expectedCurrency string
-		expectError    bool
+		expectError      bool
 	}{
 		{"Valid Money", 10050, "USD", "USD", false},
 		{"Zero Amount", 0, "EUR", "EUR", false},

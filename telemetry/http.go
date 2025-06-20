@@ -72,7 +72,7 @@ func InstrumentClient(client *http.Client, opts ...otelhttp.Option) *http.Client
 	}
 
 	// Add additional default options to ensure trace headers are propagated
-	defaultOpts = append(defaultOpts, 
+	defaultOpts = append(defaultOpts,
 		otelhttp.WithSpanOptions(trace.WithAttributes(attribute.String("http.client", "instrumented"))),
 		otelhttp.WithFilter(func(r *http.Request) bool {
 			// Always trace all requests

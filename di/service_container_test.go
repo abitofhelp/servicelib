@@ -122,7 +122,7 @@ func TestNewServiceContainer(t *testing.T) {
 			if tc.expectError {
 				assert.Error(t, err)
 				assert.Nil(t, container)
-				
+
 				// Check error message contains expected stage
 				if tc.errorStage == "domain" {
 					assert.Contains(t, err.Error(), "failed to initialize domain service")
@@ -132,16 +132,16 @@ func TestNewServiceContainer(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, container)
-				
+
 				// Check that the container has the expected components
 				assert.Equal(t, tc.repository, container.GetRepository())
 				assert.Equal(t, "domain-"+tc.repository.ID, container.GetDomainService().ID)
 				assert.Equal(t, "app-domain-"+tc.repository.ID, container.GetApplicationService().ID)
-				
+
 				// Check that GetRepositoryFactory returns the repository
 				repoInterface := container.GetRepositoryFactory()
 				assert.Equal(t, tc.repository, repoInterface)
-				
+
 				// Test Close method
 				err = container.Close()
 				assert.NoError(t, err)

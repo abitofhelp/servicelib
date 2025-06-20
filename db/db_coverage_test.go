@@ -1,5 +1,6 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
+//go:build coverage
 // +build coverage
 
 package db

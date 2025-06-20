@@ -6,7 +6,7 @@ package main
 import (
 	"fmt"
 	"strings"
-	
+
 	"github.com/abitofhelp/servicelib/config"
 )
 
@@ -32,16 +32,16 @@ func (s *DatabaseSettings) GetDatabaseConnectionString(dbType string) string {
 	if dbType != s.Type {
 		return ""
 	}
-	
+
 	switch dbType {
 	case "postgres":
-		return fmt.Sprintf("postgres://%s:%s@%s:%d/%s", 
+		return fmt.Sprintf("postgres://%s:%s@%s:%d/%s",
 			s.Username, s.Password, s.Host, s.Port, s.DatabaseName)
 	case "mysql":
-		return fmt.Sprintf("mysql://%s:%s@%s:%d/%s", 
+		return fmt.Sprintf("mysql://%s:%s@%s:%d/%s",
 			s.Username, s.Password, s.Host, s.Port, s.DatabaseName)
 	case "mongodb":
-		return fmt.Sprintf("mongodb://%s:%s@%s:%d/%s", 
+		return fmt.Sprintf("mongodb://%s:%s@%s:%d/%s",
 			s.Username, s.Password, s.Host, s.Port, s.DatabaseName)
 	default:
 		return ""
@@ -70,27 +70,27 @@ func main() {
 		Password:     "password123",
 		DatabaseName: "myapp_db",
 		Options: map[string]string{
-			"sslmode":     "disable",
-			"pool_size":   "10",
-			"timeout":     "30s",
+			"sslmode":   "disable",
+			"pool_size": "10",
+			"timeout":   "30s",
 		},
 		TablePrefix: "app_",
 	}
-	
+
 	// Create a config adapter
 	adapter := config.NewGenericConfigAdapter(dbSettings).
 		WithDatabaseName(dbSettings.DatabaseName)
-	
+
 	// Get the database configuration through the adapter
 	dbConfig := adapter.GetDatabase()
-	
+
 	// Use the standard DatabaseConfig interface methods
 	fmt.Println("=== Database Configuration ===")
 	fmt.Println("Type:", dbConfig.GetType())
 	fmt.Println("Connection String:", dbConfig.GetConnectionString())
 	fmt.Println("Database Name:", dbConfig.GetDatabaseName())
 	fmt.Println("Users Collection:", dbConfig.GetCollectionName("user"))
-	
+
 	// Use the original settings object for additional functionality
 	fmt.Println("\n=== Additional Database Settings ===")
 	fmt.Println("SSL Mode:", dbSettings.GetOption("sslmode", "require"))
@@ -98,7 +98,7 @@ func main() {
 	fmt.Println("Timeout:", dbSettings.GetOption("timeout", "10s"))
 	fmt.Println("Users Table:", dbSettings.GetTableName("User"))
 	fmt.Println("Products Table:", dbSettings.GetTableName("Product"))
-	
+
 	// Expected output:
 	// === Database Configuration ===
 	// Type: postgres

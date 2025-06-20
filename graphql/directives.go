@@ -150,7 +150,7 @@ func CheckAuthorization(ctx context.Context, allowedRoles []string, requiredScop
 
 		// Log the unauthorized access attempt
 		if logger != nil {
-			logger.Warn(ctx, "Unauthorized access attempt", 
+			logger.Warn(ctx, "Unauthorized access attempt",
 				zap.String("operation", operation),
 				zap.Strings("allowed_roles", allowedRoles),
 				zap.Strings("required_scopes", requiredScopes),

@@ -162,7 +162,7 @@ func (t Temperature) ToFahrenheit() Temperature {
 	case Celsius:
 		fahrenheitValue = (t.value * 9 / 5) + 32
 	case Kelvin:
-		fahrenheitValue = (t.value - 273.15) * 9 / 5 + 32
+		fahrenheitValue = (t.value-273.15)*9/5 + 32
 	default:
 		return t // Should never happen due to validation
 	}
@@ -182,7 +182,7 @@ func (t Temperature) ToKelvin() Temperature {
 	case Celsius:
 		kelvinValue = t.value + 273.15
 	case Fahrenheit:
-		kelvinValue = (t.value - 32) * 5 / 9 + 273.15
+		kelvinValue = (t.value-32)*5/9 + 273.15
 	default:
 		return t // Should never happen due to validation
 	}

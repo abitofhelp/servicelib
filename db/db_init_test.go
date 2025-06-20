@@ -20,23 +20,23 @@ func TestInitMongoClientSuccess(t *testing.T) {
 
 	// This would be the ideal test, but we can't easily mock mongo.Connect
 	/*
-	// Create a mock controller
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+		// Create a mock controller
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
 
-	// Create a mock MongoClientInterface
-	mockClient := mocks.NewMockMongoClientInterface(ctrl)
+		// Create a mock MongoClientInterface
+		mockClient := mocks.NewMockMongoClientInterface(ctrl)
 
-	// Set up expectations
-	mockClient.EXPECT().Connect(gomock.Any()).Return(nil)
-	mockClient.EXPECT().Ping(gomock.Any(), gomock.Nil()).Return(nil)
+		// Set up expectations
+		mockClient.EXPECT().Connect(gomock.Any()).Return(nil)
+		mockClient.EXPECT().Ping(gomock.Any(), gomock.Nil()).Return(nil)
 
-	// Call the function
-	client, err := InitMongoClient(context.Background(), "mongodb://localhost:27017", 1*time.Second)
+		// Call the function
+		client, err := InitMongoClient(context.Background(), "mongodb://localhost:27017", 1*time.Second)
 
-	// Assertions
-	assert.NoError(t, err)
-	assert.NotNil(t, client)
+		// Assertions
+		assert.NoError(t, err)
+		assert.NotNil(t, client)
 	*/
 }
 
@@ -57,22 +57,22 @@ func TestInitPostgresPoolSuccess(t *testing.T) {
 
 	// This would be the ideal test, but we can't easily mock pgxpool.New
 	/*
-	// Create a mock controller
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+		// Create a mock controller
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
 
-	// Create a mock PgxPoolInterface
-	mockPool := mocks.NewMockPgxPoolInterface(ctrl)
+		// Create a mock PgxPoolInterface
+		mockPool := mocks.NewMockPgxPoolInterface(ctrl)
 
-	// Set up expectations
-	mockPool.EXPECT().Ping(gomock.Any()).Return(nil)
+		// Set up expectations
+		mockPool.EXPECT().Ping(gomock.Any()).Return(nil)
 
-	// Call the function
-	pool, err := InitPostgresPool(context.Background(), "postgres://localhost:5432", 1*time.Second)
+		// Call the function
+		pool, err := InitPostgresPool(context.Background(), "postgres://localhost:5432", 1*time.Second)
 
-	// Assertions
-	assert.NoError(t, err)
-	assert.NotNil(t, pool)
+		// Assertions
+		assert.NoError(t, err)
+		assert.NotNil(t, pool)
 	*/
 }
 

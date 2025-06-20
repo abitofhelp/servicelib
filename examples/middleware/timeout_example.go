@@ -26,7 +26,7 @@ func main() {
 	})
 
 	// Apply timeout middleware with a 2-second timeout
-	timeoutHandler := middleware.WithTimeout(2*time.Second)(slowHandler)
+	timeoutHandler := middleware.WithTimeout(2 * time.Second)(slowHandler)
 
 	// Register the handler
 	http.Handle("/", middleware.WithRequestContext(timeoutHandler))

@@ -4,8 +4,8 @@ package middleware
 
 import (
 	"context"
-	"net/http"
 	stderrors "errors" // Standard errors package with alias
+	"net/http"
 	"strings"
 
 	"github.com/abitofhelp/servicelib/auth/errors"

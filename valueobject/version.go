@@ -164,9 +164,10 @@ func (v Version) IsPreRelease() bool {
 
 // CompareTo compares this version to another version
 // Returns:
-//   -1 if this version is less than the other
-//    0 if this version is equal to the other
-//    1 if this version is greater than the other
+//
+//	-1 if this version is less than the other
+//	 0 if this version is equal to the other
+//	 1 if this version is greater than the other
 func (v Version) CompareTo(other Version) int {
 	// Compare major version
 	if v.major < other.major {

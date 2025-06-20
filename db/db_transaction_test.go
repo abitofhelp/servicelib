@@ -4,6 +4,7 @@
 // between mock interfaces and concrete types. It needs to be refactored to properly
 // test transaction functionality.
 
+//go:build skip
 // +build skip
 
 package db

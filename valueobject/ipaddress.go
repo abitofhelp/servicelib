@@ -12,7 +12,7 @@ import (
 type IPAddress string
 
 // NewIPAddress creates a new IPAddress with validation for both IPv4 and IPv6 formats
-// It uses Go's net.ParseIP function which supports both IPv4 (e.g., "192.168.1.1") 
+// It uses Go's net.ParseIP function which supports both IPv4 (e.g., "192.168.1.1")
 // and IPv6 (e.g., "2001:db8::1") address formats
 func NewIPAddress(ip string) (IPAddress, error) {
 	// Trim whitespace

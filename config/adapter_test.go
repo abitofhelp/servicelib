@@ -10,13 +10,13 @@ import (
 
 // MockConfig implements the necessary interfaces for testing
 type MockConfig struct {
-	AppVersion    string
-	AppName       string
-	AppEnv        string
-	DbType        string
-	MongoURI      string
-	PostgresDSN   string
-	SQLiteURI     string
+	AppVersion  string
+	AppName     string
+	AppEnv      string
+	DbType      string
+	MongoURI    string
+	PostgresDSN string
+	SQLiteURI   string
 }
 
 // GetAppVersion returns the application version
@@ -190,8 +190,8 @@ func TestGenericConfigAdapter_GetApp(t *testing.T) {
 		assert.NotNil(t, appConfig)
 
 		// Check that the app config returns default values
-		assert.Equal(t, "1.0.0", appConfig.GetVersion()) // Default version
-		assert.Equal(t, "custom-app", appConfig.GetName()) // Custom app name
+		assert.Equal(t, "1.0.0", appConfig.GetVersion())          // Default version
+		assert.Equal(t, "custom-app", appConfig.GetName())        // Custom app name
 		assert.Equal(t, "custom-env", appConfig.GetEnvironment()) // Custom environment
 	})
 }
@@ -281,8 +281,8 @@ func TestGenericConfigAdapter_GetDatabase(t *testing.T) {
 		assert.NotNil(t, dbConfig)
 
 		// Check that the database config returns default values
-		assert.Equal(t, "unknown", dbConfig.GetType()) // Default type
-		assert.Equal(t, "", dbConfig.GetConnectionString()) // Default connection string
+		assert.Equal(t, "unknown", dbConfig.GetType())           // Default type
+		assert.Equal(t, "", dbConfig.GetConnectionString())      // Default connection string
 		assert.Equal(t, "custom-db", dbConfig.GetDatabaseName()) // Custom database name
 	})
 }

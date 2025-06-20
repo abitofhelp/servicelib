@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
-	
+
 	"github.com/abitofhelp/servicelib/transaction/saga"
 	"go.uber.org/zap"
 )
@@ -27,14 +27,14 @@ func NewResourceStore() *ResourceStore {
 func (s *ResourceStore) Create(id, value string) bool {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	
+
 	// Check if resource already exists (idempotent check)
 	if _, exists := s.resources[id]; exists {
 		// Resource already exists, return true without changing anything
 		fmt.Printf("Resource %s already exists, skipping creation\n", id)
 		return true
 	}
-	
+
 	// Create the resource
 	s.resources[id] = value
 	fmt.Printf("Resource %s created with value %s\n", id, value)
@@ -44,14 +44,14 @@ func (s *ResourceStore) Create(id, value string) bool {
 func (s *ResourceStore) Delete(id string) bool {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	
+
 	// Check if resource exists
 	if _, exists := s.resources[id]; !exists {
 		// Resource doesn't exist, return true without doing anything (idempotent)
 		fmt.Printf("Resource %s doesn't exist, skipping deletion\n", id)
 		return true
 	}
-	
+
 	// Delete the resource
 	delete(s.resources, id)
 	fmt.Printf("Resource %s deleted\n", id)
@@ -66,13 +66,13 @@ func main() {
 		return
 	}
 	defer logger.Sync()
-	
+
 	// Create a context
 	ctx := context.Background()
-	
+
 	// Create a resource store
 	store := NewResourceStore()
-	
+
 	// First transaction - creates resources
 	fmt.Println("=== First Transaction ===")
 	err = saga.WithTransaction(ctx, logger, func(tx *saga.Transaction) error {
@@ -95,7 +95,7 @@ func main() {
 				return nil
 			},
 		)
-		
+
 		tx.AddOperation(
 			// Idempotent operation to create resource B
 			func(ctx context.Context) error {
@@ -114,16 +114,16 @@ func main() {
 				return nil
 			},
 		)
-		
+
 		return nil
 	})
-	
+
 	if err != nil {
 		fmt.Printf("First transaction failed: %v\n", err)
 	} else {
 		fmt.Println("First transaction completed successfully")
 	}
-	
+
 	// Second transaction - tries to create the same resources (demonstrates idempotency)
 	fmt.Println("\n=== Second Transaction ===")
 	err = saga.WithTransaction(ctx, logger, func(tx *saga.Transaction) error {
@@ -146,7 +146,7 @@ func main() {
 				return nil
 			},
 		)
-		
+
 		tx.AddOperation(
 			// Idempotent operation to create resource B (already exists)
 			func(ctx context.Context) error {
@@ -165,7 +165,7 @@ func main() {
 				return nil
 			},
 		)
-		
+
 		// This operation will fail
 		tx.AddOperation(
 			func(ctx context.Context) error {
@@ -174,16 +174,16 @@ func main() {
 			},
 			saga.NoopRollback(),
 		)
-		
+
 		return nil
 	})
-	
+
 	if err != nil {
 		fmt.Printf("Second transaction failed: %v\n", err)
 	} else {
 		fmt.Println("Second transaction completed successfully")
 	}
-	
+
 	// Expected output:
 	// === First Transaction ===
 	// Resource A created with value Value A

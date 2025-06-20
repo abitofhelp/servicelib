@@ -96,10 +96,10 @@ func TestParseRating(t *testing.T) {
 
 func TestRating_String(t *testing.T) {
 	tests := []struct {
-		name       string
-		value      float64
-		maxValue   float64
-		expected   string
+		name     string
+		value    float64
+		maxValue float64
+		expected string
 	}{
 		{"Whole Number", 4, 5, "4.0/5.0"},
 		{"Decimal", 4.5, 5, "4.5/5.0"},
@@ -119,11 +119,11 @@ func TestRating_String(t *testing.T) {
 
 func TestRating_Equals(t *testing.T) {
 	tests := []struct {
-		name       string
-		r1Value    float64
-		r1Max      float64
-		r2Value    float64
-		r2Max      float64
+		name        string
+		r1Value     float64
+		r1Max       float64
+		r2Value     float64
+		r2Max       float64
 		shouldEqual bool
 	}{
 		{"Same Rating", 4, 5, 4, 5, true},
@@ -139,7 +139,7 @@ func TestRating_Equals(t *testing.T) {
 			r2, _ := NewRating(tt.r2Value, tt.r2Max)
 
 			if r1.Equals(r2) != tt.shouldEqual {
-				t.Errorf("Expected Equals to return %v for %.1f/%.1f and %.1f/%.1f", 
+				t.Errorf("Expected Equals to return %v for %.1f/%.1f and %.1f/%.1f",
 					tt.shouldEqual, tt.r1Value, tt.r1Max, tt.r2Value, tt.r2Max)
 			}
 		})
@@ -148,10 +148,10 @@ func TestRating_Equals(t *testing.T) {
 
 func TestRating_IsEmpty(t *testing.T) {
 	tests := []struct {
-		name       string
-		value      float64
-		maxValue   float64
-		expected   bool
+		name     string
+		value    float64
+		maxValue float64
+		expected bool
 	}{
 		{"Empty Rating", 0, 0, true},
 		{"Zero Rating", 0, 5, false},
@@ -166,7 +166,7 @@ func TestRating_IsEmpty(t *testing.T) {
 			} else {
 				rating, _ = NewRating(tt.value, tt.maxValue)
 			}
-			
+
 			if rating.IsEmpty() != tt.expected {
 				t.Errorf("Expected IsEmpty to return %v for %.1f/%.1f", tt.expected, tt.value, tt.maxValue)
 			}
@@ -190,10 +190,10 @@ func TestRating_MaxValue(t *testing.T) {
 
 func TestRating_Normalized(t *testing.T) {
 	tests := []struct {
-		name       string
-		value      float64
-		maxValue   float64
-		expected   float64
+		name     string
+		value    float64
+		maxValue float64
+		expected float64
 	}{
 		{"Full Rating", 5, 5, 1.0},
 		{"Half Rating", 2.5, 5, 0.5},
@@ -210,7 +210,7 @@ func TestRating_Normalized(t *testing.T) {
 			} else {
 				rating, _ = NewRating(tt.value, tt.maxValue)
 			}
-			
+
 			normalized := rating.Normalized()
 			if normalized != tt.expected {
 				t.Errorf("Expected normalized value %.2f, got %.2f", tt.expected, normalized)
@@ -221,10 +221,10 @@ func TestRating_Normalized(t *testing.T) {
 
 func TestRating_ToScale(t *testing.T) {
 	tests := []struct {
-		name       string
-		value      float64
-		maxValue   float64
-		newMax     float64
+		name        string
+		value       float64
+		maxValue    float64
+		newMax      float64
 		expectedVal float64
 		expectError bool
 	}{
@@ -238,7 +238,7 @@ func TestRating_ToScale(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			rating, _ := NewRating(tt.value, tt.maxValue)
 			newRating, err := rating.ToScale(tt.newMax)
-			
+
 			if tt.expectError {
 				if err == nil {
 					t.Errorf("Expected error but got none")
@@ -247,11 +247,11 @@ func TestRating_ToScale(t *testing.T) {
 				if err != nil {
 					t.Errorf("Unexpected error: %v", err)
 				}
-				
+
 				if newRating.value != tt.expectedVal {
 					t.Errorf("Expected new value %.1f, got %.1f", tt.expectedVal, newRating.value)
 				}
-				
+
 				if newRating.maxValue != tt.newMax {
 					t.Errorf("Expected new max %.1f, got %.1f", tt.newMax, newRating.maxValue)
 				}
@@ -262,12 +262,12 @@ func TestRating_ToScale(t *testing.T) {
 
 func TestRating_IsHigher(t *testing.T) {
 	tests := []struct {
-		name       string
-		r1Value    float64
-		r1Max      float64
-		r2Value    float64
-		r2Max      float64
-		expected   bool
+		name     string
+		r1Value  float64
+		r1Max    float64
+		r2Value  float64
+		r2Max    float64
+		expected bool
 	}{
 		{"Higher Rating", 4, 5, 3, 5, true},
 		{"Lower Rating", 3, 5, 4, 5, false},
@@ -280,9 +280,9 @@ func TestRating_IsHigher(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			r1, _ := NewRating(tt.r1Value, tt.r1Max)
 			r2, _ := NewRating(tt.r2Value, tt.r2Max)
-			
+
 			if r1.IsHigher(r2) != tt.expected {
-				t.Errorf("Expected IsHigher to return %v for %.1f/%.1f and %.1f/%.1f", 
+				t.Errorf("Expected IsHigher to return %v for %.1f/%.1f and %.1f/%.1f",
 					tt.expected, tt.r1Value, tt.r1Max, tt.r2Value, tt.r2Max)
 			}
 		})
@@ -291,12 +291,12 @@ func TestRating_IsHigher(t *testing.T) {
 
 func TestRating_IsLower(t *testing.T) {
 	tests := []struct {
-		name       string
-		r1Value    float64
-		r1Max      float64
-		r2Value    float64
-		r2Max      float64
-		expected   bool
+		name     string
+		r1Value  float64
+		r1Max    float64
+		r2Value  float64
+		r2Max    float64
+		expected bool
 	}{
 		{"Lower Rating", 3, 5, 4, 5, true},
 		{"Higher Rating", 4, 5, 3, 5, false},
@@ -309,9 +309,9 @@ func TestRating_IsLower(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			r1, _ := NewRating(tt.r1Value, tt.r1Max)
 			r2, _ := NewRating(tt.r2Value, tt.r2Max)
-			
+
 			if r1.IsLower(r2) != tt.expected {
-				t.Errorf("Expected IsLower to return %v for %.1f/%.1f and %.1f/%.1f", 
+				t.Errorf("Expected IsLower to return %v for %.1f/%.1f and %.1f/%.1f",
 					tt.expected, tt.r1Value, tt.r1Max, tt.r2Value, tt.r2Max)
 			}
 		})
@@ -320,10 +320,10 @@ func TestRating_IsLower(t *testing.T) {
 
 func TestRating_Percentage(t *testing.T) {
 	tests := []struct {
-		name       string
-		value      float64
-		maxValue   float64
-		expected   float64
+		name     string
+		value    float64
+		maxValue float64
+		expected float64
 	}{
 		{"Full Rating", 5, 5, 100.0},
 		{"Half Rating", 2.5, 5, 50.0},
@@ -344,10 +344,10 @@ func TestRating_Percentage(t *testing.T) {
 
 func TestRating_Stars(t *testing.T) {
 	tests := []struct {
-		name       string
-		value      float64
-		maxValue   float64
-		expected   string
+		name     string
+		value    float64
+		maxValue float64
+		expected string
 	}{
 		{"5 Stars", 5, 5, "★★★★★"},
 		{"4.5 Stars", 4.5, 5, "★★★★½"},
@@ -370,11 +370,11 @@ func TestRating_Stars(t *testing.T) {
 
 func TestRating_Format(t *testing.T) {
 	tests := []struct {
-		name       string
-		value      float64
-		maxValue   float64
-		format     string
-		expected   string
+		name     string
+		value    float64
+		maxValue float64
+		format   string
+		expected string
 	}{
 		{"Decimal Format", 4.5, 5, "decimal", "4.5/5.0"},
 		{"Percentage Format", 4.5, 5, "percentage", "90%"},

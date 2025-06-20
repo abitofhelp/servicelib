@@ -40,7 +40,7 @@ func TestHasScope(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
 			ctx = WithUserScopes(ctx, tt.scopes)
-			
+
 			if got := HasScope(ctx, tt.scope); got != tt.expected {
 				t.Errorf("HasScope() = %v, want %v", got, tt.expected)
 			}
@@ -79,7 +79,7 @@ func TestHasResource(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
 			ctx = WithUserResources(ctx, tt.resources)
-			
+
 			if got := HasResource(ctx, tt.resource); got != tt.expected {
 				t.Errorf("HasResource() = %v, want %v", got, tt.expected)
 			}
@@ -190,7 +190,7 @@ func TestIsAuthorizedWithScopes(t *testing.T) {
 			if tt.userResources != nil {
 				ctx = WithUserResources(ctx, tt.userResources)
 			}
-			
+
 			if got := IsAuthorizedWithScopes(ctx, tt.allowedRoles, tt.requiredScopes, tt.resource); got != tt.expected {
 				t.Errorf("IsAuthorizedWithScopes() = %v, want %v", got, tt.expected)
 			}
@@ -222,7 +222,7 @@ func TestIsAuthenticated(t *testing.T) {
 			if tt.userID != "" {
 				ctx = WithUserID(ctx, tt.userID)
 			}
-			
+
 			if got := IsAuthenticated(ctx); got != tt.expected {
 				t.Errorf("IsAuthenticated() = %v, want %v", got, tt.expected)
 			}

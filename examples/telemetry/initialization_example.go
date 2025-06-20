@@ -34,7 +34,7 @@ func main() {
 
 	// Load configuration
 	k := koanf.New(".")
-	
+
 	// In a real application, you would load configuration from a file
 	// For this example, we'll use a hardcoded YAML configuration
 	configYAML := []byte(`

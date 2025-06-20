@@ -47,10 +47,10 @@ func NewUsername(username string) (Username, error) {
 	}
 
 	// Ensure username doesn't contain consecutive special characters
-	if strings.Contains(trimmedUsername, "__") || strings.Contains(trimmedUsername, "--") || 
-	   strings.Contains(trimmedUsername, "..") || strings.Contains(trimmedUsername, "_.") || 
-	   strings.Contains(trimmedUsername, "_-") || strings.Contains(trimmedUsername, ".-") ||
-	   strings.Contains(trimmedUsername, "._") {
+	if strings.Contains(trimmedUsername, "__") || strings.Contains(trimmedUsername, "--") ||
+		strings.Contains(trimmedUsername, "..") || strings.Contains(trimmedUsername, "_.") ||
+		strings.Contains(trimmedUsername, "_-") || strings.Contains(trimmedUsername, ".-") ||
+		strings.Contains(trimmedUsername, "._") {
 		return "", errors.New("username cannot contain consecutive special characters")
 	}
 

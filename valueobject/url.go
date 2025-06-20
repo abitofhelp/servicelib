@@ -50,12 +50,12 @@ func (u URL) Equals(other URL) bool {
 	// Parse both URLs for comparison
 	parsedThis, err1 := url.Parse(string(u))
 	parsedOther, err2 := url.Parse(string(other))
-	
+
 	// If either URL can't be parsed, fall back to string comparison
 	if err1 != nil || err2 != nil {
 		return string(u) == string(other)
 	}
-	
+
 	// Compare normalized URLs
 	return parsedThis.String() == parsedOther.String()
 }
@@ -70,12 +70,12 @@ func (u URL) Domain() (string, error) {
 	if u.IsEmpty() {
 		return "", errors.New("URL is empty")
 	}
-	
+
 	parsedURL, err := url.Parse(string(u))
 	if err != nil {
 		return "", errors.New("invalid URL format")
 	}
-	
+
 	return parsedURL.Host, nil
 }
 
@@ -84,12 +84,12 @@ func (u URL) Path() (string, error) {
 	if u.IsEmpty() {
 		return "", errors.New("URL is empty")
 	}
-	
+
 	parsedURL, err := url.Parse(string(u))
 	if err != nil {
 		return "", errors.New("invalid URL format")
 	}
-	
+
 	return parsedURL.Path, nil
 }
 
@@ -98,11 +98,11 @@ func (u URL) Query() (url.Values, error) {
 	if u.IsEmpty() {
 		return nil, errors.New("URL is empty")
 	}
-	
+
 	parsedURL, err := url.Parse(string(u))
 	if err != nil {
 		return nil, errors.New("invalid URL format")
 	}
-	
+
 	return parsedURL.Query(), nil
 }

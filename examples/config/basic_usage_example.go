@@ -5,7 +5,7 @@ package main
 
 import (
 	"fmt"
-	
+
 	"github.com/abitofhelp/servicelib/config"
 )
 
@@ -58,26 +58,26 @@ func main() {
 			"mongodb":  "mongodb://localhost:27017",
 		},
 	}
-	
+
 	// Create a config adapter
 	adapter := config.NewGenericConfigAdapter(myConfig).
 		WithAppName("MyApplication").
 		WithAppEnvironment("production").
 		WithDatabaseName("my_database")
-	
+
 	// Get the app configuration
 	appConfig := adapter.GetApp()
 	fmt.Println("Application Version:", appConfig.GetVersion())
 	fmt.Println("Application Name:", appConfig.GetName())
 	fmt.Println("Application Environment:", appConfig.GetEnvironment())
-	
+
 	// Get the database configuration
 	dbConfig := adapter.GetDatabase()
 	fmt.Println("Database Type:", dbConfig.GetType())
 	fmt.Println("Database Connection String:", dbConfig.GetConnectionString())
 	fmt.Println("Database Name:", dbConfig.GetDatabaseName())
 	fmt.Println("Users Collection:", dbConfig.GetCollectionName("user"))
-	
+
 	// Expected output:
 	// Application Version: 1.0.0
 	// Application Name: MyApp

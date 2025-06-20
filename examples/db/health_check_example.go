@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 	"time"
-	
+
 	"github.com/abitofhelp/servicelib/db"
 )
 
@@ -16,13 +16,13 @@ func main() {
 	// Note: ctx is only used in the commented-out code below
 	// that would be used in a real application
 	ctx := context.Background()
-	
+
 	// Suppress unused variable warnings
 	_ = ctx
-	
+
 	// Example 1: Check PostgreSQL health
 	fmt.Println("=== PostgreSQL Health Check Example ===")
-	
+
 	// In a real application, you would use this code:
 	// postgresPool, err := db.InitPostgresPool(ctx, "postgres://postgres:password@localhost:5432/testdb", db.DefaultTimeout)
 	// if err != nil {
@@ -37,15 +37,15 @@ func main() {
 	// } else {
 	//     fmt.Println("PostgreSQL health check passed")
 	// }
-	
+
 	// For the example, we'll just print what would happen
 	fmt.Println("Would check PostgreSQL health by pinging the database")
 	fmt.Printf("Using default timeout: %v\n", db.DefaultTimeout)
 	fmt.Println("Health check helps ensure the database is responsive")
-	
+
 	// Example 2: Check SQLite health
 	fmt.Println("\n=== SQLite Health Check Example ===")
-	
+
 	// In a real application, you would use this code:
 	// sqliteDB, err := db.InitSQLiteDB(
 	//     ctx,
@@ -67,15 +67,15 @@ func main() {
 	// } else {
 	//     fmt.Println("SQLite health check passed")
 	// }
-	
+
 	// For the example, we'll just print what would happen
 	fmt.Println("Would check SQLite health by pinging the database")
 	fmt.Printf("Using default timeout: %v\n", db.DefaultTimeout)
 	fmt.Println("Health check verifies the database file is accessible and not corrupted")
-	
+
 	// Example 3: Check MongoDB health
 	fmt.Println("\n=== MongoDB Health Check Example ===")
-	
+
 	// In a real application, you would use this code:
 	// mongoClient, err := db.InitMongoClient(ctx, "mongodb://localhost:27017", db.DefaultTimeout)
 	// if err != nil {
@@ -90,16 +90,16 @@ func main() {
 	// } else {
 	//     fmt.Println("MongoDB health check passed")
 	// }
-	
+
 	// For the example, we'll just print what would happen
 	fmt.Println("Would check MongoDB health by pinging the database")
 	fmt.Printf("Using default timeout: %v\n", db.DefaultTimeout)
 	fmt.Println("Health check confirms the MongoDB server is running and responsive")
-	
+
 	// Example 4: Periodic health checks
 	fmt.Println("\n=== Periodic Health Check Example ===")
 	fmt.Println("In a production application, you might want to run health checks periodically")
-	
+
 	// In a real application, you would use this code:
 	// ticker := time.NewTicker(1 * time.Minute)
 	// defer ticker.Stop()
@@ -118,16 +118,16 @@ func main() {
 	//         }
 	//     }
 	// }()
-	
+
 	// For the example, we'll just print what would happen
 	fmt.Println("Would set up a ticker to check health every minute")
 	fmt.Println("Health check would run in a separate goroutine")
 	fmt.Println("If health check fails, application could reconnect or alert administrators")
-	
+
 	// Example 5: Health check with custom timeout
 	fmt.Println("\n=== Custom Timeout Health Check Example ===")
 	customTimeout := 5 * time.Second
-	
+
 	// In a real application, you would use this code:
 	// healthCtx, cancel := context.WithTimeout(ctx, customTimeout)
 	// defer cancel()
@@ -137,12 +137,12 @@ func main() {
 	// } else {
 	//     fmt.Println("Health check with custom timeout passed")
 	// }
-	
+
 	// For the example, we'll just print what would happen
 	fmt.Printf("Would check health with custom timeout: %v\n", customTimeout)
 	fmt.Println("Custom timeout is useful for health checks in different environments")
 	fmt.Println("For example, shorter timeouts for critical services, longer for non-critical")
-	
+
 	// Expected output:
 	// === PostgreSQL Health Check Example ===
 	// Would check PostgreSQL health by pinging the database

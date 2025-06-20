@@ -143,7 +143,7 @@ func TestColor_RGB(t *testing.T) {
 				}
 
 				if r != tt.expectedR || g != tt.expectedG || b != tt.expectedB {
-					t.Errorf("Expected RGB (%d,%d,%d), got (%d,%d,%d)", 
+					t.Errorf("Expected RGB (%d,%d,%d), got (%d,%d,%d)",
 						tt.expectedR, tt.expectedG, tt.expectedB, r, g, b)
 				}
 			}

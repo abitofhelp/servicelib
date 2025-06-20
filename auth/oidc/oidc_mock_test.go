@@ -27,24 +27,24 @@ func TestMockValidateToken(t *testing.T) {
 		expectedClaims *jwt.Claims
 	}{
 		{
-			name:        "Empty token",
-			tokenString: "",
+			name:           "Empty token",
+			tokenString:    "",
 			validateResult: nil,
 			validateError:  autherrors.ErrMissingToken,
 			expectError:    true,
 			expectedClaims: nil,
 		},
 		{
-			name:        "Invalid token",
-			tokenString: "invalid.token.string",
+			name:           "Invalid token",
+			tokenString:    "invalid.token.string",
 			validateResult: nil,
 			validateError:  autherrors.ErrInvalidToken,
 			expectError:    true,
 			expectedClaims: nil,
 		},
 		{
-			name:        "Expired token",
-			tokenString: "expired.token.string",
+			name:           "Expired token",
+			tokenString:    "expired.token.string",
 			validateResult: nil,
 			validateError:  autherrors.ErrExpiredToken,
 			expectError:    true,
@@ -57,8 +57,8 @@ func TestMockValidateToken(t *testing.T) {
 				UserID: "user123",
 				Roles:  []string{"admin", "user"},
 			},
-			validateError:  nil,
-			expectError:    false,
+			validateError: nil,
+			expectError:   false,
 			expectedClaims: &jwt.Claims{
 				UserID: "user123",
 				Roles:  []string{"admin", "user"},
@@ -166,19 +166,19 @@ func TestMockIsAdmin(t *testing.T) {
 func TestMockGetAuthURL(t *testing.T) {
 	// Create test cases
 	tests := []struct {
-		name          string
-		state         string
-		expectedURL   string
+		name        string
+		state       string
+		expectedURL string
 	}{
 		{
-			name:          "With state",
-			state:         "random-state",
-			expectedURL:   "https://example.com/auth?state=random-state",
+			name:        "With state",
+			state:       "random-state",
+			expectedURL: "https://example.com/auth?state=random-state",
 		},
 		{
-			name:          "Empty state",
-			state:         "",
-			expectedURL:   "https://example.com/auth?state=",
+			name:        "Empty state",
+			state:       "",
+			expectedURL: "https://example.com/auth?state=",
 		},
 	}
 
@@ -204,15 +204,15 @@ func TestMockGetAuthURL(t *testing.T) {
 func TestMockExchange(t *testing.T) {
 	// Create test cases
 	tests := []struct {
-		name          string
-		code          string
+		name           string
+		code           string
 		exchangeResult *oauth2.Token
-		exchangeError error
-		expectError   bool
+		exchangeError  error
+		expectError    bool
 	}{
 		{
-			name:          "Valid code",
-			code:          "valid-code",
+			name: "Valid code",
+			code: "valid-code",
 			exchangeResult: &oauth2.Token{
 				AccessToken: "access-token",
 				TokenType:   "Bearer",
@@ -221,18 +221,18 @@ func TestMockExchange(t *testing.T) {
 			expectError:   false,
 		},
 		{
-			name:          "Invalid code",
-			code:          "invalid-code",
+			name:           "Invalid code",
+			code:           "invalid-code",
 			exchangeResult: nil,
-			exchangeError: autherrors.ErrInvalidToken,
-			expectError:   true,
+			exchangeError:  autherrors.ErrInvalidToken,
+			expectError:    true,
 		},
 		{
-			name:          "Empty code",
-			code:          "",
+			name:           "Empty code",
+			code:           "",
 			exchangeResult: nil,
-			exchangeError: autherrors.ErrInvalidToken,
-			expectError:   true,
+			exchangeError:  autherrors.ErrInvalidToken,
+			expectError:    true,
 		},
 	}
 

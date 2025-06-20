@@ -7,10 +7,10 @@ package config
 type AppConfig interface {
 	// GetVersion returns the application version
 	GetVersion() string
-	
+
 	// GetName returns the application name
 	GetName() string
-	
+
 	// GetEnvironment returns the application environment (e.g., "development", "production")
 	GetEnvironment() string
 }
@@ -19,13 +19,13 @@ type AppConfig interface {
 type DatabaseConfig interface {
 	// GetType returns the database type (e.g., "mongodb", "postgres", "sqlite")
 	GetType() string
-	
+
 	// GetConnectionString returns the database connection string
 	GetConnectionString() string
-	
+
 	// GetDatabaseName returns the database name
 	GetDatabaseName() string
-	
+
 	// GetCollectionName returns the collection/table name for a given entity type
 	GetCollectionName(entityType string) string
 }
@@ -34,7 +34,7 @@ type DatabaseConfig interface {
 type Config interface {
 	// GetApp returns the application configuration
 	GetApp() AppConfig
-	
+
 	// GetDatabase returns the database configuration
 	GetDatabase() DatabaseConfig
 }

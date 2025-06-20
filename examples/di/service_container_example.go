@@ -73,9 +73,9 @@ func (s *MyApplicationService) Execute() string {
 
 // Implement the AppConfig interface
 type MyAppConfig struct {
-	AppName     string
-	AppVersion  string
-	AppEnv      string
+	AppName    string
+	AppVersion string
+	AppEnv     string
 }
 
 func (c *MyAppConfig) GetName() string {

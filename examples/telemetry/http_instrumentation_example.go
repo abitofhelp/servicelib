@@ -34,13 +34,13 @@ func main() {
 	helloHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Get the current span from the request context
 		ctx := r.Context()
-		
+
 		// Log with the trace context
 		logger.Info(ctx, "Handling request", zap.String("path", r.URL.Path))
-		
+
 		// Simulate some work
 		time.Sleep(50 * time.Millisecond)
-		
+
 		// Write response
 		w.Header().Set("Content-Type", "text/plain")
 		w.Write([]byte("Hello, World!"))

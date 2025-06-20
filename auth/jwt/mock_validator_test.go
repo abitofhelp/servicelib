@@ -14,13 +14,13 @@ import (
 type MockValidator struct {
 	// ShouldSucceed determines whether the validation should succeed or fail
 	ShouldSucceed bool
-	
+
 	// ErrorToReturn is the error to return when validation fails
 	ErrorToReturn error
-	
+
 	// ClaimsToReturn is the claims to return when validation succeeds
 	ClaimsToReturn *jwt.Claims
-	
+
 	// Called tracks whether ValidateToken was called
 	Called bool
 }
@@ -28,19 +28,19 @@ type MockValidator struct {
 // ValidateToken implements the TokenValidator interface for testing.
 func (m *MockValidator) ValidateToken(ctx context.Context, tokenString string) (*jwt.Claims, error) {
 	m.Called = true
-	
+
 	if tokenString == "" {
 		return nil, autherrors.ErrMissingToken
 	}
-	
+
 	if m.ShouldSucceed {
 		return m.ClaimsToReturn, nil
 	}
-	
+
 	if m.ErrorToReturn != nil {
 		return nil, m.ErrorToReturn
 	}
-	
+
 	return nil, errors.New("mock validation failed")
 }
 
@@ -55,7 +55,7 @@ func NewSuccessfulMockValidator(claims *jwt.Claims) *MockValidator {
 // NewFailingMockValidator creates a new MockValidator that fails with the given error.
 func NewFailingMockValidator(err error) *MockValidator {
 	return &MockValidator{
-		ShouldSucceed:  false,
-		ErrorToReturn:  err,
+		ShouldSucceed: false,
+		ErrorToReturn: err,
 	}
 }

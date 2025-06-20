@@ -149,17 +149,17 @@ func TestVersion_String(t *testing.T) {
 
 func TestVersion_Equals(t *testing.T) {
 	tests := []struct {
-		name       string
-		v1Major    int
-		v1Minor    int
-		v1Patch    int
-		v1Pre      string
-		v1Build    string
-		v2Major    int
-		v2Minor    int
-		v2Patch    int
-		v2Pre      string
-		v2Build    string
+		name        string
+		v1Major     int
+		v1Minor     int
+		v1Patch     int
+		v1Pre       string
+		v1Build     string
+		v2Major     int
+		v2Minor     int
+		v2Patch     int
+		v2Pre       string
+		v2Build     string
 		shouldEqual bool
 	}{
 		{"Same Version", 1, 2, 3, "", "", 1, 2, 3, "", "", true},
@@ -210,7 +210,7 @@ func TestVersion_IsEmpty(t *testing.T) {
 			} else {
 				version, _ = NewVersion(tt.major, tt.minor, tt.patch, tt.pre, tt.build)
 			}
-			
+
 			if version.IsEmpty() != tt.expected {
 				t.Errorf("Expected IsEmpty to return %v for %s", tt.expected, version.String())
 			}
@@ -221,25 +221,25 @@ func TestVersion_IsEmpty(t *testing.T) {
 func TestVersion_Getters(t *testing.T) {
 	major, minor, patch := 1, 2, 3
 	preRelease, build := "alpha", "build123"
-	
+
 	version, _ := NewVersion(major, minor, patch, preRelease, build)
-	
+
 	if version.Major() != major {
 		t.Errorf("Expected Major() to return %d, got %d", major, version.Major())
 	}
-	
+
 	if version.Minor() != minor {
 		t.Errorf("Expected Minor() to return %d, got %d", minor, version.Minor())
 	}
-	
+
 	if version.Patch() != patch {
 		t.Errorf("Expected Patch() to return %d, got %d", patch, version.Patch())
 	}
-	
+
 	if version.PreRelease() != preRelease {
 		t.Errorf("Expected PreRelease() to return %s, got %s", preRelease, version.PreRelease())
 	}
-	
+
 	if version.Build() != build {
 		t.Errorf("Expected Build() to return %s, got %s", build, version.Build())
 	}
@@ -275,34 +275,34 @@ func TestVersion_CompareTo(t *testing.T) {
 		// Major version comparison
 		{"Major Greater", "2.0.0", "1.0.0", 1},
 		{"Major Less", "1.0.0", "2.0.0", -1},
-		
+
 		// Minor version comparison
 		{"Minor Greater", "1.2.0", "1.1.0", 1},
 		{"Minor Less", "1.1.0", "1.2.0", -1},
-		
+
 		// Patch version comparison
 		{"Patch Greater", "1.1.2", "1.1.1", 1},
 		{"Patch Less", "1.1.1", "1.1.2", -1},
-		
+
 		// Pre-release comparison
 		{"Normal vs Pre-release", "1.0.0", "1.0.0-alpha", 1},
 		{"Pre-release vs Normal", "1.0.0-alpha", "1.0.0", -1},
 		{"Different Pre-release - Alphabetical", "1.0.0-alpha", "1.0.0-beta", -1},
 		{"Different Pre-release - Reverse Alphabetical", "1.0.0-beta", "1.0.0-alpha", 1},
-		
+
 		// Numeric identifiers in pre-release
 		{"Numeric Pre-release Comparison", "1.0.0-alpha.1", "1.0.0-alpha.2", -1},
 		{"Numeric vs Non-numeric Pre-release", "1.0.0-1", "1.0.0-alpha", -1},
 		{"Non-numeric vs Numeric Pre-release", "1.0.0-alpha", "1.0.0-1", 1},
-		
+
 		// Pre-release with different number of identifiers
 		{"More Pre-release Identifiers", "1.0.0-alpha.beta.1", "1.0.0-alpha.beta", 1},
 		{"Fewer Pre-release Identifiers", "1.0.0-alpha.beta", "1.0.0-alpha.beta.1", -1},
-		
+
 		// Equal versions
 		{"Equal Versions", "1.0.0", "1.0.0", 0},
 		{"Equal Versions with Pre-release", "1.0.0-alpha", "1.0.0-alpha", 0},
-		
+
 		// Build metadata (should not affect comparison)
 		{"Equal with Different Build", "1.0.0+build1", "1.0.0+build2", 0},
 	}
@@ -311,10 +311,10 @@ func TestVersion_CompareTo(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			v1, _ := ParseVersion(tt.v1)
 			v2, _ := ParseVersion(tt.v2)
-			
+
 			result := v1.CompareTo(v2)
 			if result != tt.expected {
-				t.Errorf("Expected CompareTo to return %d for %s and %s, got %d", 
+				t.Errorf("Expected CompareTo to return %d for %s and %s, got %d",
 					tt.expected, tt.v1, tt.v2, result)
 			}
 		})
@@ -336,9 +336,9 @@ func TestVersion_NextMajor(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			version, _ := ParseVersion(tt.version)
 			next := version.NextMajor()
-			
+
 			if next.String() != tt.expected {
-				t.Errorf("Expected NextMajor to return %s for %s, got %s", 
+				t.Errorf("Expected NextMajor to return %s for %s, got %s",
 					tt.expected, tt.version, next.String())
 			}
 		})
@@ -360,9 +360,9 @@ func TestVersion_NextMinor(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			version, _ := ParseVersion(tt.version)
 			next := version.NextMinor()
-			
+
 			if next.String() != tt.expected {
-				t.Errorf("Expected NextMinor to return %s for %s, got %s", 
+				t.Errorf("Expected NextMinor to return %s for %s, got %s",
 					tt.expected, tt.version, next.String())
 			}
 		})
@@ -384,9 +384,9 @@ func TestVersion_NextPatch(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			version, _ := ParseVersion(tt.version)
 			next := version.NextPatch()
-			
+
 			if next.String() != tt.expected {
-				t.Errorf("Expected NextPatch to return %s for %s, got %s", 
+				t.Errorf("Expected NextPatch to return %s for %s, got %s",
 					tt.expected, tt.version, next.String())
 			}
 		})
@@ -415,7 +415,7 @@ func Test_comparePreRelease(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result := comparePreRelease(tt.a, tt.b)
 			if result != tt.expected {
-				t.Errorf("Expected comparePreRelease to return %d for %s and %s, got %d", 
+				t.Errorf("Expected comparePreRelease to return %d for %s and %s, got %d",
 					tt.expected, tt.a, tt.b, result)
 			}
 		})

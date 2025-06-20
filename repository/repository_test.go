@@ -87,7 +87,7 @@ func TestMockRepositoryFactory(t *testing.T) {
 	t.Run("GetRepository", func(t *testing.T) {
 		// Create a mock repository to return
 		mockRepo := mocks.NewMockStringRepository(ctrl)
-		
+
 		// Setup expectations
 		mockFactory.EXPECT().GetRepository().Return(mockRepo)
 		mockFactory.EXPECT().GetRepository().Return(nil)
@@ -107,7 +107,7 @@ func TestMockRepositoryFactory(t *testing.T) {
 func TestRepositoryInterface(t *testing.T) {
 	// This test doesn't actually execute any code, it just verifies that the types
 	// satisfy the interfaces at compile time
-	
+
 	// Verify that MockStringRepository implements Repository[string]
 	var _ Repository[string] = (*mocks.MockStringRepository)(nil)
 }
@@ -116,7 +116,7 @@ func TestRepositoryInterface(t *testing.T) {
 func TestRepositoryFactoryInterface(t *testing.T) {
 	// This test doesn't actually execute any code, it just verifies that the types
 	// satisfy the interfaces at compile time
-	
+
 	// Verify that MockRepositoryFactory implements RepositoryFactory
 	var _ RepositoryFactory = (*mocks.MockRepositoryFactory)(nil)
 }

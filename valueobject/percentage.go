@@ -18,14 +18,14 @@ func NewPercentage(value float64) (Percentage, error) {
 	if value < 0 {
 		return 0, errors.New("percentage cannot be negative")
 	}
-	
+
 	if value > 100 {
 		return 0, errors.New("percentage cannot exceed 100")
 	}
-	
+
 	// Round to 2 decimal places for precision
 	roundedValue := float64(int64(value*100+0.5)) / 100
-	
+
 	return Percentage(roundedValue), nil
 }
 
@@ -33,23 +33,23 @@ func NewPercentage(value float64) (Percentage, error) {
 func ParsePercentage(s string) (Percentage, error) {
 	// Trim whitespace
 	trimmed := strings.TrimSpace(s)
-	
+
 	// Empty string is not allowed
 	if trimmed == "" {
 		return 0, errors.New("percentage string cannot be empty")
 	}
-	
+
 	// Remove percentage sign if present
 	if strings.HasSuffix(trimmed, "%") {
 		trimmed = strings.TrimSuffix(trimmed, "%")
 	}
-	
+
 	// Parse the value
 	value, err := strconv.ParseFloat(trimmed, 64)
 	if err != nil {
 		return 0, errors.New("invalid percentage format")
 	}
-	
+
 	return NewPercentage(value)
 }
 

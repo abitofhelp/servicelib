@@ -187,8 +187,8 @@ type Auth struct {
 
 	// metrics for tracking authentication and authorization operations
 	metrics struct {
-		tokenGenerations   int64
-		tokenValidations   int64
+		tokenGenerations    int64
+		tokenValidations    int64
 		authorizationChecks int64
 	}
 }
@@ -237,7 +237,7 @@ func New(ctx context.Context, config Config, logger *zap.Logger) (*Auth, error) 
 			Timeout:       config.JWT.Remote.Timeout,
 		})
 
-		ctxLogger.Info(ctx, "JWT remote validation enabled", 
+		ctxLogger.Info(ctx, "JWT remote validation enabled",
 			zap.String("validation_url", config.JWT.Remote.ValidationURL),
 			zap.Duration("timeout", config.JWT.Remote.Timeout))
 	}

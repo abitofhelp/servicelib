@@ -114,8 +114,8 @@ func WithTimeout(timeout time.Duration) func(http.Handler) http.Handler {
 			// Create a wrapper for the response writer that's protected by the mutex
 			syncWriter := &syncResponseWriter{
 				ResponseWriter: w,
-				mu:            &mu,
-				responded:     &responded,
+				mu:             &mu,
+				responded:      &responded,
 			}
 
 			// Process the request in a goroutine

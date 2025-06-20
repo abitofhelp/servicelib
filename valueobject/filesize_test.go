@@ -27,7 +27,7 @@ func TestNewFileSize(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fs, err := NewFileSize(tt.value, tt.unit)
-			
+
 			if tt.expectError {
 				if err == nil {
 					t.Errorf("Expected error but got none")
@@ -67,7 +67,7 @@ func TestParseFileSize(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fs, err := ParseFileSize(tt.input)
-			
+
 			if tt.expectError {
 				if err == nil {
 					t.Errorf("Expected error but got none")
@@ -112,7 +112,7 @@ func TestFileSize_IsEmpty(t *testing.T) {
 }
 
 func TestFileSize_Conversions(t *testing.T) {
-	fs, _ := NewFileSize(1024 * 1024, Bytes) // 1MB in bytes
+	fs, _ := NewFileSize(1024*1024, Bytes) // 1MB in bytes
 
 	if fs.Bytes() != 1024*1024 {
 		t.Errorf("Expected 1048576 bytes, got %d", fs.Bytes())

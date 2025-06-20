@@ -26,19 +26,19 @@ type DatabaseConfigProvider interface {
 
 // GenericConfigAdapter is a generic adapter for any config type that provides the necessary methods
 type GenericConfigAdapter[T any] struct {
-	config T
-	appName string
+	config         T
+	appName        string
 	appEnvironment string
-	dbName string
+	dbName         string
 }
 
 // NewGenericConfigAdapter creates a new GenericConfigAdapter with default values
 func NewGenericConfigAdapter[T any](cfg T) *GenericConfigAdapter[T] {
 	return &GenericConfigAdapter[T]{
-		config: cfg,
-		appName: "application",
+		config:         cfg,
+		appName:        "application",
 		appEnvironment: "development",
-		dbName: "database",
+		dbName:         "database",
 	}
 }
 
@@ -63,8 +63,8 @@ func (a *GenericConfigAdapter[T]) WithDatabaseName(name string) *GenericConfigAd
 // GetApp returns the application configuration
 func (a *GenericConfigAdapter[T]) GetApp() AppConfig {
 	return &GenericAppConfigAdapter[T]{
-		config: a.config,
-		appName: a.appName,
+		config:         a.config,
+		appName:        a.appName,
 		appEnvironment: a.appEnvironment,
 	}
 }
@@ -79,8 +79,8 @@ func (a *GenericConfigAdapter[T]) GetDatabase() DatabaseConfig {
 
 // GenericAppConfigAdapter is a generic adapter for application configuration
 type GenericAppConfigAdapter[T any] struct {
-	config T
-	appName string
+	config         T
+	appName        string
 	appEnvironment string
 }
 

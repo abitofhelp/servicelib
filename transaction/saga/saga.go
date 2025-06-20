@@ -7,9 +7,9 @@ import (
 	"context"
 	"go.uber.org/zap"
 
- appctx "github.com/abitofhelp/servicelib/context"
- "github.com/abitofhelp/servicelib/errors"
- "github.com/abitofhelp/servicelib/logging"
+	appctx "github.com/abitofhelp/servicelib/context"
+	"github.com/abitofhelp/servicelib/errors"
+	"github.com/abitofhelp/servicelib/logging"
 )
 
 // Operation represents a function that performs a database operation.

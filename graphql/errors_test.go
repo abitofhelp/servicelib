@@ -22,12 +22,12 @@ func TestHandleError(t *testing.T) {
 
 	// Test cases
 	tests := []struct {
-		name           string
-		err            error
-		operation      string
-		expectedCode   string
-		expectedMsg    string
-		checkExactMsg  bool
+		name          string
+		err           error
+		operation     string
+		expectedCode  string
+		expectedMsg   string
+		checkExactMsg bool
 	}{
 		{
 			name:          "Context canceled",

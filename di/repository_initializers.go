@@ -16,8 +16,8 @@ import (
 // GenericMongoInitializer initializes a MongoDB collection and returns it
 // This can be used by applications to create their own repository initializers
 func GenericMongoInitializer(
-	ctx context.Context, 
-	uri string, 
+	ctx context.Context,
+	uri string,
 	databaseName string,
 	collectionName string,
 	zapLogger *zap.Logger,
@@ -48,8 +48,8 @@ func GenericMongoInitializer(
 // GenericPostgresInitializer initializes a PostgreSQL connection pool and returns it
 // This can be used by applications to create their own repository initializers
 func GenericPostgresInitializer(
-	ctx context.Context, 
-	dsn string, 
+	ctx context.Context,
+	dsn string,
 	zapLogger *zap.Logger,
 ) (interface{}, error) {
 	// Check if logger is nil
@@ -75,8 +75,8 @@ func GenericPostgresInitializer(
 // GenericSQLiteInitializer initializes a SQLite database connection and returns it
 // This can be used by applications to create their own repository initializers
 func GenericSQLiteInitializer(
-	ctx context.Context, 
-	uri string, 
+	ctx context.Context,
+	uri string,
 	zapLogger *zap.Logger,
 ) (interface{}, error) {
 	// Check if logger is nil

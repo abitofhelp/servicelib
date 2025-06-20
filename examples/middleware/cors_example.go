@@ -15,7 +15,7 @@ func main() {
 	apiHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Set content type
 		w.Header().Set("Content-Type", "application/json")
-		
+
 		// Return a simple JSON response
 		w.Write([]byte(`{"message":"This is a CORS-enabled API endpoint"}`))
 	})

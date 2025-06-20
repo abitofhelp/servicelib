@@ -5,7 +5,7 @@ package main
 
 import (
 	"fmt"
-	
+
 	"github.com/abitofhelp/servicelib/config"
 )
 
@@ -58,26 +58,26 @@ func main() {
 			"notifications": false,
 		},
 	}
-	
+
 	// Create a config adapter
 	adapter := config.NewGenericConfigAdapter(settings)
-	
+
 	// Get the app configuration through the adapter
 	appConfig := adapter.GetApp()
-	
+
 	// Use the standard AppConfig interface methods
 	fmt.Println("=== Application Configuration ===")
 	fmt.Println("Version:", appConfig.GetVersion())
 	fmt.Println("Name:", appConfig.GetName())
 	fmt.Println("Environment:", appConfig.GetEnvironment())
-	
+
 	// Use the original settings object for additional functionality
 	fmt.Println("\n=== Additional Settings ===")
 	fmt.Println("Log Level:", settings.GetLogLevel())
 	fmt.Println("Dark Mode Enabled:", settings.IsFeatureEnabled("darkMode"))
 	fmt.Println("Beta Features Enabled:", settings.IsFeatureEnabled("betaFeatures"))
 	fmt.Println("Notifications Enabled:", settings.IsFeatureEnabled("notifications"))
-	
+
 	// Expected output:
 	// === Application Configuration ===
 	// Version: 2.1.0

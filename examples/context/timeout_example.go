@@ -91,7 +91,7 @@ func main() {
 func printContextDeadline(ctx context.Context) {
 	deadline, ok := ctx.Deadline()
 	if ok {
-		fmt.Printf("Deadline: %s (in %v)\n", 
+		fmt.Printf("Deadline: %s (in %v)\n",
 			deadline.Format(time.RFC3339),
 			time.Until(deadline).Round(time.Millisecond))
 	} else {

@@ -36,7 +36,7 @@ func TestHasRole(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
 			ctx = WithUserRoles(ctx, tt.roles)
-			
+
 			if got := HasRole(ctx, tt.role); got != tt.expected {
 				t.Errorf("HasRole() = %v, want %v", got, tt.expected)
 			}
@@ -81,7 +81,7 @@ func TestIsAuthorized(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
 			ctx = WithUserRoles(ctx, tt.userRoles)
-			
+
 			if got := IsAuthorized(ctx, tt.allowedRoles); got != tt.expected {
 				t.Errorf("IsAuthorized() = %v, want %v", got, tt.expected)
 			}
