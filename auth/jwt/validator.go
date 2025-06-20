@@ -1,10 +1,15 @@
-// Copyright (c) 2025 A Bit of Help, Inc.
+// Copyright (c) 2024 A Bit of Help, Inc.
 
 package jwt
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
 	stderrors "errors" // Standard errors package with alias
+	"strings"
 	"time"
 
 	"github.com/abitofhelp/servicelib/auth/errors"
@@ -23,18 +28,48 @@ type TokenValidator interface {
 }
 
 // parseToken parses and validates a JWT token.
-func parseToken(tokenString string, secretKey string) (*jwt.Token, error) {
+func parseToken(tokenString string, secretKey string, signingMethod SigningMethod) (*jwt.Token, error) {
 	if tokenString == "" {
 		return nil, errors.WithOp(errors.ErrMissingToken, "jwt.parseToken")
 	}
 
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		// Validate the signing method
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			err := errors.WithContext(errors.ErrInvalidSignature, "alg", token.Header["alg"])
-			err = errors.WithOp(err, "jwt.parseToken")
-			err = errors.WithMessage(err, "unexpected signing method")
-			return nil, err
+		// Validate the signing method based on the configured method
+		var expectedMethod string
+		switch signingMethod {
+		case SigningMethodHS256, SigningMethodHS384, SigningMethodHS512:
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				expectedMethod = string(signingMethod)
+				err := errors.WithContext(errors.ErrInvalidSignature, "alg", token.Header["alg"])
+				err = errors.WithOp(err, "jwt.parseToken")
+				err = errors.WithMessage(err, fmt.Sprintf("unexpected signing method: expected %s", expectedMethod))
+				return nil, err
+			}
+		case SigningMethodRS256, SigningMethodRS384, SigningMethodRS512:
+			if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+				expectedMethod = string(signingMethod)
+				err := errors.WithContext(errors.ErrInvalidSignature, "alg", token.Header["alg"])
+				err = errors.WithOp(err, "jwt.parseToken")
+				err = errors.WithMessage(err, fmt.Sprintf("unexpected signing method: expected %s", expectedMethod))
+				return nil, err
+			}
+		case SigningMethodES256, SigningMethodES384, SigningMethodES512:
+			if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
+				expectedMethod = string(signingMethod)
+				err := errors.WithContext(errors.ErrInvalidSignature, "alg", token.Header["alg"])
+				err = errors.WithOp(err, "jwt.parseToken")
+				err = errors.WithMessage(err, fmt.Sprintf("unexpected signing method: expected %s", expectedMethod))
+				return nil, err
+			}
+		default:
+			// Default to HS256 for backward compatibility
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				expectedMethod = "HS256"
+				err := errors.WithContext(errors.ErrInvalidSignature, "alg", token.Header["alg"])
+				err = errors.WithOp(err, "jwt.parseToken")
+				err = errors.WithMessage(err, fmt.Sprintf("unexpected signing method: expected %s", expectedMethod))
+				return nil, err
+			}
 		}
 
 		return []byte(secretKey), nil
@@ -114,7 +149,7 @@ func (v *LocalValidator) ValidateToken(ctx context.Context, tokenString string) 
 	}
 
 	// Use the existing validation logic from the JWT service
-	token, err := parseToken(tokenString, v.config.SecretKey)
+	token, err := parseToken(tokenString, v.config.SecretKey, v.config.SigningMethod)
 	if err != nil {
 		v.logger.Debug("Failed to parse token", zap.Error(err))
 		return nil, err
@@ -219,21 +254,101 @@ func (v *RemoteValidator) ValidateToken(ctx context.Context, tokenString string)
 // RemoteClient handles HTTP communication with the remote validation service.
 type RemoteClient struct {
 	config RemoteConfig
+	client *http.Client
 }
 
 // NewRemoteClient creates a new remote client with the provided configuration.
 func NewRemoteClient(config RemoteConfig) *RemoteClient {
 	return &RemoteClient{
 		config: config,
+		client: &http.Client{
+			Timeout: config.Timeout,
+		},
 	}
+}
+
+// ValidationRequest represents a request to validate a token.
+type ValidationRequest struct {
+	Token string `json:"token"`
+}
+
+// ValidationResponse represents a response from the validation endpoint.
+type ValidationResponse struct {
+	Valid  bool    `json:"valid"`
+	UserID string  `json:"user_id"`
+	Roles  []string `json:"roles"`
+	Scopes []string `json:"scopes"`
+	Error  string  `json:"error,omitempty"`
 }
 
 // ValidateToken sends a validation request to the remote service.
 func (c *RemoteClient) ValidateToken(ctx context.Context, tokenString string) (*Claims, error) {
-	// This is a placeholder for the actual HTTP client implementation
-	// In a real implementation, this would make an HTTP request to the remote validation endpoint
-	// and parse the response to extract the claims
+	// Create the request body
+	reqBody := ValidationRequest{
+		Token: tokenString,
+	}
 
-	// For now, we'll just return an error to indicate that remote validation is not implemented
-	return nil, errors.WithMessage(errors.ErrNotImplemented, "remote validation is not implemented")
+	// Marshal the request to JSON
+	reqJSON, err := json.Marshal(reqBody)
+	if err != nil {
+		return nil, errors.WithContext(errors.Wrap(err, "failed to marshal validation request"), "token_length", len(tokenString))
+	}
+
+	// Create the HTTP request
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.config.ValidationURL, strings.NewReader(string(reqJSON)))
+	if err != nil {
+		return nil, errors.WithContext(errors.Wrap(err, "failed to create validation request"), "url", c.config.ValidationURL)
+	}
+
+	// Set headers
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+
+	// Add authentication if provided
+	if c.config.ClientID != "" && c.config.ClientSecret != "" {
+		req.SetBasicAuth(c.config.ClientID, c.config.ClientSecret)
+	}
+
+	// Send the request
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return nil, errors.WithContext(errors.Wrap(err, "failed to send validation request"), "url", c.config.ValidationURL)
+	}
+	defer resp.Body.Close()
+
+	// Read the response body
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, errors.WithContext(errors.Wrap(err, "failed to read validation response"), "status", resp.Status)
+	}
+
+	// Check the status code
+	if resp.StatusCode != http.StatusOK {
+		err := errors.WithContext(errors.ErrInvalidToken, "status", resp.Status)
+		err = errors.WithContext(err, "response", string(respBody))
+		return nil, err
+	}
+
+	// Parse the response
+	var validationResp ValidationResponse
+	if err := json.Unmarshal(respBody, &validationResp); err != nil {
+		return nil, errors.WithContext(errors.Wrap(err, "failed to parse validation response"), "response", string(respBody))
+	}
+
+	// Check if the token is valid
+	if !validationResp.Valid {
+		if validationResp.Error != "" {
+			return nil, errors.WithMessage(errors.ErrInvalidToken, validationResp.Error)
+		}
+		return nil, errors.WithMessage(errors.ErrInvalidToken, "token is not valid")
+	}
+
+	// Create claims from the response
+	claims := &Claims{
+		UserID:    validationResp.UserID,
+		Roles:     validationResp.Roles,
+		Scopes:    validationResp.Scopes,
+	}
+
+	return claims, nil
 }

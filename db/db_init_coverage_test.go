@@ -1,4 +1,4 @@
-// Copyright (c) 2025 A Bit of Help, Inc.
+// Copyright (c) 2024 A Bit of Help, Inc.
 
 package db
 
@@ -38,21 +38,33 @@ func TestInitMongoClientCoverage(t *testing.T) {
 func TestInitPostgresPoolCoverage(t *testing.T) {
 	// Test with an invalid URI
 	t.Run("Invalid URI", func(t *testing.T) {
-		pool, err := InitPostgresPool(context.Background(), "invalid-uri", 1*time.Second)
+		config := PostgresConfig{
+			URI:     "invalid-uri",
+			Timeout: 1 * time.Second,
+		}
+		pool, err := InitPostgresPool(context.Background(), config)
 		assert.Error(t, err)
 		assert.Nil(t, pool)
 	})
 
 	// Test with a valid URI but unreachable server
 	t.Run("Unreachable server", func(t *testing.T) {
-		pool, err := InitPostgresPool(context.Background(), "postgres://nonexistent-server:5432", 1*time.Second)
+		config := PostgresConfig{
+			URI:     "postgres://nonexistent-server:5432",
+			Timeout: 1 * time.Second,
+		}
+		pool, err := InitPostgresPool(context.Background(), config)
 		assert.Error(t, err)
 		assert.Nil(t, pool)
 	})
 
 	// Test with a timeout that's too short
 	t.Run("Timeout too short", func(t *testing.T) {
-		pool, err := InitPostgresPool(context.Background(), "postgres://localhost:5432", 1*time.Nanosecond)
+		config := PostgresConfig{
+			URI:     "postgres://localhost:5432",
+			Timeout: 1 * time.Nanosecond,
+		}
+		pool, err := InitPostgresPool(context.Background(), config)
 		assert.Error(t, err)
 		assert.Nil(t, pool)
 	})

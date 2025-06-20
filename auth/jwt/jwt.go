@@ -1,4 +1,4 @@
-// Copyright (c) 2025 A Bit of Help, Inc.
+// Copyright (c) 2024 A Bit of Help, Inc.
 
 // Package jwt provides JWT token handling for the auth module.
 // It includes functionality for generating and validating JWT tokens.
@@ -6,8 +6,11 @@ package jwt
 
 import (
 	"context"
+	"fmt"
 	stderrors "errors" // Standard errors package with alias
+	"net/url"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/abitofhelp/servicelib/auth/errors"
@@ -16,6 +19,30 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
+)
+
+// SigningMethod represents the algorithm used to sign JWT tokens
+type SigningMethod string
+
+const (
+	// SigningMethodHS256 represents HMAC using SHA-256
+	SigningMethodHS256 SigningMethod = "HS256"
+	// SigningMethodHS384 represents HMAC using SHA-384
+	SigningMethodHS384 SigningMethod = "HS384"
+	// SigningMethodHS512 represents HMAC using SHA-512
+	SigningMethodHS512 SigningMethod = "HS512"
+	// SigningMethodRS256 represents RSASSA-PKCS1-v1_5 using SHA-256
+	SigningMethodRS256 SigningMethod = "RS256"
+	// SigningMethodRS384 represents RSASSA-PKCS1-v1_5 using SHA-384
+	SigningMethodRS384 SigningMethod = "RS384"
+	// SigningMethodRS512 represents RSASSA-PKCS1-v1_5 using SHA-512
+	SigningMethodRS512 SigningMethod = "RS512"
+	// SigningMethodES256 represents ECDSA using P-256 and SHA-256
+	SigningMethodES256 SigningMethod = "ES256"
+	// SigningMethodES384 represents ECDSA using P-384 and SHA-384
+	SigningMethodES384 SigningMethod = "ES384"
+	// SigningMethodES512 represents ECDSA using P-521 and SHA-512
+	SigningMethodES512 SigningMethod = "ES512"
 )
 
 // Config holds the configuration for JWT token handling.
@@ -28,6 +55,14 @@ type Config struct {
 
 	// Issuer identifies the entity that issued the token
 	Issuer string
+
+	// SigningMethod is the algorithm used to sign JWT tokens
+	// Default is HS256 if not specified
+	SigningMethod SigningMethod
+
+	// MinSecretKeyLength is the minimum length required for the secret key
+	// Default is 32 if not specified
+	MinSecretKeyLength int
 }
 
 // Service handles JWT token operations including generation and validation.
@@ -46,12 +81,36 @@ type Service struct {
 
 	// remoteValidator is used for remote token validation (optional)
 	remoteValidator TokenValidator
+
+	// revokedTokens is a map of revoked token IDs to their expiration time
+	revokedTokens map[string]time.Time
+
+	// mutex protects the revokedTokens map
+	mutex sync.RWMutex
 }
 
 // NewService creates a new JWT service with the provided configuration and logger.
-func NewService(config Config, logger *zap.Logger) *Service {
+func NewService(config Config, logger *zap.Logger) (*Service, error) {
 	if logger == nil {
 		logger = zap.NewNop()
+	}
+
+	// Set default values if not provided
+	if config.SigningMethod == "" {
+		config.SigningMethod = SigningMethodHS256
+	}
+
+	if config.MinSecretKeyLength == 0 {
+		config.MinSecretKeyLength = 32
+	}
+
+	// Validate secret key length
+	if len(config.SecretKey) < config.MinSecretKeyLength {
+		err := errors.WithContext(errors.ErrInvalidConfig, "secret_key_length", len(config.SecretKey))
+		err = errors.WithOp(err, "jwt.NewService")
+		err = errors.WithMessage(err, fmt.Sprintf("secret key must be at least %d characters", config.MinSecretKeyLength))
+		logger.Error("Invalid JWT configuration", zap.Error(err))
+		return nil, err
 	}
 
 	// Create local validator
@@ -62,13 +121,32 @@ func NewService(config Config, logger *zap.Logger) *Service {
 		logger:         logger,
 		tracer:         otel.Tracer("auth.jwt"),
 		localValidator: localValidator,
-	}
+		revokedTokens:  make(map[string]time.Time),
+	}, nil
 }
 
 // WithRemoteValidator adds a remote validator to the JWT service.
-func (s *Service) WithRemoteValidator(config RemoteConfig) *Service {
+func (s *Service) WithRemoteValidator(config RemoteConfig) (*Service, error) {
+	// Validate the ValidationURL
+	if config.ValidationURL == "" {
+		err := errors.WithContext(errors.ErrInvalidConfig, "validation_url", config.ValidationURL)
+		err = errors.WithOp(err, "jwt.Service.WithRemoteValidator")
+		err = errors.WithMessage(err, "validation URL cannot be empty")
+		s.logger.Error("Invalid remote validator configuration", zap.Error(err))
+		return nil, err
+	}
+
+	// Parse and validate the URL
+	_, err := url.Parse(config.ValidationURL)
+	if err != nil {
+		err = errors.WithContext(errors.Wrap(err, "invalid validation URL"), "validation_url", config.ValidationURL)
+		err = errors.WithOp(err, "jwt.Service.WithRemoteValidator")
+		s.logger.Error("Invalid remote validator configuration", zap.Error(err))
+		return nil, err
+	}
+
 	s.remoteValidator = NewRemoteValidator(config, s.logger)
-	return s
+	return s, nil
 }
 
 // SetRemoteValidatorForTesting sets the remote validator for testing purposes.
@@ -118,6 +196,9 @@ func (s *Service) GenerateToken(ctx context.Context, userID string, roles []stri
 	now := time.Now()
 	expiresAt := now.Add(s.config.TokenDuration)
 
+	// Generate a unique token ID
+	tokenID := fmt.Sprintf("%s-%d", userID, now.UnixNano())
+
 	claims := Claims{
 		UserID:    userID,
 		Roles:     roles,
@@ -128,10 +209,36 @@ func (s *Service) GenerateToken(ctx context.Context, userID string, roles []stri
 			IssuedAt:  jwt.NewNumericDate(now),
 			NotBefore: jwt.NewNumericDate(now),
 			Issuer:    s.config.Issuer,
+			ID:        tokenID, // Add a unique token ID for revocation
 		},
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	// Select the signing method based on the configuration
+	var signingMethod jwt.SigningMethod
+	switch s.config.SigningMethod {
+	case SigningMethodHS256:
+		signingMethod = jwt.SigningMethodHS256
+	case SigningMethodHS384:
+		signingMethod = jwt.SigningMethodHS384
+	case SigningMethodHS512:
+		signingMethod = jwt.SigningMethodHS512
+	case SigningMethodRS256:
+		signingMethod = jwt.SigningMethodRS256
+	case SigningMethodRS384:
+		signingMethod = jwt.SigningMethodRS384
+	case SigningMethodRS512:
+		signingMethod = jwt.SigningMethodRS512
+	case SigningMethodES256:
+		signingMethod = jwt.SigningMethodES256
+	case SigningMethodES384:
+		signingMethod = jwt.SigningMethodES384
+	case SigningMethodES512:
+		signingMethod = jwt.SigningMethodES512
+	default:
+		signingMethod = jwt.SigningMethodHS256
+	}
+
+	token := jwt.NewWithClaims(signingMethod, claims)
 	tokenString, err := token.SignedString([]byte(s.config.SecretKey))
 	if err != nil {
 		err = errors.WithContext(errors.Wrap(err, "failed to sign token"), "user_id", userID)
@@ -140,7 +247,7 @@ func (s *Service) GenerateToken(ctx context.Context, userID string, roles []stri
 		return "", err
 	}
 
-	s.logger.Debug("Token generated successfully", zap.String("user_id", userID))
+	s.logger.Debug("Token generated successfully", zap.String("user_id", userID), zap.String("token_id", tokenID))
 	return tokenString, nil
 }
 
@@ -161,6 +268,15 @@ func (s *Service) ValidateToken(ctx context.Context, tokenString string) (*Claim
 	if s.remoteValidator != nil {
 		claims, err := s.remoteValidator.ValidateToken(ctx, tokenString)
 		if err == nil {
+			// Check if the token has been revoked
+			if s.isTokenRevoked(claims.ID) {
+				err := errors.WithContext(errors.ErrInvalidToken, "token_id", claims.ID)
+				err = errors.WithOp(err, "jwt.Service.ValidateToken")
+				err = errors.WithMessage(err, "token has been revoked")
+				s.logger.Debug("Token has been revoked", zap.String("token_id", claims.ID))
+				return nil, err
+			}
+
 			s.logger.Debug("Token validated successfully by remote validator", zap.String("user_id", claims.UserID))
 			return claims, nil
 		}
@@ -181,8 +297,83 @@ func (s *Service) ValidateToken(ctx context.Context, tokenString string) (*Claim
 		return nil, err
 	}
 
+	// Check if the token has been revoked
+	if s.isTokenRevoked(claims.ID) {
+		err := errors.WithContext(errors.ErrInvalidToken, "token_id", claims.ID)
+		err = errors.WithOp(err, "jwt.Service.ValidateToken")
+		err = errors.WithMessage(err, "token has been revoked")
+		s.logger.Debug("Token has been revoked", zap.String("token_id", claims.ID))
+		return nil, err
+	}
+
 	s.logger.Debug("Token validated successfully by local validator", zap.String("user_id", claims.UserID))
 	return claims, nil
+}
+
+// RevokeToken revokes a token by its ID.
+func (s *Service) RevokeToken(ctx context.Context, tokenID string, expiresAt time.Time) error {
+	ctx, span := s.tracer.Start(ctx, "jwt.Service.RevokeToken")
+	defer span.End()
+
+	span.SetAttributes(attribute.String("token.id", tokenID))
+
+	if tokenID == "" {
+		err := errors.WithContext(errors.ErrInvalidToken, "token_id", tokenID)
+		err = errors.WithOp(err, "jwt.Service.RevokeToken")
+		err = errors.WithMessage(err, "token ID cannot be empty")
+		s.logger.Error("Failed to revoke token: token ID is empty")
+		return err
+	}
+
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	// Add the token to the revoked tokens map
+	s.revokedTokens[tokenID] = expiresAt
+	s.logger.Debug("Token revoked", zap.String("token_id", tokenID))
+
+	// Clean up expired revoked tokens
+	s.cleanupRevokedTokens()
+
+	return nil
+}
+
+// RevokeTokenByString revokes a token by its string representation.
+func (s *Service) RevokeTokenByString(ctx context.Context, tokenString string) error {
+	ctx, span := s.tracer.Start(ctx, "jwt.Service.RevokeTokenByString")
+	defer span.End()
+
+	span.SetAttributes(attribute.String("token.length", strconv.Itoa(len(tokenString))))
+
+	// Parse the token to get its ID and expiration time
+	claims, err := s.ValidateToken(ctx, tokenString)
+	if err != nil {
+		s.logger.Error("Failed to revoke token: token validation failed", zap.Error(err))
+		return err
+	}
+
+	// Revoke the token
+	return s.RevokeToken(ctx, claims.ID, claims.ExpiresAt.Time)
+}
+
+// isTokenRevoked checks if a token has been revoked.
+func (s *Service) isTokenRevoked(tokenID string) bool {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	_, revoked := s.revokedTokens[tokenID]
+	return revoked
+}
+
+// cleanupRevokedTokens removes expired revoked tokens from the map.
+func (s *Service) cleanupRevokedTokens() {
+	now := time.Now()
+	for tokenID, expiresAt := range s.revokedTokens {
+		if now.After(expiresAt) {
+			delete(s.revokedTokens, tokenID)
+			s.logger.Debug("Removed expired revoked token", zap.String("token_id", tokenID))
+		}
+	}
 }
 
 // ExtractTokenFromHeader extracts a JWT token from an Authorization header.

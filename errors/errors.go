@@ -1,4 +1,4 @@
-// Copyright (c) 2025 A Bit of Help, Inc.
+// Copyright (c) 2024 A Bit of Help, Inc.
 
 // Package errors provides a comprehensive error handling system for the application.
 // It includes error codes, HTTP status mapping, contextual information, and utilities

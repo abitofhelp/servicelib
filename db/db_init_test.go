@@ -1,4 +1,4 @@
-// Copyright (c) 2025 A Bit of Help, Inc.
+// Copyright (c) 2024 A Bit of Help, Inc.
 
 package db
 
@@ -79,7 +79,11 @@ func TestInitPostgresPoolSuccess(t *testing.T) {
 // TestInitPostgresPoolErrorPath tests the error path of InitPostgresPool
 func TestInitPostgresPoolErrorPath(t *testing.T) {
 	// Test with an invalid URI
-	pool, err := InitPostgresPool(context.Background(), "invalid-uri", 1*time.Second)
+	config := PostgresConfig{
+		URI:     "invalid-uri",
+		Timeout: 1 * time.Second,
+	}
+	pool, err := InitPostgresPool(context.Background(), config)
 
 	// Assertions
 	assert.Error(t, err)
