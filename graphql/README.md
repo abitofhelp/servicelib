@@ -1,116 +1,117 @@
 # GraphQL Package
 
-This package provides utilities for working with GraphQL in Go services, including server configuration, error handling, and role-based access control (RBAC).
+## Overview
+
+The `graphql` package provides utilities for working with GraphQL in Go services, including server configuration, error handling, and role-based access control (RBAC).
 
 ## Features
 
-- GraphQL server configuration with sensible defaults
-- Error handling with proper context and logging
-- Role-based access control (RBAC) with the `@isAuthorized` directive
-- Metrics and tracing for GraphQL operations
-- Timeout and cancellation handling
+- **GraphQL Server Configuration**: Sensible defaults for GraphQL server setup
+- **Error Handling**: Proper context and logging for GraphQL errors
+- **Role-Based Access Control**: RBAC with the `@isAuthorized` directive
+- **Metrics and Tracing**: Performance monitoring for GraphQL operations
+- **Timeout and Cancellation**: Proper handling of timeouts and cancellations
 
-## Role-Based Access Control (RBAC)
+## Installation
 
-The package provides a generic implementation of the `@isAuthorized` directive for GraphQL, which can be used to restrict access to GraphQL operations based on user roles.
-
-### Setup
-
-1. Define a Role enum in your GraphQL schema:
-
-```graphql
-enum Role {
-  ADMIN
-  EDITOR
-  VIEWER
-  # Add more roles as needed
-}
-
-enum Scope {
-  READ
-  WRITE
-  DELETE
-  CREATE
-}
-
-enum Resource {
-  FAMILY
-  PARENT
-  CHILD
-  ITEM
-}
-
-directive @isAuthorized(
-  allowedRoles: [Role!]!, 
-  requiredScopes: [Scope!] = [READ], 
-  resource: Resource = FAMILY
-) on FIELD_DEFINITION
+```bash
+go get github.com/abitofhelp/servicelib/graphql
 ```
 
-2. Apply the directive to your queries and mutations:
+## Quick Start
 
-```graphql
-type Query {
-  getItem(id: ID!): Item @isAuthorized(
-    allowedRoles: [ADMIN, EDITOR, VIEWER], 
-    requiredScopes: [READ], 
-    resource: ITEM
-  )
-}
+See the [Directive Registration example](../examples/graphql/directive_registration_example.go) for a complete, runnable example of how to set up a GraphQL server with the `@isAuthorized` directive.
 
-type Mutation {
-  createItem(input: ItemInput!): Item! @isAuthorized(
-    allowedRoles: [ADMIN, EDITOR], 
-    requiredScopes: [CREATE], 
-    resource: ITEM
-  )
-}
-```
-
-3. Register the directive in your GraphQL server:
-
-See the [Directive Registration example](../examples/graphql/directive_registration_example.go) for a complete, runnable example of how to register the @isAuthorized directive in your GraphQL server.
-
-### JWT Authentication
-
-The RBAC implementation works with the JWT authentication middleware from the `servicelib/auth` package. The middleware extracts the user's roles, scopes, and resources from the JWT token and adds them to the request context, which is then used by the `@isAuthorized` directive to check if the user has the required roles, scopes, and access to the specified resource.
-
-To set up JWT authentication:
-
-1. Configure the auth service in your dependency injection container:
+## Configuration
 
 See the [Auth Configuration example](../examples/graphql/auth_configuration_example.go) for a complete, runnable example of how to configure the auth service for GraphQL.
 
-2. Apply the auth middleware to your HTTP handler:
+## API Documentation
 
-See the [Auth Middleware example](../examples/graphql/auth_middleware_example.go) for a complete, runnable example of how to apply the auth middleware to a GraphQL handler.
+### Core Types
 
-### Helper Functions
+#### IsAuthorizedDirective
 
-The package provides several helper functions for working with RBAC:
+The `IsAuthorizedDirective` function implements the `@isAuthorized` directive for GraphQL, which can be used to restrict access to GraphQL operations based on user roles.
 
-- `IsAuthorizedDirective`: The implementation of the `@isAuthorized` directive that checks roles, scopes, and resources
-- `CheckAuthorization`: A helper function for checking authorization in resolvers with roles, scopes, and resources
-- `ConvertRolesToStrings`: A generic helper function for converting enum types to strings
-- `IsAuthorizedWithScopes`: A function that checks if a user has the required roles, scopes, and access to a resource
-- `HasScope`: A function that checks if a user has a specific scope
-- `HasResource`: A function that checks if a user has access to a specific resource
+See the [Directive Registration example](../examples/graphql/directive_registration_example.go) for a complete, runnable example of how to use the IsAuthorizedDirective.
 
-## Example Usage
+#### CheckAuthorization
 
-See the [Resolver Authorization example](../examples/graphql/resolver_authorization_example.go) for a complete, runnable example of how to check authorization in a GraphQL resolver.
+The `CheckAuthorization` function is a helper for checking authorization in resolvers with roles, scopes, and resources.
 
-## Generating JWT Tokens
+See the [Resolver Authorization example](../examples/graphql/resolver_authorization_example.go) for a complete, runnable example of how to use the CheckAuthorization function.
 
-To test the RBAC implementation, you can use the `genjwt` tool to generate JWT tokens with different roles, scopes, and resources:
+### Key Methods
 
-See the [JWT Token Generation example](../examples/graphql/jwt_token_generation_example.go) for a complete, runnable example of how to generate JWT tokens for testing GraphQL RBAC.
+#### IsAuthorizedWithScopes
 
-## Metrics
+The `IsAuthorizedWithScopes` function checks if a user has the required roles, scopes, and access to a resource.
 
-The package provides metrics for authorization checks:
+See the [Resolver Authorization example](../examples/graphql/resolver_authorization_example.go) for a complete, runnable example of how to use the IsAuthorizedWithScopes function.
 
-- `authorization_check_duration_seconds`: Duration of authorization checks in seconds
-- `authorization_failures_total`: Total number of authorization failures
+#### HasScope
 
-These metrics are automatically registered with Prometheus and can be used to monitor the performance and security of your GraphQL API.
+The `HasScope` function checks if a user has a specific scope.
+
+#### HasResource
+
+The `HasResource` function checks if a user has access to a specific resource.
+
+## Examples
+
+For complete, runnable examples, see the following files in the examples directory:
+
+- [Directive Registration](../examples/graphql/directive_registration_example.go) - Shows how to register the @isAuthorized directive
+- [Auth Configuration](../examples/graphql/auth_configuration_example.go) - Shows how to configure the auth service
+- [Auth Middleware](../examples/graphql/auth_middleware_example.go) - Shows how to apply the auth middleware
+- [Resolver Authorization](../examples/graphql/resolver_authorization_example.go) - Shows how to check authorization in resolvers
+- [JWT Token Generation](../examples/graphql/jwt_token_generation_example.go) - Shows how to generate JWT tokens for testing
+
+## Best Practices
+
+1. **Schema Design**: Define clear Role, Scope, and Resource enums in your GraphQL schema.
+
+2. **Directive Usage**: Apply the `@isAuthorized` directive to all operations that require authorization.
+
+3. **JWT Configuration**: Configure the JWT authentication middleware to extract roles, scopes, and resources from tokens.
+
+4. **Error Handling**: Implement proper error handling for authorization failures.
+
+5. **Testing**: Generate test tokens with different roles, scopes, and resources to verify your authorization logic.
+
+## Troubleshooting
+
+### Common Issues
+
+#### Authorization Failures
+
+**Issue**: Users with valid tokens are not authorized to perform operations.
+
+**Solution**: Check that the token contains the correct roles, scopes, and resources. Verify that the `@isAuthorized` directive is configured correctly.
+
+#### Directive Registration Errors
+
+**Issue**: Errors when registering the `@isAuthorized` directive.
+
+**Solution**: Ensure that your GraphQL schema includes the Role, Scope, and Resource enums and the directive definition.
+
+#### Performance Issues
+
+**Issue**: Authorization checks are causing performance issues.
+
+**Solution**: Use the provided metrics to identify bottlenecks. Consider caching authorization results for frequently accessed operations.
+
+## Related Components
+
+- [Auth](../auth/README.md) - The auth component provides JWT authentication middleware used by the graphql package.
+- [Middleware](../middleware/README.md) - The middleware component includes HTTP middleware for authentication and authorization.
+- [Telemetry](../telemetry/README.md) - The telemetry component provides metrics and tracing used by the graphql package.
+
+## Contributing
+
+Contributions to this component are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.

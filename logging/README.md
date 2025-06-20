@@ -51,66 +51,13 @@ See the [Trace ID example](../examples/logging/trace_id_example.go) for a comple
 
 The `Logger` interface defines the methods for context-aware logging.
 
-```go
-// Example of the Logger interface
-package example
-
-import (
-	"context"
-
-	"go.uber.org/zap"
-)
-
-// Logger defines the interface for context-aware logging
-type Logger interface {
-	// Debug logs a debug-level message with context information
-	Debug(ctx context.Context, msg string, fields ...zap.Field)
-
-	// Info logs an info-level message with context information
-	Info(ctx context.Context, msg string, fields ...zap.Field)
-
-	// Warn logs a warning-level message with context information
-	Warn(ctx context.Context, msg string, fields ...zap.Field)
-
-	// Error logs an error-level message with context information
-	Error(ctx context.Context, msg string, fields ...zap.Field)
-
-	// Fatal logs a fatal-level message with context information
-	Fatal(ctx context.Context, msg string, fields ...zap.Field)
-
-	// Sync flushes any buffered log entries
-	Sync() error
-}
-```
+See the [Context-Aware Logging example](../examples/logging/context_aware_logging_example.go) for a complete, runnable example of how to use the Logger interface.
 
 ## Configuration
 
-The logger can be configured with different log levels and output formats:
+The logger can be configured with different log levels and output formats.
 
-```go
-// Example of logger configuration
-package example
-
-import (
-	"github.com/abitofhelp/servicelib/logging"
-)
-
-func configureLoggers() {
-	// Development mode (console output with colors)
-	logger, err := logging.NewLogger("debug", true)
-	if err != nil {
-		panic(err)
-	}
-	defer logger.Sync()
-
-	// Production mode (JSON output)
-	prodLogger, err := logging.NewLogger("info", false)
-	if err != nil {
-		panic(err)
-	}
-	defer prodLogger.Sync()
-}
-```
+See the [Basic Usage example](../examples/logging/basic_usage_example.go) for a complete, runnable example of how to configure the logger.
 
 Available log levels:
 - `debug`: Detailed information for debugging
@@ -119,28 +66,9 @@ Available log levels:
 - `error`: Error events that might still allow the application to continue
 - `fatal`: Severe error events that cause the application to terminate
 
-## Logging Best Practices
+## Best Practices
 
 1. **Use Structured Logging**: Always use structured logging with key-value pairs instead of string formatting.
-
-   ```go
-   // Example of structured logging
-   package example
-
-   import (
-       "fmt"
-
-       "go.uber.org/zap"
-   )
-
-   func logUserLogin(logger *zap.Logger, user struct{ Name string }, ip string) {
-       // Good
-       logger.Info("User logged in", zap.String("username", user.Name), zap.String("ip", ip))
-
-       // Avoid
-       logger.Info(fmt.Sprintf("User %s logged in from %s", user.Name, ip))
-   }
-   ```
 
 2. **Include Context**: Always pass context to logging methods when available to include trace information.
 
@@ -150,30 +78,40 @@ Available log levels:
 
 5. **Performance**: In hot paths, check if the log level is enabled before constructing expensive log messages.
 
-   ```go
-   // Example of conditional logging
-   package example
+See the [Basic Usage example](../examples/logging/basic_usage_example.go) for examples of these best practices.
 
-   import (
-       "go.uber.org/zap"
-       "go.uber.org/zap/zapcore"
-   )
+## Troubleshooting
 
-   func logExpensiveData(logger *zap.Logger) {
-       if logger.Core().Enabled(zapcore.DebugLevel) {
-           logger.Debug("Expensive debug info", zap.Any("data", generateExpensiveDebugData()))
-       }
-   }
+### Common Issues
 
-   func generateExpensiveDebugData() interface{} {
-       // This would be an expensive operation to generate debug data
-       return map[string]interface{}{
-           "complex": "data structure",
-           "that": "would be expensive to compute",
-       }
-   }
-   ```
+#### Logger Not Initialized
+
+**Issue**: Attempting to use a logger that hasn't been properly initialized.
+
+**Solution**: Always check for errors when creating a logger and ensure that the logger is initialized before use.
+
+#### Log Messages Not Appearing
+
+**Issue**: Log messages are not appearing in the expected output.
+
+**Solution**: Check that the log level is set appropriately. For example, debug messages won't appear if the log level is set to info or higher.
+
+#### Performance Issues
+
+**Issue**: Logging is causing performance issues in the application.
+
+**Solution**: Use conditional logging for expensive operations, ensure that debug logging is disabled in production, and consider using sampling for high-volume logs.
+
+## Related Components
+
+- [Telemetry](../telemetry/README.md) - The telemetry component uses the logging component for logging telemetry events.
+- [Middleware](../middleware/README.md) - The middleware component uses the logging component for request logging.
+- [Health](../health/README.md) - The health component uses the logging component for logging health check results.
+
+## Contributing
+
+Contributions to this component are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.

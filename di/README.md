@@ -1,5 +1,7 @@
 # Dependency Injection Package
 
+## Overview
+
 The `di` package provides a container-based dependency injection system for Go applications. It helps manage dependencies between components, making your code more modular, testable, and maintainable.
 
 ## Features
@@ -12,10 +14,10 @@ The `di` package provides a container-based dependency injection system for Go a
 
 - **Features**:
   - Constructor injection
-  - Singleton instances
-  - Lazy initialization
-  - Scoped instances
-  - Circular dependency detection
+  - Type-safe dependency management with generics
+  - Context-aware containers
+  - Structured configuration support
+  - Domain-driven design support
 
 ## Installation
 
@@ -23,375 +25,126 @@ The `di` package provides a container-based dependency injection system for Go a
 go get github.com/abitofhelp/servicelib/di
 ```
 
-## Usage
+## Quick Start
 
-### Basic Container Usage
+See the [Basic Usage Example](../examples/di/basic_usage_example.go) for a complete, runnable example of how to use the di package.
 
-```go
-package main
+## Configuration
 
-import (
-    "fmt"
-    "github.com/abitofhelp/servicelib/di"
-)
+See the [Service Container Example](../examples/di/service_container_example.go) for a complete, runnable example of how to configure the di package.
 
-func main() {
-    // Create a new DI container
-    container := di.NewContainer()
+## API Documentation
 
-    // Register a simple value
-    container.Register("greeting", "Hello, World!")
+### Core Types
 
-    // Register a function that returns a value
-    container.Register("counter", func() int {
-        return 42
-    })
+#### BaseContainer
 
-    // Retrieve values from the container
-    greeting, err := container.Get("greeting")
-    if err != nil {
-        fmt.Printf("Error: %v\n", err)
-        return
-    }
+The `BaseContainer` is the foundation for all container types. It provides access to common dependencies like context, logger, and configuration.
 
-    counter, err := container.Get("counter")
-    if err != nil {
-        fmt.Printf("Error: %v\n", err)
-        return
-    }
+See the [Basic Usage Example](../examples/di/basic_usage_example.go) for a complete, runnable example of how to use the BaseContainer.
 
-    fmt.Println(greeting.(string))  // Output: Hello, World!
-    fmt.Println(counter.(int))      // Output: 42
-}
-```
+#### ServiceContainer
 
-### Dependency Resolution
+The `ServiceContainer` is designed for domain-driven design applications. It manages repositories, domain services, and application services.
+
+See the [Service Container Example](../examples/di/service_container_example.go) for a complete, runnable example of how to use the ServiceContainer.
+
+#### GenericAppContainer
+
+The `GenericAppContainer` provides a flexible container for any application structure. It allows custom initialization of repositories, domain services, and application services.
+
+See the [Generic Container Example](../examples/di/generic_container_example.go) for a complete, runnable example of how to use the GenericAppContainer.
+
+### Key Methods
+
+#### NewBaseContainer
+
+The `NewBaseContainer` function creates a new base container with context, logger, and configuration.
 
 ```go
-package main
-
-import (
-    "fmt"
-    "github.com/abitofhelp/servicelib/di"
-)
-
-// Define some interfaces and implementations
-type Logger interface {
-    Log(message string)
-}
-
-type ConsoleLogger struct{}
-
-func (l *ConsoleLogger) Log(message string) {
-    fmt.Println("LOG:", message)
-}
-
-type Service interface {
-    DoSomething()
-}
-
-type MyService struct {
-    logger Logger
-}
-
-func NewMyService(logger Logger) Service {
-    return &MyService{logger: logger}
-}
-
-func (s *MyService) DoSomething() {
-    s.logger.Log("Doing something...")
-}
-
-func main() {
-    // Create a new DI container
-    container := di.NewContainer()
-
-    // Register the logger
-    container.Register("logger", func(c di.Container) (interface{}, error) {
-        return &ConsoleLogger{}, nil
-    })
-
-    // Register the service with a dependency on the logger
-    container.Register("service", func(c di.Container) (interface{}, error) {
-        // Resolve the logger dependency
-        logger, err := c.Get("logger")
-        if err != nil {
-            return nil, err
-        }
-
-        // Create and return the service
-        return NewMyService(logger.(Logger)), nil
-    })
-
-    // Resolve and use the service
-    service, err := container.Get("service")
-    if err != nil {
-        fmt.Printf("Error: %v\n", err)
-        return
-    }
-
-    // Use the service
-    service.(Service).DoSomething()  // Output: LOG: Doing something...
-}
+baseContainer, err := di.NewBaseContainer(ctx, logger, cfg)
 ```
 
-### Singleton vs. Transient Instances
+#### NewContainer
+
+The `NewContainer` function creates a new generic container with context, logger, and configuration.
 
 ```go
-package main
-
-import (
-    "fmt"
-    "github.com/abitofhelp/servicelib/di"
-)
-
-type Counter struct {
-    value int
-}
-
-func (c *Counter) Increment() {
-    c.value++
-}
-
-func (c *Counter) Value() int {
-    return c.value
-}
-
-func main() {
-    // Create a new DI container
-    container := di.NewContainer()
-
-    // Register a singleton counter
-    container.RegisterSingleton("singletonCounter", func(c di.Container) (interface{}, error) {
-        return &Counter{}, nil
-    })
-
-    // Register a transient counter
-    container.Register("transientCounter", func(c di.Container) (interface{}, error) {
-        return &Counter{}, nil
-    })
-
-    // Get the singleton counter twice and increment it
-    counter1, _ := container.Get("singletonCounter")
-    counter1.(*Counter).Increment()
-
-    counter2, _ := container.Get("singletonCounter")
-    fmt.Printf("Singleton counter value: %d\n", counter2.(*Counter).Value())  // Output: 1 (shared instance)
-
-    // Get the transient counter twice and increment it
-    counter3, _ := container.Get("transientCounter")
-    counter3.(*Counter).Increment()
-
-    counter4, _ := container.Get("transientCounter")
-    fmt.Printf("Transient counter value: %d\n", counter4.(*Counter).Value())  // Output: 0 (new instance)
-}
+container, err := di.NewContainer(ctx, logger, cfg)
 ```
 
-### Scoped Containers
+#### NewServiceContainer
+
+The `NewServiceContainer` function creates a new service container with context, logger, configuration, repository, and service initializers.
 
 ```go
-package main
-
-import (
-    "context"
-    "fmt"
-    "github.com/abitofhelp/servicelib/di"
-)
-
-type RequestContext struct {
-    UserID string
-}
-
-type UserService struct {
-    requestContext *RequestContext
-}
-
-func (s *UserService) GetUserID() string {
-    return s.requestContext.UserID
-}
-
-func main() {
-    // Create a parent container
-    parentContainer := di.NewContainer()
-
-    // Handle a request for user1
-    handleRequest(parentContainer, "user1")
-
-    // Handle a request for user2
-    handleRequest(parentContainer, "user2")
-}
-
-func handleRequest(parentContainer di.Container, userID string) {
-    // Create a scoped container for this request
-    scopedContainer := parentContainer.CreateScope()
-
-    // Register request-specific dependencies
-    scopedContainer.Register("requestContext", &RequestContext{UserID: userID})
-
-    // Register a service that depends on the request context
-    scopedContainer.Register("userService", func(c di.Container) (interface{}, error) {
-        ctx, err := c.Get("requestContext")
-        if err != nil {
-            return nil, err
-        }
-        return &UserService{requestContext: ctx.(*RequestContext)}, nil
-    })
-
-    // Resolve and use the service
-    service, _ := scopedContainer.Get("userService")
-    userService := service.(*UserService)
-
-    fmt.Printf("Request for user: %s\n", userService.GetUserID())
-}
+container, err := di.NewServiceContainer(ctx, logger, cfg, repo, initDomainService, initAppService)
 ```
 
-### Using with Context
+#### NewGenericAppContainer
+
+The `NewGenericAppContainer` function creates a new generic application container with context, logger, configuration, connection string, and initializers.
 
 ```go
-package main
-
-import (
-    "context"
-    "fmt"
-    "github.com/abitofhelp/servicelib/di"
-)
-
-func main() {
-    // Create a base context
-    ctx := context.Background()
-
-    // Create a container with context
-    container, err := di.NewContainerWithContext(ctx)
-    if err != nil {
-        fmt.Printf("Error: %v\n", err)
-        return
-    }
-
-    // Register a service that uses the context
-    container.Register("contextAwareService", func(c di.Container) (interface{}, error) {
-        // Get the context from the container
-        ctx := c.GetContext()
-        
-        // Use the context
-        return &ContextAwareService{ctx: ctx}, nil
-    })
-
-    // Use the service
-    service, _ := container.Get("contextAwareService")
-    service.(*ContextAwareService).DoSomething()
-}
-
-type ContextAwareService struct {
-    ctx context.Context
-}
-
-func (s *ContextAwareService) DoSomething() {
-    // Use the context for cancellation, timeouts, etc.
-    select {
-    case <-s.ctx.Done():
-        fmt.Println("Context cancelled")
-    default:
-        fmt.Println("Context is still valid")
-    }
-}
+container, err := di.NewGenericAppContainer(ctx, logger, cfg, connectionString, initRepo, initDomainService, initAppService)
 ```
 
-## Advanced Usage
+## Examples
 
-### Circular Dependency Detection
+For complete, runnable examples, see the following files in the examples directory:
 
-The DI container automatically detects circular dependencies:
-
-```go
-package main
-
-import (
-    "fmt"
-    "github.com/abitofhelp/servicelib/di"
-)
-
-func main() {
-    container := di.NewContainer()
-
-    // Register service A which depends on service B
-    container.Register("serviceA", func(c di.Container) (interface{}, error) {
-        b, err := c.Get("serviceB")
-        if err != nil {
-            return nil, err
-        }
-        return &ServiceA{b: b.(*ServiceB)}, nil
-    })
-
-    // Register service B which depends on service A
-    container.Register("serviceB", func(c di.Container) (interface{}, error) {
-        a, err := c.Get("serviceA")
-        if err != nil {
-            return nil, err
-        }
-        return &ServiceB{a: a.(*ServiceA)}, nil
-    })
-
-    // This will result in a circular dependency error
-    _, err := container.Get("serviceA")
-    fmt.Printf("Error: %v\n", err)
-    // Output: Error: circular dependency detected: serviceA -> serviceB -> serviceA
-}
-
-type ServiceA struct {
-    b *ServiceB
-}
-
-type ServiceB struct {
-    a *ServiceA
-}
-```
-
-### Lazy Initialization
-
-```go
-package main
-
-import (
-    "fmt"
-    "github.com/abitofhelp/servicelib/di"
-)
-
-func main() {
-    container := di.NewContainer()
-
-    // Register a service that will be initialized lazily
-    container.RegisterLazy("expensiveService", func(c di.Container) (interface{}, error) {
-        fmt.Println("Initializing expensive service...")
-        // Simulate expensive initialization
-        return &ExpensiveService{}, nil
-    })
-
-    fmt.Println("Container created, but expensive service not yet initialized")
-
-    // Service is only initialized when requested
-    service, _ := container.Get("expensiveService")
-    fmt.Println("Service retrieved:", service != nil)
-}
-
-type ExpensiveService struct{}
-```
+- [Basic Usage Example](../examples/di/basic_usage_example.go) - Shows basic usage of the Container type
+- [Service Container Example](../examples/di/service_container_example.go) - Shows how to use the ServiceContainer type
+- [Generic Container Example](../examples/di/generic_container_example.go) - Shows how to use the GenericAppContainer type
 
 ## Best Practices
 
-1. **Use Interfaces**: Register interfaces rather than concrete types to make your code more flexible and testable.
+1. **Use Interfaces**: Define clear interfaces for your repositories, domain services, and application services.
 
-2. **Singleton vs. Transient**: Use singletons for stateless services and transient instances for stateful ones.
+2. **Type Safety**: Use generics to ensure type safety in your dependency injection.
 
-3. **Scoped Containers**: Use scoped containers for request-specific dependencies.
+3. **Context Awareness**: Pass context through your application to enable proper cancellation and timeout handling.
 
-4. **Avoid Service Locator Pattern**: Inject dependencies directly rather than passing the container around.
+4. **Configuration**: Use structured configuration objects rather than loose key-value pairs.
 
-5. **Constructor Injection**: Prefer constructor injection over property or method injection.
+5. **Domain-Driven Design**: Organize your code according to domain-driven design principles with clear separation between repositories, domain services, and application services.
 
-6. **Circular Dependencies**: Avoid circular dependencies by redesigning your components.
+6. **Error Handling**: Always check for errors when creating containers and initializing dependencies.
 
-7. **Testing**: Use the DI container to easily mock dependencies in tests.
+7. **Testing**: Use dependency injection to make your code more testable by allowing mock implementations.
+
+## Troubleshooting
+
+### Common Issues
+
+#### Container Creation Failures
+
+**Issue**: Errors when creating a container.
+
+**Solution**: Ensure that you're providing valid context, logger, and configuration objects. Check that your configuration implements the required interfaces.
+
+#### Dependency Initialization Failures
+
+**Issue**: Errors when initializing dependencies.
+
+**Solution**: Check that your initializer functions are correctly implemented and handle all possible error cases. Ensure that dependencies are available before trying to use them.
+
+#### Type Mismatches
+
+**Issue**: Type assertion errors when using container methods.
+
+**Solution**: Use the correct generic type parameters when creating containers. Ensure that your types implement the required interfaces.
+
+## Related Components
+
+- [Config](../config/README.md) - The config component is used to configure the di package.
+- [Logging](../logging/README.md) - The logging component is used for logging in the di package.
+- [Context](../context/README.md) - The context component is used for context management in the di package.
+
+## Contributing
+
+Contributions to this component are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.

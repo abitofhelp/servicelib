@@ -1,6 +1,9 @@
 # ServiceLib
 
 [![codecov](https://codecov.io/gh/abitofhelp/servicelib/graph/badge.svg)](https://codecov.io/gh/abitofhelp/servicelib)
+[![Go Report Card](https://goreportcard.com/badge/github.com/abitofhelp/servicelib)](https://goreportcard.com/report/github.com/abitofhelp/servicelib)
+[![GoDoc](https://godoc.org/github.com/abitofhelp/servicelib?status.svg)](https://godoc.org/github.com/abitofhelp/servicelib)
+
 ## Coverage (click for details)
 [![codecov](https://codecov.io/gh/abitofhelp/servicelib/graphs/sunburst.svg)](https://codecov.io/gh/abitofhelp/servicelib)
 
@@ -18,37 +21,86 @@ The library follows modern Go practices and design patterns, with a focus on:
 
 ## Documentation
 
-For comprehensive documentation, please see the [Developer Guide](docs/ServiceLib_Developer_Guide.md) which includes:
+For comprehensive documentation, please see the following resources:
 
-- Detailed component descriptions
-- UML diagrams of the architecture and key components
-- Usage examples
-- Best practices
-- Troubleshooting guidance
+- **[Developer Guide](docs/ServiceLib_Developer_Guide.md)** - Detailed component descriptions, architecture diagrams, usage examples, best practices, and troubleshooting guidance
+- **[Integration Tests](docs/Integration_Tests.md)** - Instructions for running integration tests, test environment setup, and troubleshooting test failures
+- **[UML Diagrams](docs/diagrams/README.md)** - Architectural and component diagrams showing package dependencies and component relationships
+- **[API Reference](https://pkg.go.dev/github.com/abitofhelp/servicelib)** - Generated API documentation from Go doc comments
 
 ## Features
 
-- **[Authentication](auth/README.md)** - JWT, OAuth2, and OIDC implementations for secure service-to-service and user authentication
+ServiceLib provides a comprehensive set of components organized by functionality:
+
+### Core Infrastructure
+
 - **[Configuration](config/README.md)** - Flexible configuration management with adapters for various sources (files, environment variables, etc.)
 - **[Context](context/README.md)** - Context utilities for request handling, cancellation, and value propagation
-- **[Database](db/README.md)** - Database connection and transaction management with support for PostgreSQL, SQLite, and MongoDB
 - **[Dependency Injection](di/README.md)** - Container-based DI system for managing service dependencies
 - **[Error Handling](errors/README.md)** - Structured error types and handling with rich context information
-- **[GraphQL](graphql/README.md)** - Utilities for building GraphQL services with gqlgen integration
-- **[Health Checks](health/README.md)** - Health check endpoints and handlers for Kubernetes readiness and liveness probes
 - **[Logging](logging/README.md)** - Structured logging with Zap for high-performance logging
-- **[Middleware](middleware/README.md)** - HTTP middleware components for common cross-cutting concerns
+
+### Security
+
+- **[Authentication](auth/README.md)** - JWT, OAuth2, and OIDC implementations for secure service-to-service and user authentication
+- **[Validation](validation/README.md)** - Request and data validation using go-playground/validator
+
+### Data Access
+
+- **[Database](db/README.md)** - Database connection and transaction management with support for PostgreSQL, SQLite, and MongoDB
 - **[Repository Pattern](repository/README.md)** - Generic repository implementations for data access abstraction
+- **[Transaction](transaction/README.md)** - Distributed transaction management with Saga pattern support
+
+### API & Communication
+
+- **[GraphQL](graphql/README.md)** - Utilities for building GraphQL services with gqlgen integration
+- **[Middleware](middleware/README.md)** - HTTP middleware components for common cross-cutting concerns
+
+### Operations & Observability
+
+- **[Health Checks](health/README.md)** - Health check endpoints and handlers for Kubernetes readiness and liveness probes
 - **[Shutdown](shutdown/README.md)** - Graceful shutdown utilities for clean service termination
 - **[Signal Handling](signal/README.md)** - OS signal handling for responding to system events
 - **[Telemetry](telemetry/README.md)** - Metrics, tracing, and monitoring with Prometheus and OpenTelemetry
-- **[Validation](validation/README.md)** - Request and data validation using go-playground/validator
+
+### Domain Modeling
+
+- **[Value Objects](valueobject/README.md)** - Immutable objects that represent domain concepts
+
+## Compatibility and Versioning
+
+ServiceLib follows [Semantic Versioning](https://semver.org/). The current version is available in the [go.mod](go.mod) file.
+
+- **Go Version**: Requires Go 1.18 or later (for generics support)
+- **Dependencies**: All dependencies are managed through Go modules
+- **API Stability**: APIs marked as stable will not have breaking changes within the same major version
+- **Backward Compatibility**: We strive to maintain backward compatibility within the same major version
 
 ## Installation
 
 ```bash
 go get github.com/abitofhelp/servicelib
 ```
+
+## Getting Started
+
+To get started with ServiceLib, you can create a simple HTTP server with logging and middleware:
+
+1. Create a new Go module:
+   ```bash
+   mkdir myservice
+   cd myservice
+   go mod init myservice
+   ```
+
+2. Install ServiceLib:
+   ```bash
+   go get github.com/abitofhelp/servicelib
+   ```
+
+3. Create a main.go file with a basic HTTP server using ServiceLib components.
+
+For a complete example, see the [Quickstart Example](examples/quickstart_example.go).
 
 ## Examples
 

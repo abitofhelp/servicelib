@@ -1,5 +1,7 @@
 # Context Package
 
+## Overview
+
 The `context` package extends Go's standard context package with additional utilities for request handling, cancellation, and value propagation. It provides a set of helper functions and types to make working with contexts easier and more type-safe.
 
 ## Features
@@ -15,177 +17,52 @@ The `context` package extends Go's standard context package with additional util
 go get github.com/abitofhelp/servicelib/context
 ```
 
-## Usage
+## Quick Start
 
-### Value Management
+See the [Basic Usage Example](../examples/context/basic_usage_example.go) for a complete, runnable example of how to use the context package.
 
-```go
-package main
+## Configuration
 
-import (
-    "fmt"
-    "context"
-    "github.com/abitofhelp/servicelib/context"
-)
+The context package does not require any specific configuration. It can be used directly without any setup.
 
-// Define a type-safe key
-type userIDKey struct{}
+## API Documentation
 
-func main() {
-    // Create a context with a value
-    ctx := context.WithValue(context.Background(), userIDKey{}, "user-123")
-    
-    // Get a value from the context
-    userID, ok := context.GetValue[string](ctx, userIDKey{})
-    if ok {
-        fmt.Println("User ID:", userID)
-    }
-    
-    // Using helper functions
-    ctx = context.WithUserID(ctx, "user-456")
-    userID = context.GetUserID(ctx)
-    fmt.Println("User ID:", userID)
-}
-```
+### Core Types
 
-### Timeout Management
+#### Context Keys
 
-```go
-package main
+The package provides strongly typed keys for context values to ensure type safety.
 
-import (
-    "fmt"
-    "time"
-    "context"
-    "github.com/abitofhelp/servicelib/context"
-)
+See the [Basic Usage Example](../examples/context/basic_usage_example.go) for a complete, runnable example of how to use context keys.
 
-func main() {
-    // Create a context with a timeout
-    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-    defer cancel()
-    
-    // Check if the context has a deadline
-    if deadline, ok := context.GetDeadline(ctx); ok {
-        fmt.Printf("Context will expire at: %v\n", deadline)
-        fmt.Printf("Time remaining: %v\n", context.GetRemainingTime(ctx))
-    }
-    
-    // Execute a function with a timeout
-    result, err := context.ExecuteWithTimeout(ctx, func(ctx context.Context) (string, error) {
-        // Simulate work
-        time.Sleep(2 * time.Second)
-        return "Success", nil
-    })
-    
-    if err != nil {
-        fmt.Println("Error:", err)
-    } else {
-        fmt.Println("Result:", result)
-    }
-}
-```
+### Key Methods
 
-### Cancellation
+#### Value Management
 
-```go
-package main
+The package provides methods for setting and getting values from a context.
 
-import (
-    "fmt"
-    "time"
-    "context"
-    "github.com/abitofhelp/servicelib/context"
-)
+See the [Value Propagation Example](../examples/context/value_propagation_example.go) for a complete, runnable example of how to use value management methods.
 
-func main() {
-    // Create a cancellable context
-    ctx, cancel := context.WithCancel(context.Background())
-    
-    // Start a goroutine that will be cancelled
-    go func() {
-        select {
-        case <-ctx.Done():
-            fmt.Println("Goroutine cancelled")
-            return
-        case <-time.After(10 * time.Second):
-            fmt.Println("Goroutine completed")
-        }
-    }()
-    
-    // Cancel the context after 2 seconds
-    time.Sleep(2 * time.Second)
-    cancel()
-    
-    // Wait to see the output
-    time.Sleep(1 * time.Second)
-}
-```
+#### Timeout Management
 
-### Propagation
+The package provides methods for working with context deadlines and timeouts.
 
-```go
-package main
+See the [Timeout Example](../examples/context/timeout_example.go) for a complete, runnable example of how to use timeout management methods.
 
-import (
-    "fmt"
-    "context"
-    "net/http"
-    "github.com/abitofhelp/servicelib/context"
-)
+#### Error Handling
 
-func main() {
-    // Create an HTTP handler that propagates context values
-    http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
-        // Extract values from the request context
-        ctx := r.Context()
-        
-        // Add a request ID to the context
-        ctx = context.WithRequestID(ctx, "req-123")
-        
-        // Call a service function with the context
-        result := serviceFunction(ctx)
-        
-        fmt.Fprintf(w, "Result: %s", result)
-    })
-    
-    http.ListenAndServe(":8080", nil)
-}
+The package provides methods for handling errors in context operations.
 
-func serviceFunction(ctx context.Context) string {
-    // Get values from the context
-    requestID := context.GetRequestID(ctx)
-    
-    // Use the values
-    return fmt.Sprintf("Processing request %s", requestID)
-}
-```
+See the [Error Handling Example](../examples/context/error_handling_example.go) for a complete, runnable example of how to handle errors.
 
-## Common Context Values
+## Examples
 
-The package provides helpers for common context values:
+For complete, runnable examples, see the following files in the examples directory:
 
-```go
-// Request ID
-ctx = context.WithRequestID(ctx, "req-123")
-requestID := context.GetRequestID(ctx)
-
-// User ID
-ctx = context.WithUserID(ctx, "user-456")
-userID := context.GetUserID(ctx)
-
-// Tenant ID
-ctx = context.WithTenantID(ctx, "tenant-789")
-tenantID := context.GetTenantID(ctx)
-
-// Correlation ID
-ctx = context.WithCorrelationID(ctx, "corr-abc")
-correlationID := context.GetCorrelationID(ctx)
-
-// Transaction ID
-ctx = context.WithTransactionID(ctx, "tx-def")
-transactionID := context.GetTransactionID(ctx)
-```
+- [Basic Usage Example](../examples/context/basic_usage_example.go) - Shows basic usage of the context package
+- [Value Propagation Example](../examples/context/value_propagation_example.go) - Shows how to propagate values through a context
+- [Timeout Example](../examples/context/timeout_example.go) - Shows how to use timeouts with context
+- [Error Handling Example](../examples/context/error_handling_example.go) - Shows how to handle errors in context operations
 
 ## Best Practices
 
@@ -199,6 +76,39 @@ transactionID := context.GetTransactionID(ctx)
 
 5. **Value Scope**: Context values should be request-scoped and not used for passing optional parameters to functions.
 
+## Troubleshooting
+
+### Common Issues
+
+#### Context Cancellation Not Propagating
+
+**Issue**: Context cancellation is not being propagated to child goroutines.
+
+**Solution**: Ensure that you're passing the context to all functions and goroutines that should respect cancellation. Check that you're properly selecting on `ctx.Done()` in long-running operations.
+
+#### Context Values Not Found
+
+**Issue**: Context values are not being found when expected.
+
+**Solution**: Ensure that you're using the correct key type and that the value was actually set in the context. Remember that context values are immutable, so you need to capture the return value of `context.WithValue()`.
+
+#### Deadlines Not Being Respected
+
+**Issue**: Operations are not respecting context deadlines.
+
+**Solution**: Ensure that you're checking `ctx.Err()` regularly in long-running operations. Use `select` statements with `ctx.Done()` to abort operations when the context is cancelled or times out.
+
+## Related Components
+
+- [Logging](../logging/README.md) - The logging component uses context for request-scoped logging.
+- [Telemetry](../telemetry/README.md) - The telemetry component uses context for propagating trace information.
+- [Middleware](../middleware/README.md) - The middleware component uses context for request processing.
+- [Auth](../auth/README.md) - The auth component uses context for storing authentication information.
+
+## Contributing
+
+Contributions to this component are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
+
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.

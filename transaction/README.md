@@ -1,5 +1,7 @@
 # Transaction Package
 
+## Overview
+
 The `transaction` package provides utilities for managing distributed transactions in Go applications. It implements the Saga pattern, which is a way to maintain data consistency across multiple services, each with its own database, where traditional ACID transactions are not possible.
 
 ## Features
@@ -17,313 +19,111 @@ The `transaction` package provides utilities for managing distributed transactio
 go get github.com/abitofhelp/servicelib/transaction
 ```
 
-## Usage
+## Quick Start
 
-### Basic Saga Transaction
+See the [Basic Saga Example](../examples/transaction/basic_saga_example.go) for a complete, runnable example of how to use the transaction package.
 
-```go
-package main
+## Configuration
 
-import (
-    "context"
-    "fmt"
-    
-    "github.com/abitofhelp/servicelib/transaction/saga"
-    "go.uber.org/zap"
-)
+See the [Custom Transaction Example](../examples/transaction/custom_transaction_example.go) for a complete, runnable example of how to configure the transaction package.
 
-func main() {
-    // Create a logger
-    logger, _ := zap.NewProduction()
-    
-    // Create a context
-    ctx := context.Background()
-    
-    // Execute operations within a transaction
-    err := saga.WithTransaction(ctx, logger, func(tx *saga.Transaction) error {
-        // Add operations with their corresponding rollback operations
-        tx.AddOperation(
-            // Operation to create a user
-            func(ctx context.Context) error {
-                fmt.Println("Creating user...")
-                // In a real application, this would call a user service
-                return nil
-            },
-            // Rollback operation to delete the user if a later operation fails
-            func(ctx context.Context) error {
-                fmt.Println("Rolling back user creation...")
-                // In a real application, this would call the user service to delete the user
-                return nil
-            },
-        )
-        
-        tx.AddOperation(
-            // Operation to create an order
-            func(ctx context.Context) error {
-                fmt.Println("Creating order...")
-                // In a real application, this would call an order service
-                return nil
-            },
-            // Rollback operation to delete the order if a later operation fails
-            func(ctx context.Context) error {
-                fmt.Println("Rolling back order creation...")
-                // In a real application, this would call the order service to delete the order
-                return nil
-            },
-        )
-        
-        tx.AddOperation(
-            // Operation to process payment
-            func(ctx context.Context) error {
-                fmt.Println("Processing payment...")
-                // Simulate a failure in payment processing
-                return fmt.Errorf("payment processing failed")
-            },
-            // Rollback operation to refund the payment
-            func(ctx context.Context) error {
-                fmt.Println("Rolling back payment processing...")
-                // In a real application, this would call the payment service to issue a refund
-                return nil
-            },
-        )
-        
-        return nil
-    })
-    
-    if err != nil {
-        fmt.Printf("Transaction failed: %v\n", err)
-    } else {
-        fmt.Println("Transaction completed successfully")
-    }
-    
-    // Output:
-    // Creating user...
-    // Creating order...
-    // Processing payment...
-    // Rolling back order creation...
-    // Rolling back user creation...
-    // Transaction failed: transaction execution failed: transaction operation failed: payment processing failed
-}
-```
+## API Documentation
 
-### Custom Transaction Execution
+### Core Types
 
-```go
-package main
+#### Transaction
 
-import (
-    "context"
-    "fmt"
-    
-    "github.com/abitofhelp/servicelib/transaction/saga"
-    "go.uber.org/zap"
-)
+The `Transaction` struct is the main entry point for the transaction package. It provides methods for adding operations and executing transactions.
 
-func main() {
-    // Create a logger
-    logger, _ := zap.NewProduction()
-    
-    // Create a context
-    ctx := context.Background()
-    
-    // Create a transaction
-    tx := saga.NewTransaction(logger)
-    
-    // Add operations with their corresponding rollback operations
-    tx.AddOperation(
-        // Operation to reserve inventory
-        func(ctx context.Context) error {
-            fmt.Println("Reserving inventory...")
-            return nil
-        },
-        // Rollback operation to release inventory
-        func(ctx context.Context) error {
-            fmt.Println("Releasing inventory...")
-            return nil
-        },
-    )
-    
-    tx.AddOperation(
-        // Operation to create shipment
-        func(ctx context.Context) error {
-            fmt.Println("Creating shipment...")
-            return nil
-        },
-        // Rollback operation to cancel shipment
-        func(ctx context.Context) error {
-            fmt.Println("Cancelling shipment...")
-            return nil
-        },
-    )
-    
-    tx.AddOperation(
-        // Operation to send notification
-        func(ctx context.Context) error {
-            fmt.Println("Sending notification...")
-            return nil
-        },
-        // No-op rollback since notifications can't be "unsent"
-        saga.NoopRollback(),
-    )
-    
-    // Execute the transaction
-    if err := tx.Execute(ctx); err != nil {
-        fmt.Printf("Transaction failed: %v\n", err)
-    } else {
-        fmt.Println("Transaction completed successfully")
-    }
-    
-    // Output:
-    // Reserving inventory...
-    // Creating shipment...
-    // Sending notification...
-    // Transaction completed successfully
-}
-```
+See the [Basic Usage Example](../examples/transaction/basic_usage_example.go) for a complete, runnable example of how to use the Transaction struct.
 
-### Error Handling with Checked Rollbacks
+#### Operation
 
-```go
-package main
+The `Operation` type represents a function that performs a specific operation within a transaction.
 
-import (
-    "context"
-    "fmt"
-    
-    "github.com/abitofhelp/servicelib/transaction/saga"
-    "go.uber.org/zap"
-)
+#### Rollback
 
-func main() {
-    // Create a logger
-    logger, _ := zap.NewProduction()
-    
-    // Create a context
-    ctx := context.Background()
-    
-    // Create a transaction
-    tx := saga.NewTransaction(logger)
-    
-    // Add operations with checked rollbacks
-    tx.AddOperation(
-        // Operation to update account balance
-        func(ctx context.Context) error {
-            fmt.Println("Updating account balance...")
-            return nil
-        },
-        // Checked rollback with operation name and error message
-        saga.CheckedRollback(
-            func(ctx context.Context) error {
-                fmt.Println("Restoring account balance...")
-                return nil
-            },
-            "RestoreBalance",
-            "Failed to restore account balance",
-        ),
-    )
-    
-    tx.AddOperation(
-        // Operation to record transaction history
-        func(ctx context.Context) error {
-            fmt.Println("Recording transaction history...")
-            return nil
-        },
-        // Checked rollback with additional details
-        saga.CheckedRollbackWithDetails(
-            func(ctx context.Context) error {
-                fmt.Println("Marking transaction as reversed...")
-                return nil
-            },
-            "ReverseTransaction",
-            "Failed to mark transaction as reversed",
-            map[string]interface{}{
-                "transaction_type": "account_update",
-                "importance": "high",
-            },
-        ),
-    )
-    
-    // Execute the transaction
-    if err := tx.Execute(ctx); err != nil {
-        fmt.Printf("Transaction failed: %v\n", err)
-    } else {
-        fmt.Println("Transaction completed successfully")
-    }
-    
-    // Output:
-    // Updating account balance...
-    // Recording transaction history...
-    // Transaction completed successfully
-}
-```
+The `Rollback` type represents a function that undoes the effects of an operation if the transaction fails.
+
+### Key Methods
+
+#### WithTransaction
+
+The `WithTransaction` function provides a convenient way to execute operations within a transaction.
+
+See the [Basic Saga Example](../examples/transaction/basic_saga_example.go) for a complete, runnable example of how to use the WithTransaction function.
+
+#### AddOperation
+
+The `AddOperation` method adds an operation and its corresponding rollback operation to a transaction.
+
+#### Execute
+
+The `Execute` method executes all operations in a transaction and rolls back completed operations if any operation fails.
+
+#### CheckedRollback
+
+The `CheckedRollback` function creates a rollback operation with error checking and logging.
+
+See the [Error Handling Example](../examples/transaction/error_handling_example.go) for a complete, runnable example of how to use the CheckedRollback function.
+
+## Examples
+
+For complete, runnable examples, see the following files in the examples directory:
+
+- [Basic Saga Example](../examples/transaction/basic_saga_example.go) - Shows how to use the WithTransaction function
+- [Basic Usage Example](../examples/transaction/basic_usage_example.go) - Shows how to create and use a Transaction
+- [Context Timeout Example](../examples/transaction/context_timeout_example.go) - Shows how to use context timeouts with transactions
+- [Custom Transaction Example](../examples/transaction/custom_transaction_example.go) - Shows how to create a custom transaction
+- [Error Handling Example](../examples/transaction/error_handling_example.go) - Shows how to handle errors in transactions
+- [Idempotent Operations Example](../examples/transaction/idempotent_operations_example.go) - Shows how to create idempotent operations
 
 ## Best Practices
 
 1. **Define Clear Compensation Actions**: For each operation, define a clear rollback operation that undoes its effects.
 
-   ```go
-   tx.AddOperation(
-       // Operation
-       func(ctx context.Context) error {
-           return createResource(ctx)
-       },
-       // Compensation action
-       func(ctx context.Context) error {
-           return deleteResource(ctx)
-       },
-   )
-   ```
-
 2. **Handle Rollback Failures**: Be prepared for rollback operations to fail and handle those failures appropriately.
-
-   ```go
-   // Use CheckedRollback to add error context
-   saga.CheckedRollback(
-       func(ctx context.Context) error {
-           return deleteResource(ctx)
-       },
-       "DeleteResource",
-       "Failed to delete resource during rollback",
-   )
-   ```
 
 3. **Use Context Properly**: Pass context through all operations to ensure proper cancellation and timeout handling.
 
-   ```go
-   // Create a context with timeout
-   ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-   defer cancel()
-   
-   // Use the context in the transaction
-   err := saga.WithTransaction(ctx, logger, func(tx *saga.Transaction) error {
-       // ...
-   })
-   ```
-
 4. **Log Transaction Events**: Enable detailed logging to track transaction progress and diagnose issues.
-
-   ```go
-   // Create a logger with appropriate level
-   logger, _ := zap.NewProduction()
-   
-   // Pass the logger to the transaction
-   tx := saga.NewTransaction(logger)
-   ```
 
 5. **Idempotent Operations**: Design operations and rollbacks to be idempotent when possible.
 
-   ```go
-   // Idempotent operation example
-   func createResourceIdempotent(ctx context.Context, id string) error {
-       // Check if resource already exists
-       if resourceExists(ctx, id) {
-           return nil
-       }
-       // Create the resource
-       return createResource(ctx, id)
-   }
-   ```
+See the [Idempotent Operations Example](../examples/transaction/idempotent_operations_example.go) for a complete, runnable example of how to create idempotent operations.
+
+## Troubleshooting
+
+### Common Issues
+
+#### Rollback Failures
+
+**Issue**: Rollback operations fail, leaving the system in an inconsistent state.
+
+**Solution**: Use `CheckedRollback` to add error context and logging to rollback operations. Consider implementing a recovery mechanism for failed rollbacks.
+
+#### Context Cancellation
+
+**Issue**: Transactions are not respecting context cancellation or timeouts.
+
+**Solution**: Ensure that all operations check the context for cancellation. See the [Context Timeout Example](../examples/transaction/context_timeout_example.go) for a complete, runnable example.
+
+#### Transaction Coordination
+
+**Issue**: Transactions are not being coordinated properly across multiple services.
+
+**Solution**: Ensure that each service has a well-defined API for both operations and their compensating actions. Consider using a transaction coordinator service for complex scenarios.
+
+## Related Components
+
+- [Logging](../logging/README.md) - The logging component is used by the transaction package for logging transaction events.
+- [Context](../context/README.md) - The context component is used by the transaction package for context propagation.
+- [Errors](../errors/README.md) - The errors component is used by the transaction package for error handling.
+
+## Contributing
+
+Contributions to this component are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.

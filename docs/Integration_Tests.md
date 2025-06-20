@@ -13,12 +13,12 @@ Integration tests are marked with the `integration` build tag to prevent them fr
 Integration tests are organized by package:
 
 - `auth/integration/` - Tests for authentication and authorization components
-  - `jwt_integration_test.go` - Tests JWT token validation flow
-  - `oidc_integration_test.go` - Tests OIDC integration with a mock provider
+  - [`jwt_integration_test.go`](../auth/integration/jwt_integration_test.go) - Tests JWT token validation flow
+  - [`oidc_integration_test.go`](../auth/integration/oidc_integration_test.go) - Tests OIDC integration with a mock provider
 
 - `telemetry/integration/` - Tests for telemetry components
-  - `metrics_integration_test.go` - Tests metrics recording and Prometheus endpoint
-  - `http_integration_test.go` - Tests HTTP instrumentation
+  - [`metrics_integration_test.go`](../telemetry/integration/metrics_integration_test.go) - Tests metrics recording and Prometheus endpoint
+  - [`http_integration_test.go`](../telemetry/integration/http_integration_test.go) - Tests HTTP instrumentation
 
 ## Running Integration Tests
 
@@ -87,6 +87,40 @@ When writing new integration tests:
 7. Ensure tests are isolated and can run independently
 8. Add comprehensive assertions to verify behavior
 
+## Common Test Scenarios
+
+Here are some common test scenarios and how to run them:
+
+### Testing JWT Authentication
+
+The JWT authentication tests verify that tokens can be generated, validated, and used for authorization:
+
+```bash
+go test -tags=integration -run TestJWTAuthenticationFlow ./auth/integration
+```
+
+See [jwt_integration_test.go](../auth/integration/jwt_integration_test.go) for implementation details.
+
+### Testing Metrics Collection
+
+The metrics collection tests verify that metrics are properly recorded and exposed via Prometheus:
+
+```bash
+go test -tags=integration -run TestPrometheusMetricsEndpoint ./telemetry/integration
+```
+
+See [metrics_integration_test.go](../telemetry/integration/metrics_integration_test.go) for implementation details.
+
+### Testing HTTP Instrumentation
+
+The HTTP instrumentation tests verify that HTTP requests are properly instrumented with tracing and metrics:
+
+```bash
+go test -tags=integration -run TestHTTPInstrumentation ./telemetry/integration
+```
+
+See [http_integration_test.go](../telemetry/integration/http_integration_test.go) for implementation details.
+
 ## Troubleshooting
 
 ### Common Issues
@@ -100,3 +134,51 @@ When writing new integration tests:
 - **External Dependencies**: If tests fail due to missing external dependencies, check that you've set up the required services and updated the test configuration.
 
 - **Port Conflicts**: Integration tests may start servers on specific ports. If you encounter port conflicts, modify the test to use a different port or use `httptest.NewServer()` which assigns a random port.
+
+- **Authentication Failures**: OIDC integration tests may fail due to authentication issues. Check that your OIDC provider is properly configured and that the client credentials are correct.
+
+- **Network Connectivity**: Tests that communicate with external services may fail due to network issues. Check your network connectivity and firewall settings.
+
+- **Environment Variables**: Some tests may require specific environment variables to be set. Check the test file for any required environment variables.
+
+### Common Test Failures
+
+- **JWT Token Validation Failures**: These often occur due to incorrect secret keys or token expiration. Check that the JWT configuration in the test matches the configuration in the code being tested.
+
+- **OIDC Provider Unavailable**: If the OIDC integration tests fail with connection errors, check that the OIDC provider is running and accessible.
+
+- **Metrics Recording Failures**: These may occur if the OpenTelemetry collector is not properly configured or not running. Check the collector configuration and status.
+
+- **HTTP Instrumentation Failures**: These may occur if the HTTP server or client is not properly configured. Check the HTTP configuration in the test.
+
+### Debugging Test Failures
+
+When a test fails, follow these steps to debug the issue:
+
+1. **Run the test with verbose output**: Use the `-v` flag to see detailed output from the test.
+
+   ```bash
+   go test -tags=integration -v -run TestSpecificTest ./path/to/package
+   ```
+
+2. **Check the test logs**: Look for error messages in the test output that might indicate the cause of the failure.
+
+3. **Inspect the test code**: Look at the test file to understand what the test is doing and what might be causing it to fail.
+
+4. **Use the Go debugger**: If necessary, use the Go debugger to step through the test code and identify the issue.
+
+   ```bash
+   dlv test --build-flags="-tags=integration" ./path/to/package -- -test.run TestSpecificTest
+   ```
+
+5. **Check external dependencies**: If the test interacts with external services, check that those services are running and accessible.
+
+### Common Test Failures
+
+- **JWT Token Validation Failures**: These often occur due to incorrect secret keys or token expiration. Check that the JWT configuration in the test matches the configuration in the code being tested.
+
+- **OIDC Provider Unavailable**: If the OIDC integration tests fail with connection errors, check that the OIDC provider is running and accessible.
+
+- **Metrics Recording Failures**: These may occur if the OpenTelemetry collector is not properly configured or not running. Check the collector configuration and status.
+
+- **HTTP Instrumentation Failures**: These may occur if the HTTP server or client is not properly configured. Check the HTTP configuration in the test.

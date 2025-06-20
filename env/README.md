@@ -14,77 +14,13 @@ The `env` package provides utilities for working with environment variables in G
 go get github.com/abitofhelp/servicelib/env
 ```
 
-## Usage
+## Quick Start
 
-### Basic Usage
+See the [Basic Usage Example](../examples/env/basic_usage_example.go) for a complete, runnable example of how to use the env package.
 
-```go
-package main
+## Configuration
 
-import (
-    "fmt"
-    
-    "github.com/abitofhelp/servicelib/env"
-)
-
-func main() {
-    // Get an environment variable with a fallback value
-    port := env.GetEnv("PORT", "8080")
-    fmt.Printf("Server will run on port: %s\n", port)
-    
-    // Get a database URL with a fallback
-    dbURL := env.GetEnv("DATABASE_URL", "postgres://localhost:5432/mydb")
-    fmt.Printf("Database URL: %s\n", dbURL)
-    
-    // Get API keys (sensitive information)
-    apiKey := env.GetEnv("API_KEY", "")
-    if apiKey == "" {
-        fmt.Println("Warning: API_KEY environment variable is not set")
-    }
-}
-```
-
-### Integration with Configuration
-
-```go
-package main
-
-import (
-    "fmt"
-    
-    "github.com/abitofhelp/servicelib/env"
-)
-
-// AppConfig holds the application configuration
-type AppConfig struct {
-    ServerPort  string
-    DatabaseURL string
-    LogLevel    string
-    APIKey      string
-}
-
-// LoadConfig loads the application configuration from environment variables
-func LoadConfig() AppConfig {
-    return AppConfig{
-        ServerPort:  env.GetEnv("SERVER_PORT", "8080"),
-        DatabaseURL: env.GetEnv("DATABASE_URL", "postgres://localhost:5432/mydb"),
-        LogLevel:    env.GetEnv("LOG_LEVEL", "info"),
-        APIKey:      env.GetEnv("API_KEY", ""),
-    }
-}
-
-func main() {
-    config := LoadConfig()
-    
-    fmt.Printf("Server Port: %s\n", config.ServerPort)
-    fmt.Printf("Database URL: %s\n", config.DatabaseURL)
-    fmt.Printf("Log Level: %s\n", config.LogLevel)
-    
-    if config.APIKey == "" {
-        fmt.Println("Warning: API_KEY environment variable is not set")
-    }
-}
-```
+See the [Configuration Integration Example](../examples/env/config_integration_example.go) for a complete, runnable example of how to integrate environment variables with a configuration structure.
 
 ## Best Practices
 

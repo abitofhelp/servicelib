@@ -60,6 +60,55 @@ The auth module provides utilities for working with context. See the [Context Ut
 
 The auth module provides comprehensive error handling with context-aware errors. See the [Error Handling example](../examples/auth/error_handling_example.go) for a complete, runnable example of how to handle errors.
 
+## Best Practices
+
+1. **Secure Secret Keys**: Always store JWT secret keys securely, preferably in environment variables or a secure key management system.
+
+2. **Token Expiration**: Set appropriate expiration times for tokens based on your security requirements.
+
+3. **HTTPS**: Always use HTTPS in production to protect tokens in transit.
+
+4. **Validate All Tokens**: Always validate tokens before trusting their contents.
+
+5. **Role-Based Access Control**: Use role-based access control to limit access to sensitive operations.
+
+6. **Error Handling**: Implement proper error handling for authentication and authorization failures.
+
+7. **Logging**: Log authentication and authorization events for audit purposes, but be careful not to log sensitive information.
+
+## Troubleshooting
+
+### Common Issues
+
+#### Token Validation Failures
+
+**Issue**: JWT token validation fails with "invalid signature" error.
+
+**Solution**: Ensure that the same secret key is used for both token generation and validation. Check that the token hasn't been tampered with.
+
+#### OIDC Provider Connection Issues
+
+**Issue**: Unable to connect to the OIDC provider.
+
+**Solution**: Check network connectivity, firewall settings, and that the OIDC provider is running and accessible.
+
+#### Authorization Failures
+
+**Issue**: User has the correct token but is not authorized to perform an operation.
+
+**Solution**: Check that the user has the required roles or permissions for the operation. Verify that the role-based access control configuration is correct.
+
+## Related Components
+
+- [Middleware](../middleware/README.md) - The middleware component includes HTTP middleware for authentication and authorization.
+- [Context](../context/README.md) - The context component provides utilities for working with context, which is used extensively in the auth module.
+- [Logging](../logging/README.md) - The logging component provides structured logging, which is used by the auth module for logging authentication and authorization events.
+- [Telemetry](../telemetry/README.md) - The telemetry component provides tracing, which is used by the auth module for tracing authentication and authorization operations.
+
+## Contributing
+
+Contributions to this component are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
+
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.

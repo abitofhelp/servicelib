@@ -1,5 +1,7 @@
 # Configuration Package
 
+## Overview
+
 The `config` package provides a flexible configuration system that supports multiple sources and formats for Go applications. It allows you to manage application configuration in a hierarchical manner with support for various data sources.
 
 ## Features
@@ -23,185 +25,109 @@ The `config` package provides a flexible configuration system that supports mult
 go get github.com/abitofhelp/servicelib/config
 ```
 
-## Usage
+## Quick Start
 
-### Basic Usage
+See the [Basic Usage example](../examples/config/basic_usage_example.go) for a complete, runnable example of how to use the config package.
+
+## Configuration
+
+See the [Configuration example](../examples/config/app_config_example.go) for a complete, runnable example of how to configure the config package.
+
+## API Documentation
+
+### Core Types
+
+#### Config
+
+The `Config` interface provides methods for accessing configuration values.
+
+See the [Basic Usage example](../examples/config/basic_usage_example.go) for a complete, runnable example of how to use the Config interface.
+
+#### Options
+
+The `Options` struct provides configuration options for creating a new config instance.
+
+See the [Custom Adapter example](../examples/config/custom_adapter_example.go) for a complete, runnable example of how to use the Options struct.
+
+### Key Methods
+
+#### New
+
+The `New` function creates a new configuration instance from the specified files.
 
 ```go
-package main
-
-import (
-    "fmt"
-    "log"
-    "github.com/abitofhelp/servicelib/config"
-)
-
-func main() {
-    // Create a new configuration from files
-    cfg, err := config.New("config.yaml", "env.yaml")
-    if err != nil {
-        log.Fatalf("Failed to load configuration: %v", err)
-    }
-
-    // Get a string value
-    apiKey := cfg.GetString("api.key")
-    fmt.Println("API Key:", apiKey)
-
-    // Get an int value with default
-    port := cfg.GetInt("server.port", 8080)
-    fmt.Println("Server Port:", port)
-
-    // Get a nested value
-    dbURL := cfg.GetString("database.url")
-    fmt.Println("Database URL:", dbURL)
-
-    // Get a boolean value
-    debug := cfg.GetBool("logging.debug", false)
-    fmt.Println("Debug Mode:", debug)
-
-    // Get a duration value
-    timeout := cfg.GetDuration("server.timeout", "30s")
-    fmt.Println("Server Timeout:", timeout)
-}
+cfg, err := config.New("config.yaml", "env.yaml")
 ```
 
-### Binding to Structs
+See the [Basic Usage example](../examples/config/basic_usage_example.go) for a complete, runnable example.
+
+#### NewWithOptions
+
+The `NewWithOptions` function creates a new configuration instance with the specified options.
 
 ```go
-package main
-
-import (
-    "fmt"
-    "log"
-    "github.com/abitofhelp/servicelib/config"
-)
-
-// Example configuration struct
-type AppConfig struct {
-    Server struct {
-        Port    int    `yaml:"port"`
-        Host    string `yaml:"host"`
-        Timeout int    `yaml:"timeout"`
-    } `yaml:"server"`
-    Database struct {
-        URL      string `yaml:"url"`
-        Username string `yaml:"username"`
-        Password string `yaml:"password"`
-        Pool     int    `yaml:"pool"`
-    } `yaml:"database"`
-    API struct {
-        Key      string `yaml:"key"`
-        Endpoint string `yaml:"endpoint"`
-        Version  string `yaml:"version"`
-    } `yaml:"api"`
-    Logging struct {
-        Level  string `yaml:"level"`
-        Format string `yaml:"format"`
-        Path   string `yaml:"path"`
-    } `yaml:"logging"`
-}
-
-func main() {
-    // Create a new configuration
-    cfg, err := config.New("config.yaml")
-    if err != nil {
-        log.Fatalf("Failed to load configuration: %v", err)
-    }
-
-    // Bind configuration to a struct
-    var appConfig AppConfig
-    if err := cfg.Unmarshal(&appConfig); err != nil {
-        log.Fatalf("Failed to unmarshal configuration: %v", err)
-    }
-
-    fmt.Printf("Server Configuration: %+v\n", appConfig.Server)
-    fmt.Printf("Database Configuration: %+v\n", appConfig.Database)
-}
-```
-
-### Watching for Changes
-
-```go
-package main
-
-import (
-    "log"
-    "github.com/abitofhelp/servicelib/config"
-)
-
-func main() {
-    // Create a new configuration
-    cfg, err := config.New("config.yaml")
-    if err != nil {
-        log.Fatalf("Failed to load configuration: %v", err)
-    }
-
-    // Watch for configuration changes
-    cfg.Watch(func() {
-        // Reload configuration when changes are detected
-        var appConfig AppConfig
-        if err := cfg.Unmarshal(&appConfig); err != nil {
-            log.Printf("Failed to reload configuration: %v", err)
-            return
-        }
-        log.Println("Configuration reloaded successfully")
-        
-        // Apply the new configuration
-        applyConfiguration(appConfig)
-    })
-    
-    // Keep the application running
-    select {}
-}
-
-func applyConfiguration(config AppConfig) {
-    // Apply the configuration to your application
-    // For example, update database connections, change log levels, etc.
-}
-```
-
-### Environment Variables
-
-The config package can also load configuration from environment variables:
-
-```go
-// Create a configuration that includes environment variables
 cfg, err := config.NewWithOptions(config.Options{
     Files: []string{"config.yaml"},
     EnvPrefix: "APP_",
     EnvReplacer: "_",
 })
-
-// This will look for environment variables like:
-// APP_SERVER_PORT, APP_DATABASE_URL, etc.
 ```
 
-## Configuration File Example
+See the [Custom Adapter example](../examples/config/custom_adapter_example.go) for a complete, runnable example.
 
-Here's an example of a YAML configuration file:
+#### Get Methods
 
-```yaml
-server:
-  port: 8080
-  host: "localhost"
-  timeout: 30
+The `Get*` methods retrieve configuration values of different types.
 
-database:
-  url: "postgres://user:password@localhost:5432/mydb"
-  username: "user"
-  password: "password"
-  pool: 10
+```go
+// Get a string value
+apiKey := cfg.GetString("api.key")
 
-api:
-  key: "your-api-key"
-  endpoint: "https://api.example.com"
-  version: "v1"
+// Get an int value with default
+port := cfg.GetInt("server.port", 8080)
 
-logging:
-  level: "info"
-  format: "json"
-  path: "/var/log/app.log"
+// Get a boolean value
+debug := cfg.GetBool("logging.debug", false)
+
+// Get a duration value
+timeout := cfg.GetDuration("server.timeout", "30s")
 ```
+
+See the [Basic Usage example](../examples/config/basic_usage_example.go) for a complete, runnable example.
+
+#### Unmarshal
+
+The `Unmarshal` method binds configuration values to a struct.
+
+```go
+var appConfig AppConfig
+if err := cfg.Unmarshal(&appConfig); err != nil {
+    log.Fatalf("Failed to unmarshal configuration: %v", err)
+}
+```
+
+See the [App Config example](../examples/config/app_config_example.go) for a complete, runnable example.
+
+#### Watch
+
+The `Watch` method watches for configuration changes and calls the specified function when changes are detected.
+
+```go
+cfg.Watch(func() {
+    // Reload configuration when changes are detected
+})
+```
+
+See the [Basic Usage example](../examples/config/basic_usage_example.go) for a complete, runnable example.
+
+## Examples
+
+For complete, runnable examples, see the following files in the examples directory:
+
+- [Basic Usage](../examples/config/basic_usage_example.go) - Shows basic usage of the config package
+- [App Config](../examples/config/app_config_example.go) - Shows how to bind configuration to a struct
+- [Database Config](../examples/config/database_config_example.go) - Shows how to configure database connections
+- [Custom Adapter](../examples/config/custom_adapter_example.go) - Shows how to create a custom configuration adapter
 
 ## Best Practices
 
@@ -215,6 +141,38 @@ logging:
 
 5. **Documentation**: Document all configuration options, including their purpose, type, and default values.
 
+## Troubleshooting
+
+### Common Issues
+
+#### Missing Configuration Files
+
+**Issue**: Configuration files are not found at the specified path.
+
+**Solution**: Ensure that the configuration files exist at the specified path. Use absolute paths or paths relative to the working directory.
+
+#### Type Conversion Errors
+
+**Issue**: Type conversion fails when retrieving configuration values.
+
+**Solution**: Ensure that the configuration values are of the expected type. Use the appropriate Get* method for the value type.
+
+#### Environment Variables Not Applied
+
+**Issue**: Environment variables are not being applied to the configuration.
+
+**Solution**: Ensure that the environment variables are properly formatted with the correct prefix and separator. Check that the EnvPrefix and EnvReplacer options are set correctly.
+
+## Related Components
+
+- [Logging](../logging/README.md) - The logging component uses the config package for configuration.
+- [Database](../db/README.md) - The database component uses the config package for database configuration.
+- [Telemetry](../telemetry/README.md) - The telemetry component uses the config package for telemetry configuration.
+
+## Contributing
+
+Contributions to this component are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
+
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.

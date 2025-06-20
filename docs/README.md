@@ -8,12 +8,34 @@ ServiceLib is a comprehensive Go library designed to accelerate the development 
 
 ## Documentation Structure
 
-- [Developer Guide](ServiceLib_Developer_Guide.md) - Comprehensive guide for developers using ServiceLib
-- [API Reference](https://pkg.go.dev/github.com/abitofhelp/servicelib) - Generated API documentation
-- [Examples](../examples/) - Example applications using ServiceLib
-- [Integration Tests](Integration_Tests.md) - Information about running integration tests
-- [UML Diagrams](diagrams/README.md) - Architectural and component diagrams
-- [Contributing Guide](../CONTRIBUTING.md) - Guidelines for contributing to ServiceLib
+The ServiceLib documentation is organized into several key sections to help you find the information you need:
+
+### Core Documentation
+
+- **[Developer Guide](ServiceLib_Developer_Guide.md)** - Comprehensive guide for developers using ServiceLib, including detailed component descriptions, architecture overview, usage examples, best practices, and troubleshooting guidance.
+
+- **[API Reference](https://pkg.go.dev/github.com/abitofhelp/servicelib)** - Generated API documentation from Go doc comments, providing function signatures, type definitions, package documentation, and usage examples.
+
+- **[Examples](../examples/README.md)** - Example applications using ServiceLib, organized by component, including a quickstart example for new users, component-specific examples, advanced usage patterns, and integration examples.
+
+### Development & Testing
+
+- **[Integration Tests](Integration_Tests.md)** - Information about running integration tests, including test setup instructions, test environment requirements, running specific test suites, and troubleshooting test failures.
+
+- **[Contributing Guide](../CONTRIBUTING.md)** - Guidelines for contributing to ServiceLib, including development workflow, coding standards, pull request process, and issue reporting.
+
+### Architecture & Design
+
+- **[UML Diagrams](diagrams/README.md)** - Architectural and component diagrams, including package dependencies, component relationships, sequence diagrams, and class diagrams.
+  - [Package Dependencies Diagram](diagrams/svg/package_dependencies.svg) ([source](diagrams/source/package_dependencies.puml))
+  - [Layered Architecture Diagram](diagrams/svg/layered_architecture.svg) ([source](diagrams/source/layered_architecture.puml))
+  - [Authentication Component Diagram](diagrams/svg/auth_component.svg) ([source](diagrams/source/auth_component.puml))
+  - [Dependency Injection Component Diagram](diagrams/svg/di_component.svg) ([source](diagrams/source/di_component.puml))
+  - [Health Check Component Diagram](diagrams/svg/health_component.svg) ([source](diagrams/source/health_component.puml))
+
+### Component Documentation
+
+Each component in ServiceLib has its own README file with detailed documentation:
 
 ## Key Components
 
@@ -45,19 +67,11 @@ To get started with ServiceLib, follow these steps:
    go get github.com/abitofhelp/servicelib
    ```
 
-2. Import the packages you need:
-   ```go
-   import (
-       "github.com/abitofhelp/servicelib/auth"
-       "github.com/abitofhelp/servicelib/config"
-       "github.com/abitofhelp/servicelib/logging"
-       // Import other packages as needed
-   )
-   ```
+2. Check out the [Quickstart Example](../examples/quickstart_example.go) to see a basic application using ServiceLib.
 
-3. Check the [Developer Guide](ServiceLib_Developer_Guide.md) for detailed usage instructions and examples.
+3. Review the [Developer Guide](ServiceLib_Developer_Guide.md) for detailed usage instructions and examples.
 
-4. Explore the [Examples](../examples/) directory for complete example applications.
+4. Explore the [Examples](../examples/) directory for component-specific examples.
 
 5. For testing your implementation, refer to the [Integration Tests](Integration_Tests.md) documentation.
 
