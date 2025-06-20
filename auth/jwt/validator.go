@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/abitofhelp/servicelib/auth/errors"
+	"github.com/abitofhelp/servicelib/logging"
 	"github.com/golang-jwt/jwt/v5"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -116,7 +117,7 @@ type LocalValidator struct {
 	config Config
 
 	// logger is used for logging token operations and errors
-	logger *zap.Logger
+	logger *logging.ContextLogger
 
 	// tracer is used for tracing token operations
 	tracer trace.Tracer
@@ -130,7 +131,7 @@ func NewLocalValidator(config Config, logger *zap.Logger) *LocalValidator {
 
 	return &LocalValidator{
 		config: config,
-		logger: logger,
+		logger: logging.NewContextLogger(logger),
 		tracer: otel.Tracer("auth.jwt.local"),
 	}
 }
@@ -144,14 +145,14 @@ func (v *LocalValidator) ValidateToken(ctx context.Context, tokenString string) 
 
 	if tokenString == "" {
 		err := errors.WithOp(errors.ErrMissingToken, "jwt.LocalValidator.ValidateToken")
-		v.logger.Debug("Token string is empty")
+		v.logger.Debug(ctx, "Token string is empty")
 		return nil, err
 	}
 
 	// Use the existing validation logic from the JWT service
 	token, err := parseToken(tokenString, v.config.SecretKey, v.config.SigningMethod)
 	if err != nil {
-		v.logger.Debug("Failed to parse token", zap.Error(err))
+		v.logger.Debug(ctx, "Failed to parse token", zap.Error(err))
 		return nil, err
 	}
 
@@ -159,18 +160,18 @@ func (v *LocalValidator) ValidateToken(ctx context.Context, tokenString string) 
 	if !ok {
 		err := errors.WithOp(errors.ErrInvalidClaims, "jwt.LocalValidator.ValidateToken")
 		err = errors.WithMessage(err, "failed to extract claims from token")
-		v.logger.Debug("Failed to extract claims from token")
+		v.logger.Debug(ctx, "Failed to extract claims from token")
 		return nil, err
 	}
 
 	if claims.UserID == "" {
 		err := errors.WithOp(errors.ErrInvalidClaims, "jwt.LocalValidator.ValidateToken")
 		err = errors.WithMessage(err, "user ID is missing from token claims")
-		v.logger.Debug("User ID is missing from token claims")
+		v.logger.Debug(ctx, "User ID is missing from token claims")
 		return nil, err
 	}
 
-	v.logger.Debug("Token validated successfully", zap.String("user_id", claims.UserID))
+	v.logger.Debug(ctx, "Token validated successfully", zap.String("user_id", claims.UserID))
 	return claims, nil
 }
 
@@ -180,7 +181,7 @@ type RemoteValidator struct {
 	config RemoteConfig
 
 	// logger is used for logging token operations and errors
-	logger *zap.Logger
+	logger *logging.ContextLogger
 
 	// tracer is used for tracing token operations
 	tracer trace.Tracer
@@ -217,7 +218,7 @@ func NewRemoteValidator(config RemoteConfig, logger *zap.Logger) *RemoteValidato
 
 	return &RemoteValidator{
 		config:     config,
-		logger:     logger,
+		logger:     logging.NewContextLogger(logger),
 		tracer:     otel.Tracer("auth.jwt.remote"),
 		httpClient: NewRemoteClient(config),
 	}
@@ -232,7 +233,7 @@ func (v *RemoteValidator) ValidateToken(ctx context.Context, tokenString string)
 
 	if tokenString == "" {
 		err := errors.WithOp(errors.ErrMissingToken, "jwt.RemoteValidator.ValidateToken")
-		v.logger.Debug("Token string is empty")
+		v.logger.Debug(ctx, "Token string is empty")
 		return nil, err
 	}
 
@@ -243,11 +244,11 @@ func (v *RemoteValidator) ValidateToken(ctx context.Context, tokenString string)
 	// Validate the token remotely
 	claims, err := v.httpClient.ValidateToken(validationCtx, tokenString)
 	if err != nil {
-		v.logger.Debug("Remote validation failed", zap.Error(err))
+		v.logger.Debug(ctx, "Remote validation failed", zap.Error(err))
 		return nil, err
 	}
 
-	v.logger.Debug("Token validated successfully", zap.String("user_id", claims.UserID))
+	v.logger.Debug(ctx, "Token validated successfully", zap.String("user_id", claims.UserID))
 	return claims, nil
 }
 

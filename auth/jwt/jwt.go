@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/abitofhelp/servicelib/auth/errors"
+	"github.com/abitofhelp/servicelib/logging"
 	"github.com/golang-jwt/jwt/v5"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -155,6 +156,12 @@ func (s *Service) SetRemoteValidatorForTesting(validator TokenValidator) {
 	s.remoteValidator = validator
 }
 
+// getContextLogger returns a ContextLogger for the given context.
+// This is a helper method to ensure that wherever a context is passed, the code uses a ContextLogger.
+func (s *Service) getContextLogger(ctx context.Context) *logging.ContextLogger {
+	return logging.NewContextLogger(s.logger)
+}
+
 // Claims represents the JWT claims contained in a token.
 type Claims struct {
 	// UserID is the unique identifier of the user (stored in the 'sub' claim)
@@ -178,6 +185,9 @@ func (s *Service) GenerateToken(ctx context.Context, userID string, roles []stri
 	ctx, span := s.tracer.Start(ctx, "jwt.Service.GenerateToken")
 	defer span.End()
 
+	// Get a context logger for this operation
+	logger := s.getContextLogger(ctx)
+
 	span.SetAttributes(
 		attribute.String("user.id", userID),
 		attribute.StringSlice("user.roles", roles),
@@ -189,7 +199,7 @@ func (s *Service) GenerateToken(ctx context.Context, userID string, roles []stri
 		err := errors.WithContext(errors.ErrInvalidClaims, "user_id", userID)
 		err = errors.WithOp(err, "jwt.Service.GenerateToken")
 		err = errors.WithMessage(err, "user ID cannot be empty")
-		s.logger.Error("Failed to generate token: user ID is empty")
+		logger.Error(ctx, "Failed to generate token: user ID is empty")
 		return "", err
 	}
 
@@ -243,11 +253,11 @@ func (s *Service) GenerateToken(ctx context.Context, userID string, roles []stri
 	if err != nil {
 		err = errors.WithContext(errors.Wrap(err, "failed to sign token"), "user_id", userID)
 		err = errors.WithOp(err, "jwt.Service.GenerateToken")
-		s.logger.Error("Failed to generate token", zap.Error(err), zap.String("user_id", userID))
+		logger.Error(ctx, "Failed to generate token", zap.Error(err), zap.String("user_id", userID))
 		return "", err
 	}
 
-	s.logger.Debug("Token generated successfully", zap.String("user_id", userID), zap.String("token_id", tokenID))
+	logger.Debug(ctx, "Token generated successfully", zap.String("user_id", userID), zap.String("token_id", tokenID))
 	return tokenString, nil
 }
 
@@ -256,11 +266,14 @@ func (s *Service) ValidateToken(ctx context.Context, tokenString string) (*Claim
 	ctx, span := s.tracer.Start(ctx, "jwt.Service.ValidateToken")
 	defer span.End()
 
+	// Get a context logger for this operation
+	logger := s.getContextLogger(ctx)
+
 	span.SetAttributes(attribute.String("token.length", strconv.Itoa(len(tokenString))))
 
 	if tokenString == "" {
 		err := errors.WithOp(errors.ErrMissingToken, "jwt.Service.ValidateToken")
-		s.logger.Debug("Token string is empty")
+		logger.Debug(ctx, "Token string is empty")
 		return nil, err
 	}
 
@@ -273,27 +286,27 @@ func (s *Service) ValidateToken(ctx context.Context, tokenString string) (*Claim
 				err := errors.WithContext(errors.ErrInvalidToken, "token_id", claims.ID)
 				err = errors.WithOp(err, "jwt.Service.ValidateToken")
 				err = errors.WithMessage(err, "token has been revoked")
-				s.logger.Debug("Token has been revoked", zap.String("token_id", claims.ID))
+				logger.Debug(ctx, "Token has been revoked", zap.String("token_id", claims.ID))
 				return nil, err
 			}
 
-			s.logger.Debug("Token validated successfully by remote validator", zap.String("user_id", claims.UserID))
+			logger.Debug(ctx, "Token validated successfully by remote validator", zap.String("user_id", claims.UserID))
 			return claims, nil
 		}
 
 		// If remote validation fails with a "not implemented" error, log it but don't treat it as a fatal error
 		if stderrors.Is(err, errors.ErrNotImplemented) {
-			s.logger.Debug("Remote validation not implemented, falling back to local validation")
+			logger.Debug(ctx, "Remote validation not implemented, falling back to local validation")
 		} else {
 			// For other errors, log the error but still try local validation
-			s.logger.Debug("Remote validation failed, falling back to local validation", zap.Error(err))
+			logger.Debug(ctx, "Remote validation failed, falling back to local validation", zap.Error(err))
 		}
 	}
 
 	// Fall back to local validation
 	claims, err := s.localValidator.ValidateToken(ctx, tokenString)
 	if err != nil {
-		s.logger.Debug("Local validation failed", zap.Error(err))
+		logger.Debug(ctx, "Local validation failed", zap.Error(err))
 		return nil, err
 	}
 
@@ -302,11 +315,11 @@ func (s *Service) ValidateToken(ctx context.Context, tokenString string) (*Claim
 		err := errors.WithContext(errors.ErrInvalidToken, "token_id", claims.ID)
 		err = errors.WithOp(err, "jwt.Service.ValidateToken")
 		err = errors.WithMessage(err, "token has been revoked")
-		s.logger.Debug("Token has been revoked", zap.String("token_id", claims.ID))
+		logger.Debug(ctx, "Token has been revoked", zap.String("token_id", claims.ID))
 		return nil, err
 	}
 
-	s.logger.Debug("Token validated successfully by local validator", zap.String("user_id", claims.UserID))
+	logger.Debug(ctx, "Token validated successfully by local validator", zap.String("user_id", claims.UserID))
 	return claims, nil
 }
 
@@ -315,13 +328,16 @@ func (s *Service) RevokeToken(ctx context.Context, tokenID string, expiresAt tim
 	ctx, span := s.tracer.Start(ctx, "jwt.Service.RevokeToken")
 	defer span.End()
 
+	// Get a context logger for this operation
+	logger := s.getContextLogger(ctx)
+
 	span.SetAttributes(attribute.String("token.id", tokenID))
 
 	if tokenID == "" {
 		err := errors.WithContext(errors.ErrInvalidToken, "token_id", tokenID)
 		err = errors.WithOp(err, "jwt.Service.RevokeToken")
 		err = errors.WithMessage(err, "token ID cannot be empty")
-		s.logger.Error("Failed to revoke token: token ID is empty")
+		logger.Error(ctx, "Failed to revoke token: token ID is empty")
 		return err
 	}
 
@@ -330,7 +346,7 @@ func (s *Service) RevokeToken(ctx context.Context, tokenID string, expiresAt tim
 
 	// Add the token to the revoked tokens map
 	s.revokedTokens[tokenID] = expiresAt
-	s.logger.Debug("Token revoked", zap.String("token_id", tokenID))
+	logger.Debug(ctx, "Token revoked", zap.String("token_id", tokenID))
 
 	// Clean up expired revoked tokens
 	s.cleanupRevokedTokens()

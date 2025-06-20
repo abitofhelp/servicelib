@@ -301,7 +301,7 @@ type RetryConfig struct {
 	BackoffFactor float64
 
 	// Logger is the logger to use for logging retries
-	Logger *zap.Logger
+	Logger *logging.ContextLogger
 }
 
 // DefaultRetryConfig returns the default retry configuration.
@@ -311,7 +311,7 @@ func DefaultRetryConfig() RetryConfig {
 		InitialBackoff: 100 * time.Millisecond,
 		MaxBackoff:     2 * time.Second,
 		BackoffFactor:  2.0,
-		Logger:         zap.NewNop(),
+		Logger:         logging.NewContextLogger(zap.NewNop()),
 	}
 }
 
@@ -340,7 +340,7 @@ func ExecutePostgresTransaction(ctx context.Context, pool *pgxpool.Pool, fn func
 				backoff = config.MaxBackoff
 			}
 
-			config.Logger.Debug("Retrying database transaction",
+			config.Logger.Debug(ctx, "Retrying database transaction",
 				zap.Int("attempt", attempt),
 				zap.Duration("backoff", backoff),
 				zap.Error(lastErr))
@@ -377,7 +377,7 @@ func ExecutePostgresTransaction(ctx context.Context, pool *pgxpool.Pool, fn func
 			cancel()
 
 			if rollbackErr != nil {
-				config.Logger.Warn("Failed to rollback transaction", zap.Error(rollbackErr))
+				config.Logger.Warn(ctx, "Failed to rollback transaction", zap.Error(rollbackErr))
 			}
 
 			lastErr = err
@@ -432,7 +432,7 @@ func ExecuteSQLTransaction(ctx context.Context, db *sql.DB, fn func(tx *sql.Tx) 
 				backoff = config.MaxBackoff
 			}
 
-			config.Logger.Debug("Retrying database transaction",
+			config.Logger.Debug(ctx, "Retrying database transaction",
 				zap.Int("attempt", attempt),
 				zap.Duration("backoff", backoff),
 				zap.Error(lastErr))
@@ -467,7 +467,7 @@ func ExecuteSQLTransaction(ctx context.Context, db *sql.DB, fn func(tx *sql.Tx) 
 			cancel()
 
 			if rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
-				config.Logger.Warn("Failed to rollback transaction", zap.Error(rollbackErr))
+				config.Logger.Warn(ctx, "Failed to rollback transaction", zap.Error(rollbackErr))
 			}
 
 			lastErr = err
