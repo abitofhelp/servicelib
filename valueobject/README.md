@@ -314,7 +314,7 @@ import (
 
 func main() {
 	// Create a new money value
-	money, err := valueobject.NewMoney(10.99, "USD")
+	money, err := valueobject.NewMoneyFromFloat64(10.99, "USD")
 	if err != nil {
 		// Handle error
 		fmt.Println("Error creating money:", err)
@@ -335,7 +335,7 @@ func main() {
 	fmt.Printf("Money: %.2f %s\n", amount, currency)
 
 	// Perform calculations
-	otherMoney, _ := valueobject.NewMoney(5.99, "USD")
+	otherMoney, _ := valueobject.NewMoneyFromFloat64(5.99, "USD")
 	sum, err := money.Add(otherMoney)
 	if err != nil {
 		// Handle error (e.g., different currencies)

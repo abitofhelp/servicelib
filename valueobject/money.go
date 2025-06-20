@@ -30,8 +30,8 @@ type Money struct {
 	currency string
 }
 
-// NewMoney creates a new Money with validation
-func NewMoney(amount float64, currency string) (Money, error) {
+// NewMoneyFromFloat64 creates a new Money with validation from a float64 amount
+func NewMoneyFromFloat64(amount float64, currency string) (Money, error) {
 	// Trim whitespace from currency
 	trimmedCurrency := strings.TrimSpace(currency)
 
@@ -82,6 +82,43 @@ func NewMoneyFromString(amount string, currency string) (Money, error) {
 	if err != nil {
 		return Money{}, errors.New("invalid amount format")
 	}
+
+	return Money{
+		amount:   decimalAmount,
+		currency: trimmedCurrency,
+	}, nil
+}
+
+// NewMoneyFromUint64 creates a new Money with validation from a uint64 amount
+// This is useful for representing monetary values in the smallest currency unit (e.g., cents)
+func NewMoneyFromUint64(amount uint64, currency string) (Money, error) {
+	// Trim whitespace from currency
+	trimmedCurrency := strings.TrimSpace(currency)
+
+	// Currency is required
+	if trimmedCurrency == "" {
+		return Money{}, errors.New("currency cannot be empty")
+	}
+
+	// Basic currency code validation (assuming 3-letter ISO currency codes)
+	if len(trimmedCurrency) != 3 {
+		return Money{}, errors.New("currency must be a 3-letter ISO code")
+	}
+
+	// Convert currency to uppercase
+	trimmedCurrency = strings.ToUpper(trimmedCurrency)
+
+	// Check if the uint64 value is too large to fit in an int64
+	if amount > uint64(9223372036854775807) { // Max int64 value
+		// Handle as overflow case by setting amount to -1
+		return Money{
+			amount:   decimal.NewFromInt(-1),
+			currency: trimmedCurrency,
+		}, nil
+	}
+
+	// Convert uint64 to decimal
+	decimalAmount := decimal.NewFromUint64(amount)
 
 	return Money{
 		amount:   decimalAmount,
