@@ -69,16 +69,7 @@ type Mutation {
 
 3. Register the directive in your GraphQL server:
 
-```go
-schema := generated.NewExecutableSchema(generated.Config{
-    Resolvers: resolverInstance,
-    Directives: generated.DirectiveRoot{
-        IsAuthorized: func(ctx context.Context, obj interface{}, next graphql.Resolver, allowedRoles []string, requiredScopes []string, resource string) (interface{}, error) {
-            return graphql.IsAuthorizedDirective(ctx, obj, next, allowedRoles, requiredScopes, resource, logger)
-        },
-    },
-})
-```
+See the [Directive Registration example](../examples/graphql/directive_registration_example.go) for a complete, runnable example of how to register the @isAuthorized directive in your GraphQL server.
 
 ### JWT Authentication
 
@@ -88,24 +79,11 @@ To set up JWT authentication:
 
 1. Configure the auth service in your dependency injection container:
 
-```go
-authConfig := auth.DefaultConfig()
-authConfig.JWT.SecretKey = cfg.Auth.JWT.SecretKey
-authConfig.JWT.Issuer = cfg.Auth.JWT.Issuer
-authConfig.JWT.TokenDuration = cfg.Auth.JWT.TokenDuration
-authConfig.Middleware.SkipPaths = []string{"/health", "/metrics", "/playground"}
-
-authService, err := auth.New(ctx, authConfig, logger)
-if err != nil {
-    return nil, fmt.Errorf("failed to initialize auth service: %w", err)
-}
-```
+See the [Auth Configuration example](../examples/graphql/auth_configuration_example.go) for a complete, runnable example of how to configure the auth service for GraphQL.
 
 2. Apply the auth middleware to your HTTP handler:
 
-```go
-handler = authService.Middleware()(handler)
-```
+See the [Auth Middleware example](../examples/graphql/auth_middleware_example.go) for a complete, runnable example of how to apply the auth middleware to a GraphQL handler.
 
 ### Helper Functions
 
@@ -120,39 +98,13 @@ The package provides several helper functions for working with RBAC:
 
 ## Example Usage
 
-```go
-// In your resolver
-func (r *Resolver) CreateItem(ctx context.Context, input model.ItemInput) (*model.Item, error) {
-    // Check authorization manually if needed
-    if err := graphql.CheckAuthorization(ctx, []string{"ADMIN", "EDITOR"}, []string{"CREATE"}, "ITEM", "CreateItem", r.logger); err != nil {
-        return nil, err
-    }
-
-    // Proceed with the operation
-    // ...
-}
-```
+See the [Resolver Authorization example](../examples/graphql/resolver_authorization_example.go) for a complete, runnable example of how to check authorization in a GraphQL resolver.
 
 ## Generating JWT Tokens
 
 To test the RBAC implementation, you can use the `genjwt` tool to generate JWT tokens with different roles, scopes, and resources:
 
-```go
-// Generate admin token with all scopes for all resources
-adminScopes := []string{"READ", "WRITE", "DELETE", "CREATE"}
-adminResources := []string{"FAMILY", "PARENT", "CHILD"}
-adminToken, err := authInstance.GenerateToken(ctx, "admin", []string{"ADMIN"}, adminScopes, adminResources)
-
-// Generate editor token with all scopes for all resources
-editorScopes := []string{"READ", "WRITE", "DELETE", "CREATE"}
-editorResources := []string{"FAMILY", "PARENT", "CHILD"}
-editorToken, err := authInstance.GenerateToken(ctx, "editor", []string{"EDITOR"}, editorScopes, editorResources)
-
-// Generate viewer token with only READ scope for all resources
-viewerScopes := []string{"READ"}
-viewerResources := []string{"FAMILY", "PARENT", "CHILD"}
-viewerToken, err := authInstance.GenerateToken(ctx, "viewer", []string{"VIEWER"}, viewerScopes, viewerResources)
-```
+See the [JWT Token Generation example](../examples/graphql/jwt_token_generation_example.go) for a complete, runnable example of how to generate JWT tokens for testing GraphQL RBAC.
 
 ## Metrics
 

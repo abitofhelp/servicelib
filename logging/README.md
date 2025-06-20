@@ -1,6 +1,6 @@
-# Logging Package
+# Logging Module
 
-The `logging` package provides structured logging with Zap for high-performance logging in Go applications. It wraps the zap logging library and adds features like trace ID extraction from context and context-aware logging methods.
+The Logging Module provides structured logging with Zap for high-performance logging in Go applications. It wraps the zap logging library and adds features like trace ID extraction from context and context-aware logging methods.
 
 ## Features
 
@@ -17,96 +17,69 @@ The `logging` package provides structured logging with Zap for high-performance 
 go get github.com/abitofhelp/servicelib/logging
 ```
 
-## Usage
+## Quick Start
 
-### Basic Usage
+See the [Basic Usage example](../examples/logging/basic_usage_example.go) for a complete, runnable example of how to use the Logging module.
 
-```go
-package main
+## API Documentation
 
-import (
-    "github.com/abitofhelp/servicelib/logging"
-)
+### Basic Logging
 
-func main() {
-    // Create a new logger
-    logger, err := logging.NewLogger("info", true)
-    if err != nil {
-        panic("Failed to create logger: " + err.Error())
-    }
-    defer logger.Sync()
+The `NewLogger` function creates a new zap logger configured for either development or production use.
 
-    // Log messages
-    logger.Info("Starting application", zap.String("version", "1.0.0"))
-    logger.Debug("Debug information")
-    logger.Warn("Warning message", zap.Int("code", 123))
-    logger.Error("Error occurred", zap.Error(errors.New("sample error")))
-}
-```
+#### Basic Usage
+
+See the [Basic Usage example](../examples/logging/basic_usage_example.go) for a complete, runnable example of how to use the basic logging functionality.
 
 ### Context-Aware Logging
 
-```go
-package main
+The `ContextLogger` struct provides context-aware logging methods that automatically extract trace information from the context.
 
-import (
-    "context"
-    "github.com/abitofhelp/servicelib/logging"
-    "go.uber.org/zap"
-)
+#### Context-Aware Logging Example
 
-func main() {
-    // Create a base logger
-    baseLogger, _ := logging.NewLogger("info", true)
-    
-    // Create a context logger
-    contextLogger := logging.NewContextLogger(baseLogger)
-    
-    // Create a context
-    ctx := context.Background()
-    
-    // Log with context
-    contextLogger.Info(ctx, "Processing request", zap.String("requestID", "123456"))
-    
-    // In a function with trace context
-    processRequest(ctx, contextLogger)
-}
+See the [Context-Aware Logging example](../examples/logging/context_aware_logging_example.go) for a complete, runnable example of how to use context-aware logging.
 
-func processRequest(ctx context.Context, logger *logging.ContextLogger) {
-    // The trace ID from the context will be automatically included in the log
-    logger.Info(ctx, "Processing data", zap.Int("items", 42))
-    
-    if err := doSomething(); err != nil {
-        logger.Error(ctx, "Failed to process data", zap.Error(err))
-    }
-}
-```
+### Trace Integration
 
-### Adding Trace IDs to Logs
+The `WithTraceID` function adds trace ID and span ID to the logger from the provided context.
+
+#### Adding Trace IDs to Logs
+
+See the [Trace ID example](../examples/logging/trace_id_example.go) for a complete, runnable example of how to add trace IDs to logs.
+
+### Logger Interface
+
+The `Logger` interface defines the methods for context-aware logging.
 
 ```go
-package main
+// Example of the Logger interface
+package example
 
 import (
-    "context"
-    "github.com/abitofhelp/servicelib/logging"
-    "go.opentelemetry.io/otel"
-    "go.uber.org/zap"
+	"context"
+
+	"go.uber.org/zap"
 )
 
-func main() {
-    // Create a base logger
-    baseLogger, _ := logging.NewLogger("info", false)
-    
-    // Create a context with trace
-    ctx, span := otel.Tracer("example").Start(context.Background(), "operation")
-    defer span.End()
-    
-    // Add trace ID to logger
-    loggerWithTrace := logging.WithTraceID(ctx, baseLogger)
-    
-    // Log with trace ID
-    loggerWithTrace.Info("This log includes trace ID")
+// Logger defines the interface for context-aware logging
+type Logger interface {
+	// Debug logs a debug-level message with context information
+	Debug(ctx context.Context, msg string, fields ...zap.Field)
+
+	// Info logs an info-level message with context information
+	Info(ctx context.Context, msg string, fields ...zap.Field)
+
+	// Warn logs a warning-level message with context information
+	Warn(ctx context.Context, msg string, fields ...zap.Field)
+
+	// Error logs an error-level message with context information
+	Error(ctx context.Context, msg string, fields ...zap.Field)
+
+	// Fatal logs a fatal-level message with context information
+	Fatal(ctx context.Context, msg string, fields ...zap.Field)
+
+	// Sync flushes any buffered log entries
+	Sync() error
 }
 ```
 
@@ -115,11 +88,28 @@ func main() {
 The logger can be configured with different log levels and output formats:
 
 ```go
-// Development mode (console output with colors)
-logger, err := logging.NewLogger("debug", true)
+// Example of logger configuration
+package example
 
-// Production mode (JSON output)
-logger, err := logging.NewLogger("info", false)
+import (
+	"github.com/abitofhelp/servicelib/logging"
+)
+
+func configureLoggers() {
+	// Development mode (console output with colors)
+	logger, err := logging.NewLogger("debug", true)
+	if err != nil {
+		panic(err)
+	}
+	defer logger.Sync()
+
+	// Production mode (JSON output)
+	prodLogger, err := logging.NewLogger("info", false)
+	if err != nil {
+		panic(err)
+	}
+	defer prodLogger.Sync()
+}
 ```
 
 Available log levels:
@@ -129,16 +119,27 @@ Available log levels:
 - `error`: Error events that might still allow the application to continue
 - `fatal`: Severe error events that cause the application to terminate
 
-## Best Practices
+## Logging Best Practices
 
 1. **Use Structured Logging**: Always use structured logging with key-value pairs instead of string formatting.
 
    ```go
-   // Good
-   logger.Info("User logged in", zap.String("username", user.Name), zap.String("ip", ip))
-   
-   // Avoid
-   logger.Info(fmt.Sprintf("User %s logged in from %s", user.Name, ip))
+   // Example of structured logging
+   package example
+
+   import (
+       "fmt"
+
+       "go.uber.org/zap"
+   )
+
+   func logUserLogin(logger *zap.Logger, user struct{ Name string }, ip string) {
+       // Good
+       logger.Info("User logged in", zap.String("username", user.Name), zap.String("ip", ip))
+
+       // Avoid
+       logger.Info(fmt.Sprintf("User %s logged in from %s", user.Name, ip))
+   }
    ```
 
 2. **Include Context**: Always pass context to logging methods when available to include trace information.
@@ -150,8 +151,26 @@ Available log levels:
 5. **Performance**: In hot paths, check if the log level is enabled before constructing expensive log messages.
 
    ```go
-   if logger.Core().Enabled(zapcore.DebugLevel) {
-       logger.Debug("Expensive debug info", zap.Any("data", generateExpensiveDebugData()))
+   // Example of conditional logging
+   package example
+
+   import (
+       "go.uber.org/zap"
+       "go.uber.org/zap/zapcore"
+   )
+
+   func logExpensiveData(logger *zap.Logger) {
+       if logger.Core().Enabled(zapcore.DebugLevel) {
+           logger.Debug("Expensive debug info", zap.Any("data", generateExpensiveDebugData()))
+       }
+   }
+
+   func generateExpensiveDebugData() interface{} {
+       // This would be an expensive operation to generate debug data
+       return map[string]interface{}{
+           "complex": "data structure",
+           "that": "would be expensive to compute",
+       }
    }
    ```
 

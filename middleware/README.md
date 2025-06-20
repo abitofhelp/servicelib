@@ -1,16 +1,15 @@
-# Middleware Package
+# Middleware Module
 
-The `middleware` package provides HTTP middleware components for common cross-cutting concerns in Go applications. It includes middleware for authentication, logging, metrics collection, tracing, and more.
+The Middleware Module provides HTTP middleware components for common cross-cutting concerns in Go applications. It includes middleware for request context, timeout handling, panic recovery, logging, error handling, and CORS support.
 
 ## Features
 
-- **Authentication**: JWT authentication middleware
-- **Logging**: Request/response logging
-- **Metrics**: Request metrics collection
-- **Tracing**: Distributed tracing
-- **Recovery**: Panic recovery
-- **CORS**: Cross-Origin Resource Sharing
-- **Rate Limiting**: Request rate limiting
+- **Request Context**: Add request ID and other context information to requests
+- **Timeout Handling**: Set timeouts for request processing
+- **Recovery**: Catch and handle panics in HTTP handlers
+- **Logging**: Log request and response details
+- **Error Handling**: Centralized error handling for HTTP responses
+- **CORS**: Cross-Origin Resource Sharing support
 
 ## Installation
 
@@ -18,222 +17,155 @@ The `middleware` package provides HTTP middleware components for common cross-cu
 go get github.com/abitofhelp/servicelib/middleware
 ```
 
-## Usage
+## Quick Start
 
-### Middleware Chain
+See the [Basic Usage example](../examples/middleware/basic_usage_example.go) for a complete, runnable example of how to use the Middleware module.
+
+## API Documentation
+
+### Basic Usage
+
+See the [Basic Usage example](../examples/middleware/basic_usage_example.go) for a complete, runnable example of how to use the middleware components together.
+
+### Request Context Middleware
+
+The `WithRequestContext` middleware adds request context information, including request ID and start time.
+
+See the [Basic Usage example](../examples/middleware/basic_usage_example.go) for a complete, runnable example of how to use the request context middleware.
+
+### Timeout Middleware
+
+The `WithTimeout` middleware sets a timeout for request processing.
+
+See the [Timeout example](../examples/middleware/timeout_example.go) for a complete, runnable example of how to use the timeout middleware.
+
+### Recovery Middleware
+
+The `WithRecovery` middleware catches panics in HTTP handlers and converts them to error responses.
+
+See the [Recovery example](../examples/middleware/recovery_example.go) for a complete, runnable example of how to use the recovery middleware.
+
+### Logging Middleware
+
+The `WithLogging` middleware logs request and response details.
+
+See the [Logging example](../examples/middleware/logging_example.go) for a complete, runnable example of how to use the logging middleware.
+
+### Error Handling Middleware
+
+The `WithErrorHandling` middleware provides centralized error handling for HTTP responses.
+
+See the [Error Handling example](../examples/middleware/error_handling_example.go) for a complete, runnable example of how to use the error handling middleware.
+
+### CORS Middleware
+
+The `WithCORS` middleware adds Cross-Origin Resource Sharing support.
+
+See the [CORS example](../examples/middleware/cors_example.go) for a complete, runnable example of how to use the CORS middleware.
+
+### Middleware Composition
 
 ```go
-package main
+// Example of middleware composition
+package example
 
 import (
-    "log"
-    "net/http"
-    
-    "github.com/abitofhelp/servicelib/logging"
-    "github.com/abitofhelp/servicelib/middleware"
+	"net/http"
+
+	"github.com/abitofhelp/servicelib/logging"
+	"github.com/abitofhelp/servicelib/middleware"
+	"go.uber.org/zap"
 )
 
-func main() {
-    // Create a logger
-    logger, _ := logging.NewLogger("info", false)
-    defer logger.Sync()
-    
-    // Create a simple HTTP handler
-    mux := http.NewServeMux()
-    mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-        w.Write([]byte("Hello, World!"))
-    })
-    
-    // Create middleware chain
-    handler := middleware.Chain(
-        mux,
-        middleware.RequestID(),
-        middleware.Logging(logger),
-        middleware.Metrics(),
-        middleware.Tracing("my-service"),
-        middleware.Recovery(logger),
-    )
-    
-    // Start server with middleware
-    log.Println("Starting server on :8080")
-    http.ListenAndServe(":8080", handler)
+func composeMiddleware(logger *zap.Logger) http.Handler {
+	// Create a context logger
+	contextLogger := logging.NewContextLogger(logger)
+
+	// Create a simple HTTP handler
+	helloHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write([]byte("Hello, World!"))
+	})
+
+	// Apply middleware in the correct order
+	handler := middleware.WithRequestContext(helloHandler)
+	handler = middleware.WithRecovery(contextLogger, handler)
+	handler = middleware.WithLogging(contextLogger, handler)
+	handler = middleware.WithErrorHandling(handler)
+	handler = middleware.WithCORS(handler)
+
+	return handler
 }
-```
-
-### Individual Middleware Components
-
-#### Request ID Middleware
-
-```go
-// Add request ID middleware
-handler := middleware.RequestID()(yourHandler)
-
-// Customize request ID header
-handler := middleware.RequestIDWithConfig(middleware.RequestIDConfig{
-    Header: "X-Custom-Request-ID",
-    Generator: func() string {
-        return uuid.New().String()
-    },
-})(yourHandler)
-```
-
-#### Logging Middleware
-
-```go
-// Create a logger
-logger, _ := logging.NewLogger("info", false)
-
-// Add logging middleware
-handler := middleware.Logging(logger)(yourHandler)
-
-// Customize logging middleware
-handler := middleware.LoggingWithConfig(middleware.LoggingConfig{
-    Logger: logger,
-    SkipPaths: []string{"/health", "/metrics"},
-    LogRequestHeaders: true,
-    LogResponseHeaders: true,
-    LogRequestBody: false,
-    LogResponseBody: false,
-})(yourHandler)
-```
-
-#### Metrics Middleware
-
-```go
-// Add metrics middleware
-handler := middleware.Metrics()(yourHandler)
-
-// Customize metrics middleware
-handler := middleware.MetricsWithConfig(middleware.MetricsConfig{
-    Subsystem: "api",
-    SkipPaths: []string{"/health", "/metrics"},
-    LabelNames: []string{"method", "path", "status"},
-})(yourHandler)
-```
-
-#### Tracing Middleware
-
-```go
-// Add tracing middleware
-handler := middleware.Tracing("my-service")(yourHandler)
-
-// Customize tracing middleware
-handler := middleware.TracingWithConfig(middleware.TracingConfig{
-    ServiceName: "my-service",
-    SkipPaths: []string{"/health", "/metrics"},
-    TracePropagationHeaders: true,
-})(yourHandler)
-```
-
-#### Recovery Middleware
-
-```go
-// Add recovery middleware
-handler := middleware.Recovery(logger)(yourHandler)
-
-// Customize recovery middleware
-handler := middleware.RecoveryWithConfig(middleware.RecoveryConfig{
-    Logger: logger,
-    PrintStack: true,
-    LogAllRequests: false,
-    PanicHandler: func(w http.ResponseWriter, r *http.Request, err interface{}) {
-        // Custom panic handling
-        w.WriteHeader(http.StatusInternalServerError)
-        w.Write([]byte("Something went wrong"))
-    },
-})(yourHandler)
-```
-
-#### CORS Middleware
-
-```go
-// Add CORS middleware
-handler := middleware.CORS()(yourHandler)
-
-// Customize CORS middleware
-handler := middleware.CORSWithConfig(middleware.CORSConfig{
-    AllowOrigins: []string{"https://example.com"},
-    AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-    AllowHeaders: []string{"Content-Type", "Authorization"},
-    ExposeHeaders: []string{"X-Request-ID"},
-    AllowCredentials: true,
-    MaxAge: 86400,
-})(yourHandler)
-```
-
-#### Rate Limiting Middleware
-
-```go
-// Add rate limiting middleware
-handler := middleware.RateLimit(10, 1*time.Second)(yourHandler)
-
-// Customize rate limiting middleware
-handler := middleware.RateLimitWithConfig(middleware.RateLimitConfig{
-    Rate: 10,
-    Burst: 20,
-    Period: 1 * time.Second,
-    StoreType: "memory", // or "redis"
-    RedisURL: "redis://localhost:6379",
-    KeyFunc: func(r *http.Request) string {
-        return r.RemoteAddr // Rate limit by IP
-    },
-})(yourHandler)
 ```
 
 ### Creating Custom Middleware
 
 ```go
-package main
+// Example of creating a custom middleware
+package example
 
 import (
-    "net/http"
-    "time"
+	"net/http"
+	"time"
 )
 
-// Create a custom middleware function
+// TimingMiddleware is a custom middleware that measures request duration
 func TimingMiddleware(next http.Handler) http.Handler {
-    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        start := time.Now()
-        
-        // Call the next handler
-        next.ServeHTTP(w, r)
-        
-        // Calculate request duration
-        duration := time.Since(start)
-        
-        // Add a custom header with the request duration
-        w.Header().Set("X-Request-Duration", duration.String())
-    })
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Record start time
+		start := time.Now()
+
+		// Call the next handler
+		next.ServeHTTP(w, r)
+
+		// Calculate request duration
+		duration := time.Since(start)
+
+		// Add a custom header with the request duration
+		w.Header().Set("X-Request-Duration", duration.String())
+	})
 }
 
-func main() {
-    // Create a simple HTTP handler
-    mux := http.NewServeMux()
-    mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-        w.Write([]byte("Hello, World!"))
-    })
-    
-    // Add your custom middleware
-    handler := TimingMiddleware(mux)
-    
-    // Start server with middleware
-    http.ListenAndServe(":8080", handler)
+// Usage example
+func useTimingMiddleware() {
+	// Create a simple HTTP handler
+	helloHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hello, World!"))
+	})
+
+	// Apply your custom middleware
+	handler := TimingMiddleware(helloHandler)
+
+	// Register the handler
+	http.Handle("/", handler)
 }
 ```
 
-## Best Practices
+## Middleware Best Practices
 
 1. **Order Matters**: The order of middleware in the chain is important. For example, recovery middleware should be first to catch panics in other middleware.
 
    ```go
-   handler := middleware.Chain(
-       mux,
-       middleware.Recovery(logger),  // First to catch panics
-       middleware.RequestID(),       // Second to add request ID for logging
-       middleware.Logging(logger),   // Third to log with request ID
-       middleware.Metrics(),         // Fourth to collect metrics
-       middleware.Tracing("service") // Fifth to add tracing
+   // Example of middleware ordering
+   package example
+
+   import (
+       "net/http"
+
+       "github.com/abitofhelp/servicelib/logging"
+       "github.com/abitofhelp/servicelib/middleware"
    )
+
+   func applyMiddlewareInOrder(logger *logging.ContextLogger, handler http.Handler) http.Handler {
+       // Apply middleware in the correct order
+       handler = middleware.WithRecovery(logger, handler)     // First to catch panics
+       handler = middleware.WithRequestContext(handler)       // Second to add request context
+       handler = middleware.WithLogging(logger, handler)      // Third to log with request context
+       handler = middleware.WithErrorHandling(handler)        // Fourth to handle errors
+       handler = middleware.WithCORS(handler)                 // Fifth to add CORS headers
+
+       return handler
+   }
    ```
 
 2. **Performance**: Be mindful of middleware performance, especially for high-traffic services.
