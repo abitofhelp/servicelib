@@ -1,6 +1,6 @@
-# Signal Package
+# Signal Module
 
-The `signal` package provides utilities for handling OS signals and implementing graceful shutdown in Go applications. It helps applications respond to termination signals and execute cleanup operations before exiting.
+The Signal Module provides utilities for handling OS signals and implementing graceful shutdown in Go applications. It helps applications respond to termination signals and execute cleanup operations before exiting.
 
 ## Features
 
@@ -18,228 +18,35 @@ The `signal` package provides utilities for handling OS signals and implementing
 go get github.com/abitofhelp/servicelib/signal
 ```
 
-## Usage
+## Quick Start
+
+See the [Basic Signal Handling example](../examples/signal/basic_signal_handling_example.go) for a complete, runnable example of how to use the Signal module.
+
+## API Documentation
 
 ### Basic Signal Handling
 
-```go
-package main
+The `WaitForShutdown` function blocks until a shutdown signal is received and returns a context that will be canceled when a shutdown signal is received.
 
-import (
-    "context"
-    "fmt"
-    "net/http"
-    "time"
-    
-    "github.com/abitofhelp/servicelib/logging"
-    "github.com/abitofhelp/servicelib/signal"
-    "go.uber.org/zap"
-)
+#### Basic Usage
 
-func main() {
-    // Create a logger
-    baseLogger, _ := zap.NewProduction()
-    logger := logging.NewContextLogger(baseLogger)
-    
-    // Create an HTTP server
-    server := &http.Server{
-        Addr:    ":8080",
-        Handler: http.DefaultServeMux,
-    }
-    
-    // Register a simple handler
-    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-        fmt.Fprintf(w, "Hello, World!")
-    })
-    
-    // Start the server in a goroutine
-    go func() {
-        logger.Info(context.Background(), "Starting server on :8080")
-        if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-            logger.Error(context.Background(), "Server error", zap.Error(err))
-        }
-    }()
-    
-    // Wait for shutdown signal
-    shutdownTimeout := 30 * time.Second
-    ctx := signal.WaitForShutdown(shutdownTimeout, logger)
-    
-    // Perform shutdown when context is canceled
-    shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-    defer cancel()
-    
-    logger.Info(ctx, "Shutting down HTTP server")
-    if err := server.Shutdown(shutdownCtx); err != nil {
-        logger.Error(ctx, "Error shutting down server", zap.Error(err))
-    }
-    
-    logger.Info(ctx, "Server stopped")
-}
-```
+See the [Basic Signal Handling example](../examples/signal/basic_signal_handling_example.go) for a complete, runnable example of how to implement basic signal handling.
 
-### Using Shutdown Callbacks
+### Shutdown Callbacks
 
-```go
-package main
+The `SetupSignalHandler` function sets up a signal handler for graceful shutdown and returns a context that will be canceled when a shutdown signal is received, along with a `GracefulShutdown` instance for registering callbacks.
 
-import (
-    "context"
-    "database/sql"
-    "fmt"
-    "net/http"
-    "time"
-    
-    "github.com/abitofhelp/servicelib/logging"
-    "github.com/abitofhelp/servicelib/signal"
-    _ "github.com/jackc/pgx/v5/stdlib"
-    "go.uber.org/zap"
-)
+#### Using Shutdown Callbacks
 
-func main() {
-    // Create a logger
-    baseLogger, _ := zap.NewProduction()
-    logger := logging.NewContextLogger(baseLogger)
-    
-    // Create a database connection
-    db, err := sql.Open("pgx", "postgres://user:password@localhost:5432/mydb?sslmode=disable")
-    if err != nil {
-        logger.Fatal(context.Background(), "Failed to connect to database", zap.Error(err))
-    }
-    
-    // Create an HTTP server
-    server := &http.Server{
-        Addr:    ":8080",
-        Handler: http.DefaultServeMux,
-    }
-    
-    // Register a simple handler
-    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-        var count int
-        err := db.QueryRowContext(r.Context(), "SELECT COUNT(*) FROM users").Scan(&count)
-        if err != nil {
-            http.Error(w, "Database error", http.StatusInternalServerError)
-            return
-        }
-        
-        fmt.Fprintf(w, "Hello, World! There are %d users.", count)
-    })
-    
-    // Start the server in a goroutine
-    go func() {
-        logger.Info(context.Background(), "Starting server on :8080")
-        if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-            logger.Error(context.Background(), "Server error", zap.Error(err))
-        }
-    }()
-    
-    // Setup graceful shutdown with callbacks
-    shutdownTimeout := 30 * time.Second
-    ctx, gs := signal.SetupSignalHandler(shutdownTimeout, logger)
-    
-    // Register server shutdown callback
-    gs.RegisterCallback(func(ctx context.Context) error {
-        logger.Info(ctx, "Shutting down HTTP server")
-        return server.Shutdown(ctx)
-    })
-    
-    // Register database shutdown callback
-    gs.RegisterCallback(func(ctx context.Context) error {
-        logger.Info(ctx, "Closing database connection")
-        return db.Close()
-    })
-    
-    // Wait for context to be canceled (when signal is received)
-    <-ctx.Done()
-    
-    // Wait a moment for callbacks to complete
-    time.Sleep(100 * time.Millisecond)
-    
-    logger.Info(ctx, "Application stopped")
-}
-```
+See the [Shutdown Callbacks example](../examples/signal/shutdown_callbacks_example.go) for a complete, runnable example of how to use shutdown callbacks.
 
-### Custom Graceful Shutdown
+### Manual Cancellation
 
-```go
-package main
+The `HandleShutdown` method of the `GracefulShutdown` struct handles graceful shutdown and returns a context that will be canceled when a shutdown signal is received, along with a cancel function that can be called to cancel the context manually.
 
-import (
-    "context"
-    "fmt"
-    "net/http"
-    "time"
-    
-    "github.com/abitofhelp/servicelib/logging"
-    "github.com/abitofhelp/servicelib/signal"
-    "go.uber.org/zap"
-)
+#### Manual Cancellation Example
 
-func main() {
-    // Create a logger
-    baseLogger, _ := zap.NewProduction()
-    logger := logging.NewContextLogger(baseLogger)
-    
-    // Create a custom graceful shutdown handler
-    gs := signal.NewGracefulShutdown(30*time.Second, logger)
-    
-    // Create an HTTP server
-    server := &http.Server{
-        Addr:    ":8080",
-        Handler: http.DefaultServeMux,
-    }
-    
-    // Register handlers
-    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-        fmt.Fprintf(w, "Hello, World!")
-    })
-    
-    // Add a health check endpoint that reports shutdown status
-    var isShuttingDown bool
-    http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-        if isShuttingDown {
-            w.WriteHeader(http.StatusServiceUnavailable)
-            w.Write([]byte("Service is shutting down"))
-            return
-        }
-        
-        w.WriteHeader(http.StatusOK)
-        w.Write([]byte("Service is healthy"))
-    })
-    
-    // Start the server in a goroutine
-    go func() {
-        logger.Info(context.Background(), "Starting server on :8080")
-        if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-            logger.Error(context.Background(), "Server error", zap.Error(err))
-        }
-    }()
-    
-    // Register shutdown callbacks in order
-    
-    // First, update health status
-    gs.RegisterCallback(func(ctx context.Context) error {
-        logger.Info(ctx, "Updating health status")
-        isShuttingDown = true
-        // Wait a moment for load balancers to detect the status change
-        time.Sleep(2 * time.Second)
-        return nil
-    })
-    
-    // Then, shut down the server
-    gs.RegisterCallback(func(ctx context.Context) error {
-        logger.Info(ctx, "Shutting down HTTP server")
-        return server.Shutdown(ctx)
-    })
-    
-    // Handle shutdown and get a cancellable context
-    ctx, _ := gs.HandleShutdown()
-    
-    // Wait for context to be canceled (when signal is received)
-    <-ctx.Done()
-    
-    logger.Info(ctx, "Main function exiting")
-}
-```
+See the [Manual Cancellation example](../examples/signal/manual_cancellation_example.go) for a complete, runnable example of how to implement manual cancellation.
 
 ## Best Practices
 

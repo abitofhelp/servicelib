@@ -1,6 +1,6 @@
-# String Utilities Package
+# Stringutil Module
 
-The `stringutil` package provides additional string manipulation utilities beyond what's available in the standard library. It offers a collection of helper functions for common string operations that are frequently needed in Go applications.
+The Stringutil Module provides additional string manipulation utilities beyond what's available in the standard library. It offers a collection of helper functions for common string operations that are frequently needed in Go applications.
 
 ## Features
 
@@ -18,173 +18,59 @@ The `stringutil` package provides additional string manipulation utilities beyon
 go get github.com/abitofhelp/servicelib/stringutil
 ```
 
-## Usage
+## Quick Start
+
+See the [Case-Insensitive Operations example](../examples/stringutil/case_insensitive_operations_example.go) for a complete, runnable example of how to use the Stringutil module.
+
+## API Documentation
 
 ### Case-Insensitive Operations
 
-```go
-package main
+The module provides functions for case-insensitive string operations like prefix checking and substring searching.
 
-import (
-    "fmt"
-    
-    "github.com/abitofhelp/servicelib/stringutil"
-)
+#### Case-Insensitive String Operations
 
-func main() {
-    // Check if a string starts with a prefix (case-insensitive)
-    hasPrefix := stringutil.HasPrefixIgnoreCase("Hello, World!", "hello")
-    fmt.Printf("Has prefix 'hello': %v\n", hasPrefix) // Output: true
-    
-    // Check if a string contains a substring (case-insensitive)
-    contains := stringutil.ContainsIgnoreCase("Hello, World!", "WORLD")
-    fmt.Printf("Contains 'WORLD': %v\n", contains) // Output: true
-    
-    // Convert to lowercase (wrapper around strings.ToLower)
-    lower := stringutil.ToLowerCase("Hello, World!")
-    fmt.Printf("Lowercase: %s\n", lower) // Output: hello, world!
-}
-```
+See the [Case-Insensitive Operations example](../examples/stringutil/case_insensitive_operations_example.go) for a complete, runnable example of how to use case-insensitive string operations.
 
 ### Prefix Checking
 
-```go
-package main
+The `HasAnyPrefix` function checks if a string starts with any of the specified prefixes.
 
-import (
-    "fmt"
-    
-    "github.com/abitofhelp/servicelib/stringutil"
-)
+#### Checking String Prefixes
 
-func main() {
-    // Check if a string starts with any of the given prefixes
-    hasAnyPrefix := stringutil.HasAnyPrefix("https://example.com", "http://", "https://")
-    fmt.Printf("Has any prefix: %v\n", hasAnyPrefix) // Output: true
-    
-    // Check multiple strings for prefixes
-    urls := []string{
-        "https://example.com",
-        "http://example.org",
-        "ftp://example.net",
-        "example.io",
-    }
-    
-    for _, url := range urls {
-        if stringutil.HasAnyPrefix(url, "http://", "https://") {
-            fmt.Printf("%s is a web URL\n", url)
-        } else {
-            fmt.Printf("%s is not a web URL\n", url)
-        }
-    }
-}
-```
+See the [Prefix Checking example](../examples/stringutil/prefix_checking_example.go) for a complete, runnable example of how to check string prefixes.
 
 ### String Joining with Natural Language Formatting
 
-```go
-package main
+The `JoinWithAnd` function joins a slice of strings with commas and "and", with optional Oxford comma support.
 
-import (
-    "fmt"
-    
-    "github.com/abitofhelp/servicelib/stringutil"
-)
+#### Joining Strings with Natural Language Formatting
 
-func main() {
-    // Join strings with "and" (no Oxford comma)
-    fruits := []string{"apples", "bananas", "oranges"}
-    joined := stringutil.JoinWithAnd(fruits, false)
-    fmt.Printf("Without Oxford comma: %s\n", joined) // Output: apples, bananas and oranges
-    
-    // Join strings with "and" (with Oxford comma)
-    joinedOxford := stringutil.JoinWithAnd(fruits, true)
-    fmt.Printf("With Oxford comma: %s\n", joinedOxford) // Output: apples, bananas, and oranges
-    
-    // Handle different list lengths
-    fmt.Println(stringutil.JoinWithAnd([]string{}, false))                // Output: ""
-    fmt.Println(stringutil.JoinWithAnd([]string{"apples"}, false))        // Output: "apples"
-    fmt.Println(stringutil.JoinWithAnd([]string{"apples", "bananas"}, false)) // Output: "apples and bananas"
-}
-```
+See the [String Joining example](../examples/stringutil/string_joining_example.go) for a complete, runnable example of how to join strings with natural language formatting.
 
 ### Whitespace Handling
 
-```go
-package main
+The module provides functions for checking if a string is empty or contains only whitespace, and for removing whitespace.
 
-import (
-    "fmt"
-    
-    "github.com/abitofhelp/servicelib/stringutil"
-)
+#### Handling Whitespace in Strings
 
-func main() {
-    // Check if a string is empty or contains only whitespace
-    isEmpty := stringutil.IsEmpty("   \t\n   ")
-    fmt.Printf("Is empty: %v\n", isEmpty) // Output: true
-    
-    // Check if a string contains non-whitespace characters
-    isNotEmpty := stringutil.IsNotEmpty("  Hello  ")
-    fmt.Printf("Is not empty: %v\n", isNotEmpty) // Output: true
-    
-    // Remove all whitespace from a string
-    noWhitespace := stringutil.RemoveWhitespace("Hello, \t World! \n")
-    fmt.Printf("No whitespace: %s\n", noWhitespace) // Output: Hello,World!
-}
-```
+See the [Whitespace Handling example](../examples/stringutil/whitespace_handling_example.go) for a complete, runnable example of how to handle whitespace in strings.
 
 ### String Truncation
 
-```go
-package main
+The `Truncate` function truncates a string to a specified maximum length, adding an ellipsis if needed.
 
-import (
-    "fmt"
-    
-    "github.com/abitofhelp/servicelib/stringutil"
-)
+#### Truncating Strings
 
-func main() {
-    // Truncate a long string
-    longText := "This is a very long string that needs to be truncated to fit in a limited space."
-    truncated := stringutil.Truncate(longText, 20)
-    fmt.Printf("Truncated: %s\n", truncated) // Output: This is a very long...
-    
-    // No truncation needed for short strings
-    shortText := "Short text"
-    truncatedShort := stringutil.Truncate(shortText, 20)
-    fmt.Printf("Truncated short: %s\n", truncatedShort) // Output: Short text
-    
-    // Handle negative max length
-    negativeMax := stringutil.Truncate(longText, -5)
-    fmt.Printf("Negative max: %s\n", negativeMax) // Output: ...
-}
-```
+See the [String Truncation example](../examples/stringutil/string_truncation_example.go) for a complete, runnable example of how to truncate strings.
 
 ### Path Normalization
 
-```go
-package main
+The `ForwardSlashPath` function converts backslashes in a path to forward slashes for consistent path handling across platforms.
 
-import (
-    "fmt"
-    
-    "github.com/abitofhelp/servicelib/stringutil"
-)
+#### Normalizing File Paths
 
-func main() {
-    // Convert Windows-style paths to Unix-style
-    windowsPath := "C:\\Users\\username\\Documents\\file.txt"
-    unixPath := stringutil.ForwardSlashPath(windowsPath)
-    fmt.Printf("Unix path: %s\n", unixPath) // Output: C:/Users/username/Documents/file.txt
-    
-    // Already Unix-style paths remain unchanged
-    alreadyUnix := "/home/username/documents/file.txt"
-    normalized := stringutil.ForwardSlashPath(alreadyUnix)
-    fmt.Printf("Normalized: %s\n", normalized) // Output: /home/username/documents/file.txt
-}
-```
+See the [Path Normalization example](../examples/stringutil/path_normalization_example.go) for a complete, runnable example of how to normalize file paths.
 
 ## Best Practices
 

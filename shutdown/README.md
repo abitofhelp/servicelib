@@ -1,6 +1,6 @@
-# Shutdown Package
+# Shutdown Module
 
-The `shutdown` package provides functionality for graceful application shutdown in Go applications. It helps ensure that applications terminate cleanly, allowing resources to be properly released and pending operations to complete.
+The Shutdown Module provides functionality for graceful application shutdown in Go applications. It helps ensure that applications terminate cleanly, allowing resources to be properly released and pending operations to complete.
 
 ## Features
 
@@ -17,235 +17,46 @@ The `shutdown` package provides functionality for graceful application shutdown 
 go get github.com/abitofhelp/servicelib/shutdown
 ```
 
-## Usage
+## Quick Start
 
-### Basic Graceful Shutdown
+See the [Basic Usage example](../examples/shutdown/basic_usage_example.go) for a complete, runnable example of how to use the Shutdown module.
 
-```go
-package main
+## API Documentation
 
-import (
-    "context"
-    "fmt"
-    "net/http"
-    "time"
-    
-    "github.com/abitofhelp/servicelib/logging"
-    "github.com/abitofhelp/servicelib/shutdown"
-    "go.uber.org/zap"
-)
+### Graceful Shutdown
 
-func main() {
-    // Create a logger
-    baseLogger, _ := zap.NewProduction()
-    logger := logging.NewContextLogger(baseLogger)
-    
-    // Create an HTTP server
-    server := &http.Server{
-        Addr:    ":8080",
-        Handler: http.DefaultServeMux,
-    }
-    
-    // Register a simple handler
-    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-        fmt.Fprintf(w, "Hello, World!")
-    })
-    
-    // Start the server in a goroutine
-    go func() {
-        logger.Info(context.Background(), "Starting server on :8080")
-        if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-            logger.Error(context.Background(), "Server error", zap.Error(err))
-        }
-    }()
-    
-    // Define shutdown function
-    shutdownFunc := func() error {
-        // Create a context with timeout for shutdown
-        ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-        defer cancel()
-        
-        logger.Info(ctx, "Shutting down HTTP server")
-        return server.Shutdown(ctx)
-    }
-    
-    // Wait for shutdown signal
-    ctx := context.Background()
-    err := shutdown.GracefulShutdown(ctx, logger, shutdownFunc)
-    if err != nil {
-        logger.Error(ctx, "Error during shutdown", zap.Error(err))
-    }
-    
-    logger.Info(ctx, "Server stopped")
-}
-```
+The `GracefulShutdown` function waits for termination signals and calls the provided shutdown function.
 
-### Programmatic Shutdown Initiation
+#### Basic Usage
 
-```go
-package main
+See the [Basic Usage example](../examples/shutdown/basic_usage_example.go) for a complete, runnable example of how to implement graceful shutdown.
 
-import (
-    "context"
-    "fmt"
-    "net/http"
-    "time"
-    
-    "github.com/abitofhelp/servicelib/logging"
-    "github.com/abitofhelp/servicelib/shutdown"
-    "go.uber.org/zap"
-)
+### Programmatic Shutdown
 
-func main() {
-    // Create a logger
-    baseLogger, _ := zap.NewProduction()
-    logger := logging.NewContextLogger(baseLogger)
-    
-    // Create an HTTP server
-    server := &http.Server{
-        Addr:    ":8080",
-        Handler: http.DefaultServeMux,
-    }
-    
-    // Register handlers
-    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-        fmt.Fprintf(w, "Hello, World!")
-    })
-    
-    // Add a shutdown endpoint
-    var shutdownTrigger context.CancelFunc
-    http.HandleFunc("/shutdown", func(w http.ResponseWriter, r *http.Request) {
-        w.WriteHeader(http.StatusOK)
-        w.Write([]byte("Shutting down server..."))
-        
-        // Trigger shutdown after response is sent
-        go func() {
-            time.Sleep(100 * time.Millisecond)
-            if shutdownTrigger != nil {
-                shutdownTrigger()
-            }
-        }()
-    })
-    
-    // Start the server in a goroutine
-    go func() {
-        logger.Info(context.Background(), "Starting server on :8080")
-        if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-            logger.Error(context.Background(), "Server error", zap.Error(err))
-        }
-    }()
-    
-    // Define shutdown function
-    shutdownFunc := func() error {
-        ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-        defer cancel()
-        
-        logger.Info(ctx, "Shutting down HTTP server")
-        return server.Shutdown(ctx)
-    }
-    
-    // Setup graceful shutdown with programmatic trigger
-    ctx := context.Background()
-    shutdownTrigger, errCh := shutdown.SetupGracefulShutdown(ctx, logger, shutdownFunc)
-    
-    // Wait for shutdown to complete
-    err := <-errCh
-    if err != nil {
-        logger.Error(ctx, "Error during shutdown", zap.Error(err))
-    }
-    
-    logger.Info(ctx, "Server stopped")
-}
-```
+The `SetupGracefulShutdown` function sets up a goroutine that will handle graceful shutdown, allowing for both signal-based and programmatic shutdown initiation.
+
+#### Programmatic Shutdown Initiation
+
+See the [Programmatic Shutdown example](../examples/shutdown/programmatic_shutdown_example.go) for a complete, runnable example of how to implement programmatic shutdown.
 
 ### Multiple Resource Shutdown
 
+When shutting down an application with multiple resources, it's important to shut them down in the correct order.
+
+#### Shutting Down Multiple Resources
+
+See the [Multiple Resource example](../examples/shutdown/multiple_resource_example.go) for a complete, runnable example of how to shut down multiple resources in the correct order.
+
+### Shutdown Function Signature
+
+The shutdown function passed to the shutdown module should have the following signature:
+
 ```go
-package main
+// Example of a shutdown function
+package example
 
-import (
-    "context"
-    "database/sql"
-    "fmt"
-    "net/http"
-    "time"
-    
-    "github.com/abitofhelp/servicelib/logging"
-    "github.com/abitofhelp/servicelib/shutdown"
-    _ "github.com/jackc/pgx/v5/stdlib"
-    "go.uber.org/zap"
-)
-
-func main() {
-    // Create a logger
-    baseLogger, _ := zap.NewProduction()
-    logger := logging.NewContextLogger(baseLogger)
-    
-    // Create a database connection
-    db, err := sql.Open("pgx", "postgres://user:password@localhost:5432/mydb?sslmode=disable")
-    if err != nil {
-        logger.Fatal(context.Background(), "Failed to connect to database", zap.Error(err))
-    }
-    
-    // Create an HTTP server
-    server := &http.Server{
-        Addr:    ":8080",
-        Handler: http.DefaultServeMux,
-    }
-    
-    // Register a simple handler
-    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-        // Use the database connection
-        var count int
-        err := db.QueryRowContext(r.Context(), "SELECT COUNT(*) FROM users").Scan(&count)
-        if err != nil {
-            http.Error(w, "Database error", http.StatusInternalServerError)
-            return
-        }
-        
-        fmt.Fprintf(w, "Hello, World! There are %d users.", count)
-    })
-    
-    // Start the server in a goroutine
-    go func() {
-        logger.Info(context.Background(), "Starting server on :8080")
-        if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-            logger.Error(context.Background(), "Server error", zap.Error(err))
-        }
-    }()
-    
-    // Define shutdown function for multiple resources
-    shutdownFunc := func() error {
-        // Create a context with timeout for shutdown
-        ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-        defer cancel()
-        
-        // Shutdown HTTP server first
-        logger.Info(ctx, "Shutting down HTTP server")
-        if err := server.Shutdown(ctx); err != nil {
-            logger.Error(ctx, "Error shutting down server", zap.Error(err))
-            return err
-        }
-        
-        // Then close database connection
-        logger.Info(ctx, "Closing database connection")
-        if err := db.Close(); err != nil {
-            logger.Error(ctx, "Error closing database", zap.Error(err))
-            return err
-        }
-        
-        return nil
-    }
-    
-    // Wait for shutdown signal
-    ctx := context.Background()
-    err = shutdown.GracefulShutdown(ctx, logger, shutdownFunc)
-    if err != nil {
-        logger.Error(ctx, "Error during shutdown", zap.Error(err))
-    }
-    
-    logger.Info(ctx, "Application stopped")
-}
+// ShutdownFunc is a function that performs shutdown operations
+type ShutdownFunc func() error
 ```
 
 ## Best Practices
