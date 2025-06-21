@@ -19,7 +19,7 @@ func Example() {
 
 	// Create an auth configuration
 	config := auth.DefaultConfig()
-	config.JWT.SecretKey = "example-secret-key"
+	config.JWT.SecretKey = "example-secret-key-that-is-at-least-32-chars"
 	config.OIDC.IssuerURL = "https://example.com/oidc"
 	config.OIDC.ClientID = "example-client-id"
 	config.OIDC.ClientSecret = "example-client-secret"
@@ -38,7 +38,7 @@ func Example() {
 	serviceConfig := authconfig.CreateServiceConfig(authCfg)
 
 	// Create JWT service
-	jwtService := jwt.NewService(jwtConfig, logger)
+	jwtService, _ := jwt.NewService(jwtConfig, logger)
 
 	// Add remote validator if enabled
 	if authCfg.GetJWT().GetRemote().GetEnabled() {

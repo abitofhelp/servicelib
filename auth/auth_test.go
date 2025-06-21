@@ -20,9 +20,9 @@ func TestNew(t *testing.T) {
 	logger := zap.NewNop()
 	ctx := context.Background()
 
-	// Test with valid configuration
+ // Test with valid configuration
 	config := auth.DefaultConfig()
-	config.JWT.SecretKey = "test-secret-key"
+	config.JWT.SecretKey = "test-secret-key-that-is-at-least-32-chars"
 	config.JWT.TokenDuration = 1 * time.Hour
 	config.JWT.Issuer = "test-issuer"
 
@@ -47,7 +47,7 @@ func TestNew(t *testing.T) {
 
 	// Test with OIDC configuration
 	oidcConfig := auth.DefaultConfig()
-	oidcConfig.JWT.SecretKey = "test-secret-key"
+	oidcConfig.JWT.SecretKey = "test-secret-key-that-is-at-least-32-chars"
 	oidcConfig.JWT.TokenDuration = 1 * time.Hour
 	oidcConfig.JWT.Issuer = "test-issuer"
 	oidcConfig.OIDC.IssuerURL = "https://example.com"
@@ -91,7 +91,7 @@ func TestMiddleware(t *testing.T) {
 	ctx := context.Background()
 
 	config := auth.DefaultConfig()
-	config.JWT.SecretKey = "test-secret-key"
+	config.JWT.SecretKey = "test-secret-key-that-is-at-least-32-chars"
 	config.JWT.TokenDuration = 1 * time.Hour
 	config.JWT.Issuer = "test-issuer"
 
@@ -118,7 +118,7 @@ func TestGenerateToken(t *testing.T) {
 	ctx := context.Background()
 
 	config := auth.DefaultConfig()
-	config.JWT.SecretKey = "test-secret-key"
+	config.JWT.SecretKey = "test-secret-key-that-is-at-least-32-chars"
 	config.JWT.TokenDuration = 1 * time.Hour
 	config.JWT.Issuer = "test-issuer"
 
@@ -147,7 +147,7 @@ func TestValidateToken(t *testing.T) {
 	ctx := context.Background()
 
 	config := auth.DefaultConfig()
-	config.JWT.SecretKey = "test-secret-key"
+	config.JWT.SecretKey = "test-secret-key-that-is-at-least-32-chars"
 	config.JWT.TokenDuration = 1 * time.Hour
 	config.JWT.Issuer = "test-issuer"
 
@@ -186,7 +186,7 @@ func TestIsAuthorized(t *testing.T) {
 	ctx := context.Background()
 
 	config := auth.DefaultConfig()
-	config.JWT.SecretKey = "test-secret-key"
+	config.JWT.SecretKey = "test-secret-key-that-is-at-least-32-chars"
 	config.JWT.TokenDuration = 1 * time.Hour
 	config.JWT.Issuer = "test-issuer"
 	config.Service.AdminRoleName = "admin"
@@ -230,7 +230,7 @@ func TestIsAdmin(t *testing.T) {
 	ctx := context.Background()
 
 	config := auth.DefaultConfig()
-	config.JWT.SecretKey = "test-secret-key"
+	config.JWT.SecretKey = "test-secret-key-that-is-at-least-32-chars"
 	config.JWT.TokenDuration = 1 * time.Hour
 	config.JWT.Issuer = "test-issuer"
 	config.Service.AdminRoleName = "admin"
@@ -267,7 +267,7 @@ func TestHasRole(t *testing.T) {
 	ctx := context.Background()
 
 	config := auth.DefaultConfig()
-	config.JWT.SecretKey = "test-secret-key"
+	config.JWT.SecretKey = "test-secret-key-that-is-at-least-32-chars"
 	config.JWT.TokenDuration = 1 * time.Hour
 	config.JWT.Issuer = "test-issuer"
 
@@ -300,7 +300,7 @@ func TestGetUserID(t *testing.T) {
 	ctx := context.Background()
 
 	config := auth.DefaultConfig()
-	config.JWT.SecretKey = "test-secret-key"
+	config.JWT.SecretKey = "test-secret-key-that-is-at-least-32-chars"
 	config.JWT.TokenDuration = 1 * time.Hour
 	config.JWT.Issuer = "test-issuer"
 
@@ -327,7 +327,7 @@ func TestGetUserRoles(t *testing.T) {
 	ctx := context.Background()
 
 	config := auth.DefaultConfig()
-	config.JWT.SecretKey = "test-secret-key"
+	config.JWT.SecretKey = "test-secret-key-that-is-at-least-32-chars"
 	config.JWT.TokenDuration = 1 * time.Hour
 	config.JWT.Issuer = "test-issuer"
 

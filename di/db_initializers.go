@@ -62,7 +62,10 @@ func PostgresInitializer(
 	contextLogger := logging.NewContextLogger(logger)
 
 	// Initialize PostgreSQL connection pool using the db package
-	pool, err := db.InitPostgresPool(ctx, dsn, DefaultTimeout)
+	pool, err := db.InitPostgresPool(ctx, db.PostgresConfig{
+		URI:     dsn,
+		Timeout: DefaultTimeout,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize PostgreSQL connection pool: %w", err)
 	}

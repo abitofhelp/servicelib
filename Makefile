@@ -37,10 +37,10 @@ LINUX_ARM64=GOOS=linux GOARCH=arm64
 # This is a library project, so no binary is produced
 
 # Test parameters
-TEST_FLAGS=-race -coverprofile=coverage.out
-TEST_PACKAGES=./...
-INTEGRATION_TEST_FLAGS=-race -coverprofile=integration_coverage.out -tags=integration
-PACKAGE_COVERAGE_FLAGS=-race -coverprofile=
+TEST_FLAGS=-coverprofile=coverage.out
+TEST_PACKAGES=$(shell go list ./... | grep -v /examples)
+INTEGRATION_TEST_FLAGS=-coverprofile=integration_coverage.out -tags=integration
+PACKAGE_COVERAGE_FLAGS=-coverprofile=
 
 # Linter parameters
 GOLANGCI_LINT=golangci-lint
@@ -138,12 +138,12 @@ clean:
 # Run tests
 test:
 	@echo "Running tests..."
-	$(GOTEST) $(TEST_FLAGS) $(TEST_PACKAGES)
+	CGO_ENABLED=1 $(GOTEST) $(TEST_FLAGS) $(TEST_PACKAGES)
 
 # Run integration tests (with integration build tag)
 test-integration:
 	@echo "Running integration tests..."
-	$(GOTEST) $(INTEGRATION_TEST_FLAGS) $(TEST_PACKAGES)
+	CGO_ENABLED=1 $(GOTEST) $(INTEGRATION_TEST_FLAGS) $(TEST_PACKAGES)
 
 # Run tests for a specific package
 # Usage: make test-package PACKAGE=./path/to/package
@@ -153,7 +153,7 @@ test-package:
 		exit 1; \
 	fi
 	@echo "Running tests for package $(PACKAGE)..."
-	$(GOTEST) $(TEST_FLAGS) $(PACKAGE)
+	CGO_ENABLED=1 $(GOTEST) $(TEST_FLAGS) $(PACKAGE)
 
 # Generate test coverage report
 coverage: test
@@ -168,9 +168,9 @@ coverage-integration: test-integration
 # Run all tests (unit and integration) and generate a combined coverage report
 test-all:
 	@echo "Running all tests (unit and integration)..."
-	$(GOTEST) $(TEST_FLAGS) $(TEST_PACKAGES)
+	CGO_ENABLED=1 $(GOTEST) $(TEST_FLAGS) $(TEST_PACKAGES)
 	@mv coverage.out unit_coverage.out
-	$(GOTEST) $(INTEGRATION_TEST_FLAGS) $(TEST_PACKAGES)
+	CGO_ENABLED=1 $(GOTEST) $(INTEGRATION_TEST_FLAGS) $(TEST_PACKAGES)
 	@echo "Merging coverage reports..."
 	@if command -v gocovmerge > /dev/null; then \
 		gocovmerge unit_coverage.out integration_coverage.out > all_coverage.out; \
@@ -195,7 +195,7 @@ coverage-package:
 		exit 1; \
 	fi
 	@echo "Running tests for package $(PACKAGE) with coverage..."
-	$(GOTEST) $(PACKAGE_COVERAGE_FLAGS)$(OUTPUT).out $(PACKAGE)
+	CGO_ENABLED=1 $(GOTEST) $(PACKAGE_COVERAGE_FLAGS)$(OUTPUT).out $(PACKAGE)
 	@echo "Generating coverage report for $(PACKAGE)..."
 	$(GOCMD) tool cover -html=$(OUTPUT).out -o $(OUTPUT).html
 

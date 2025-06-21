@@ -21,11 +21,12 @@ import (
 func TestRealMiddlewareHandler(t *testing.T) {
 	// Create a real JWT service
 	jwtConfig := jwt.Config{
-		SecretKey:     "test-secret",
+		SecretKey:     "test-secret-that-is-at-least-32-chars",
 		TokenDuration: 1 * time.Hour,
 		Issuer:        "test-issuer",
 	}
-	jwtService := jwt.NewService(jwtConfig, zap.NewNop())
+	jwtService, err := jwt.NewService(jwtConfig, zap.NewNop())
+	require.NoError(t, err)
 
 	// Generate a valid token
 	ctx := context.Background()
@@ -144,13 +145,14 @@ func TestRealMiddlewareWithOIDC(t *testing.T) {
 	// Skip this test in normal runs since it requires external OIDC provider
 	t.Skip("Skipping test that requires external OIDC provider")
 
-	// Create a real JWT service
+ // Create a real JWT service
 	jwtConfig := jwt.Config{
-		SecretKey:     "test-secret",
+		SecretKey:     "test-secret-that-is-at-least-32-chars",
 		TokenDuration: 1 * time.Hour,
 		Issuer:        "test-issuer",
 	}
-	jwtService := jwt.NewService(jwtConfig, zap.NewNop())
+	jwtService, err := jwt.NewService(jwtConfig, zap.NewNop())
+	require.NoError(t, err)
 
 	// Create a real OIDC service (this would fail in a real test without a real OIDC provider)
 	oidcConfig := oidc.Config{

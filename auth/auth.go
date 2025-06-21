@@ -222,11 +222,14 @@ func New(ctx context.Context, config Config, logger *zap.Logger) (*Auth, error) 
 	}
 
 	// Create JWT service
-	jwtService := jwt.NewService(jwt.Config{
+	jwtService, jwtErr := jwt.NewService(jwt.Config{
 		SecretKey:     config.JWT.SecretKey,
 		TokenDuration: config.JWT.TokenDuration,
 		Issuer:        config.JWT.Issuer,
 	}, logger)
+	if jwtErr != nil {
+		return nil, errors.WithOp(jwtErr, "auth.New")
+	}
 
 	// Add remote validator if enabled
 	if config.JWT.Remote.Enabled {

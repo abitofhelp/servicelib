@@ -10,6 +10,7 @@ import (
 
 	autherrors "github.com/abitofhelp/servicelib/auth/errors"
 	"github.com/abitofhelp/servicelib/auth/jwt"
+	"github.com/abitofhelp/servicelib/logging"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 )
@@ -59,14 +60,17 @@ func TestHandleAuthError(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create a middleware
 			middleware := &Middleware{
-				logger: zap.NewNop(),
+				logger: logging.NewContextLogger(zap.NewNop()),
 			}
 
 			// Create test response recorder
 			rr := httptest.NewRecorder()
 
+			// Create a context
+			ctx := context.Background()
+
 			// Call handleAuthError
-			middleware.handleAuthError(rr, tt.err)
+			middleware.handleAuthError(rr, tt.err, ctx)
 
 			// Check the response
 			assert.Equal(t, tt.expectedStatus, rr.Code)
