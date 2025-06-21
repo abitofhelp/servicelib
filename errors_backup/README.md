@@ -1,10 +1,11 @@
-# ServiceLib Error Handling
+# Error Handling Package
 
-This package provides a comprehensive error handling system for the application. It includes error codes, HTTP status mapping, contextual information, and utilities for creating, wrapping, and serializing errors.
+The `errors` package provides structured error types and handling with rich context information for Go applications. It extends Go's standard error handling with features like error categorization, error wrapping with context, and error codes.
 
-## Package Structure
+## Features
 
-The error handling package is organized into several sub-packages:
+- **Error Types**:
+  - Domain errors
   - Infrastructure errors
   - Application errors
   - Validation errors
