@@ -5,10 +5,10 @@ package jwt
 import (
 	"context"
 	"encoding/json"
+	stderrors "errors" // Standard errors package with alias
 	"fmt"
 	"io"
 	"net/http"
-	stderrors "errors" // Standard errors package with alias
 	"strings"
 	"time"
 
@@ -216,11 +216,14 @@ func NewRemoteValidator(config RemoteConfig, logger *zap.Logger) *RemoteValidato
 		config.Timeout = 10 * time.Second
 	}
 
+	// Create a context logger
+	contextLogger := logging.NewContextLogger(logger)
+
 	return &RemoteValidator{
 		config:     config,
-		logger:     logging.NewContextLogger(logger),
+		logger:     contextLogger,
 		tracer:     otel.Tracer("auth.jwt.remote"),
-		httpClient: NewRemoteClient(config),
+		httpClient: NewRemoteClient(config, contextLogger),
 	}
 }
 
@@ -263,15 +266,17 @@ func (v *RemoteValidator) ValidateToken(ctx context.Context, tokenString string)
 type RemoteClient struct {
 	config RemoteConfig
 	client *http.Client
+	logger *logging.ContextLogger
 }
 
 // NewRemoteClient creates a new remote client with the provided configuration.
-func NewRemoteClient(config RemoteConfig) *RemoteClient {
+func NewRemoteClient(config RemoteConfig, logger *logging.ContextLogger) *RemoteClient {
 	return &RemoteClient{
 		config: config,
 		client: &http.Client{
 			Timeout: config.Timeout,
 		},
+		logger: logger,
 	}
 }
 
@@ -282,11 +287,11 @@ type ValidationRequest struct {
 
 // ValidationResponse represents a response from the validation endpoint.
 type ValidationResponse struct {
-	Valid  bool    `json:"valid"`
-	UserID string  `json:"user_id"`
+	Valid  bool     `json:"valid"`
+	UserID string   `json:"user_id"`
 	Roles  []string `json:"roles"`
 	Scopes []string `json:"scopes"`
-	Error  string  `json:"error,omitempty"`
+	Error  string   `json:"error,omitempty"`
 }
 
 // ValidateToken sends a validation request to the remote service.
@@ -299,13 +304,17 @@ func (c *RemoteClient) ValidateToken(ctx context.Context, tokenString string) (*
 	// Marshal the request to JSON
 	reqJSON, err := json.Marshal(reqBody)
 	if err != nil {
-		return nil, errors.WithContext(errors.Wrap(err, "failed to marshal validation request"), "token_length", len(tokenString))
+		wrappedErr := errors.WithContext(errors.Wrap(err, "failed to marshal validation request"), "token_length", len(tokenString))
+		c.logger.Debug(ctx, "Failed to marshal validation request", zap.Error(wrappedErr))
+		return nil, wrappedErr
 	}
 
 	// Create the HTTP request
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.config.ValidationURL, strings.NewReader(string(reqJSON)))
 	if err != nil {
-		return nil, errors.WithContext(errors.Wrap(err, "failed to create validation request"), "url", c.config.ValidationURL)
+		wrappedErr := errors.WithContext(errors.Wrap(err, "failed to create validation request"), "url", c.config.ValidationURL)
+		c.logger.Debug(ctx, "Failed to create validation request", zap.Error(wrappedErr), zap.String("url", c.config.ValidationURL))
+		return nil, wrappedErr
 	}
 
 	// Set headers
@@ -318,45 +327,62 @@ func (c *RemoteClient) ValidateToken(ctx context.Context, tokenString string) (*
 	}
 
 	// Send the request
+	c.logger.Debug(ctx, "Sending validation request", zap.String("url", c.config.ValidationURL))
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return nil, errors.WithContext(errors.Wrap(err, "failed to send validation request"), "url", c.config.ValidationURL)
+		wrappedErr := errors.WithContext(errors.Wrap(err, "failed to send validation request"), "url", c.config.ValidationURL)
+		c.logger.Debug(ctx, "Failed to send validation request", zap.Error(wrappedErr), zap.String("url", c.config.ValidationURL))
+		return nil, wrappedErr
 	}
 	defer resp.Body.Close()
 
 	// Read the response body
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, errors.WithContext(errors.Wrap(err, "failed to read validation response"), "status", resp.Status)
+		wrappedErr := errors.WithContext(errors.Wrap(err, "failed to read validation response"), "status", resp.Status)
+		c.logger.Debug(ctx, "Failed to read validation response", zap.Error(wrappedErr), zap.String("status", resp.Status))
+		return nil, wrappedErr
 	}
 
 	// Check the status code
 	if resp.StatusCode != http.StatusOK {
-		err := errors.WithContext(errors.ErrInvalidToken, "status", resp.Status)
-		err = errors.WithContext(err, "response", string(respBody))
-		return nil, err
+		wrappedErr := errors.WithContext(errors.ErrInvalidToken, "status", resp.Status)
+		wrappedErr = errors.WithContext(wrappedErr, "response", string(respBody))
+		c.logger.Debug(ctx, "Validation request returned non-OK status", 
+			zap.Error(wrappedErr), 
+			zap.String("status", resp.Status), 
+			zap.String("response", string(respBody)))
+		return nil, wrappedErr
 	}
 
 	// Parse the response
 	var validationResp ValidationResponse
 	if err := json.Unmarshal(respBody, &validationResp); err != nil {
-		return nil, errors.WithContext(errors.Wrap(err, "failed to parse validation response"), "response", string(respBody))
+		wrappedErr := errors.WithContext(errors.Wrap(err, "failed to parse validation response"), "response", string(respBody))
+		c.logger.Debug(ctx, "Failed to parse validation response", zap.Error(wrappedErr), zap.String("response", string(respBody)))
+		return nil, wrappedErr
 	}
 
 	// Check if the token is valid
 	if !validationResp.Valid {
+		var wrappedErr error
 		if validationResp.Error != "" {
-			return nil, errors.WithMessage(errors.ErrInvalidToken, validationResp.Error)
+			wrappedErr = errors.WithMessage(errors.ErrInvalidToken, validationResp.Error)
+			c.logger.Debug(ctx, "Token is not valid", zap.Error(wrappedErr), zap.String("error", validationResp.Error))
+		} else {
+			wrappedErr = errors.WithMessage(errors.ErrInvalidToken, "token is not valid")
+			c.logger.Debug(ctx, "Token is not valid", zap.Error(wrappedErr))
 		}
-		return nil, errors.WithMessage(errors.ErrInvalidToken, "token is not valid")
+		return nil, wrappedErr
 	}
 
 	// Create claims from the response
 	claims := &Claims{
-		UserID:    validationResp.UserID,
-		Roles:     validationResp.Roles,
-		Scopes:    validationResp.Scopes,
+		UserID: validationResp.UserID,
+		Roles:  validationResp.Roles,
+		Scopes: validationResp.Scopes,
 	}
 
+	c.logger.Debug(ctx, "Token validated successfully", zap.String("user_id", claims.UserID))
 	return claims, nil
 }
