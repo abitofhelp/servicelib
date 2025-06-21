@@ -12,7 +12,10 @@ import (
 	"github.com/abitofhelp/servicelib/errors"
 )
 
-func main() {
+// errorHandlingMain is the main function for this example.
+// It's not named "main" to avoid conflicts with other example files in the same package.
+// To run this example, rename this function to "main" and comment out the main function in other example files.
+func errorHandlingMain() {
 	fmt.Println("Context Error Handling Examples")
 	fmt.Println("==============================")
 

@@ -96,6 +96,12 @@ func NewService(config Config, logger *zap.Logger) (*Service, error) {
 		logger = zap.NewNop()
 	}
 
+	// Create a background context for logging
+	ctx := context.Background()
+
+	// Create a context logger
+	contextLogger := logging.NewContextLogger(logger)
+
 	// Set default values if not provided
 	if config.SigningMethod == "" {
 		config.SigningMethod = SigningMethodHS256
@@ -110,7 +116,7 @@ func NewService(config Config, logger *zap.Logger) (*Service, error) {
 		err := errors.WithContext(errors.ErrInvalidConfig, "secret_key_length", len(config.SecretKey))
 		err = errors.WithOp(err, "jwt.NewService")
 		err = errors.WithMessage(err, fmt.Sprintf("secret key must be at least %d characters", config.MinSecretKeyLength))
-		logger.Error("Invalid JWT configuration", zap.Error(err))
+		contextLogger.Error(ctx, "Invalid JWT configuration", zap.Error(err))
 		return nil, err
 	}
 
@@ -128,12 +134,18 @@ func NewService(config Config, logger *zap.Logger) (*Service, error) {
 
 // WithRemoteValidator adds a remote validator to the JWT service.
 func (s *Service) WithRemoteValidator(config RemoteConfig) (*Service, error) {
+	// Create a background context for logging
+	ctx := context.Background()
+
+	// Get a context logger for this operation
+	logger := s.getContextLogger(ctx)
+
 	// Validate the ValidationURL
 	if config.ValidationURL == "" {
 		err := errors.WithContext(errors.ErrInvalidConfig, "validation_url", config.ValidationURL)
 		err = errors.WithOp(err, "jwt.Service.WithRemoteValidator")
 		err = errors.WithMessage(err, "validation URL cannot be empty")
-		s.logger.Error("Invalid remote validator configuration", zap.Error(err))
+		logger.Error(ctx, "Invalid remote validator configuration", zap.Error(err))
 		return nil, err
 	}
 
@@ -142,7 +154,7 @@ func (s *Service) WithRemoteValidator(config RemoteConfig) (*Service, error) {
 	if err != nil {
 		err = errors.WithContext(errors.Wrap(err, "invalid validation URL"), "validation_url", config.ValidationURL)
 		err = errors.WithOp(err, "jwt.Service.WithRemoteValidator")
-		s.logger.Error("Invalid remote validator configuration", zap.Error(err))
+		logger.Error(ctx, "Invalid remote validator configuration", zap.Error(err))
 		return nil, err
 	}
 
@@ -359,12 +371,15 @@ func (s *Service) RevokeTokenByString(ctx context.Context, tokenString string) e
 	ctx, span := s.tracer.Start(ctx, "jwt.Service.RevokeTokenByString")
 	defer span.End()
 
+	// Get a context logger for this operation
+	logger := s.getContextLogger(ctx)
+
 	span.SetAttributes(attribute.String("token.length", strconv.Itoa(len(tokenString))))
 
 	// Parse the token to get its ID and expiration time
 	claims, err := s.ValidateToken(ctx, tokenString)
 	if err != nil {
-		s.logger.Error("Failed to revoke token: token validation failed", zap.Error(err))
+		logger.Error(ctx, "Failed to revoke token: token validation failed", zap.Error(err))
 		return err
 	}
 
@@ -383,11 +398,17 @@ func (s *Service) isTokenRevoked(tokenID string) bool {
 
 // cleanupRevokedTokens removes expired revoked tokens from the map.
 func (s *Service) cleanupRevokedTokens() {
+	// Create a background context for logging
+	ctx := context.Background()
+
+	// Get a context logger for this operation
+	logger := s.getContextLogger(ctx)
+
 	now := time.Now()
 	for tokenID, expiresAt := range s.revokedTokens {
 		if now.After(expiresAt) {
 			delete(s.revokedTokens, tokenID)
-			s.logger.Debug("Removed expired revoked token", zap.String("token_id", tokenID))
+			logger.Debug(ctx, "Removed expired revoked token", zap.String("token_id", tokenID))
 		}
 	}
 }

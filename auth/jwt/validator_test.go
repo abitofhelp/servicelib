@@ -34,7 +34,7 @@ func TestNewLocalValidator(t *testing.T) {
 func TestLocalValidator_ValidateToken(t *testing.T) {
 	logger := zap.NewNop()
 	config := jwt.Config{
-		SecretKey:     "test-secret",
+		SecretKey:     "test-secret-that-is-at-least-32-chars",
 		TokenDuration: 1 * time.Hour,
 		Issuer:        "test-issuer",
 	}
@@ -42,7 +42,8 @@ func TestLocalValidator_ValidateToken(t *testing.T) {
 	ctx := context.Background()
 
 	// Create a JWT service to generate tokens for testing
-	service := jwt.NewService(config, logger)
+	service, err := jwt.NewService(config, logger)
+	require.NoError(t, err)
 
 	// Test with valid token
 	userID := "user123"
@@ -72,11 +73,12 @@ func TestLocalValidator_ValidateToken(t *testing.T) {
 
 	// Test with expired token
 	expiredConfig := jwt.Config{
-		SecretKey:     "test-secret",
+		SecretKey:     "test-secret-that-is-at-least-32-chars",
 		TokenDuration: -1 * time.Hour, // Negative duration to create expired token
 		Issuer:        "test-issuer",
 	}
-	expiredService := jwt.NewService(expiredConfig, logger)
+	expiredService, err := jwt.NewService(expiredConfig, logger)
+	require.NoError(t, err)
 	expiredToken, err := expiredService.GenerateToken(ctx, userID, roles, []string{}, []string{})
 	require.NoError(t, err)
 
@@ -87,11 +89,12 @@ func TestLocalValidator_ValidateToken(t *testing.T) {
 
 	// Test with token signed with different key
 	differentConfig := jwt.Config{
-		SecretKey:     "different-secret",
+		SecretKey:     "different-secret-that-is-at-least-32-chars",
 		TokenDuration: 1 * time.Hour,
 		Issuer:        "test-issuer",
 	}
-	differentService := jwt.NewService(differentConfig, logger)
+	differentService, err := jwt.NewService(differentConfig, logger)
+	require.NoError(t, err)
 	differentToken, err := differentService.GenerateToken(ctx, userID, roles, []string{}, []string{})
 	require.NoError(t, err)
 

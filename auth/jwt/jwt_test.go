@@ -19,26 +19,29 @@ func TestNewService(t *testing.T) {
 	// Test with logger
 	logger := zap.NewExample()
 	config := jwt.Config{
-		SecretKey:     "test-secret",
+		SecretKey:     "test-secret-that-is-at-least-32-chars",
 		TokenDuration: 1 * time.Hour,
 		Issuer:        "test-issuer",
 	}
-	service := jwt.NewService(config, logger)
+	service, err := jwt.NewService(config, logger)
+	assert.NoError(t, err)
 	assert.NotNil(t, service)
 
 	// Test with nil logger (should use NopLogger)
-	service = jwt.NewService(config, nil)
+	service, err = jwt.NewService(config, nil)
+	assert.NoError(t, err)
 	assert.NotNil(t, service)
 }
 
 func TestGenerateToken(t *testing.T) {
 	logger := zap.NewNop()
 	config := jwt.Config{
-		SecretKey:     "test-secret",
+		SecretKey:     "test-secret-that-is-at-least-32-chars",
 		TokenDuration: 1 * time.Hour,
 		Issuer:        "test-issuer",
 	}
-	service := jwt.NewService(config, logger)
+	service, err := jwt.NewService(config, logger)
+	require.NoError(t, err)
 
 	// Test successful token generation
 	ctx := context.Background()
@@ -78,11 +81,12 @@ func TestGenerateToken(t *testing.T) {
 func TestValidateToken(t *testing.T) {
 	logger := zap.NewNop()
 	config := jwt.Config{
-		SecretKey:     "test-secret",
+		SecretKey:     "test-secret-that-is-at-least-32-chars",
 		TokenDuration: 1 * time.Hour,
 		Issuer:        "test-issuer",
 	}
-	service := jwt.NewService(config, logger)
+	service, err := jwt.NewService(config, logger)
+	require.NoError(t, err)
 	ctx := context.Background()
 
 	// Generate a valid token for testing
@@ -114,11 +118,12 @@ func TestValidateToken(t *testing.T) {
 
 	// Test with expired token
 	expiredConfig := jwt.Config{
-		SecretKey:     "test-secret",
+		SecretKey:     "test-secret-that-is-at-least-32-chars",
 		TokenDuration: -1 * time.Hour, // Negative duration to create expired token
 		Issuer:        "test-issuer",
 	}
-	expiredService := jwt.NewService(expiredConfig, logger)
+	expiredService, err := jwt.NewService(expiredConfig, logger)
+	require.NoError(t, err)
 	expiredToken, err := expiredService.GenerateToken(ctx, userID, roles, []string{}, []string{})
 	require.NoError(t, err)
 
@@ -129,11 +134,12 @@ func TestValidateToken(t *testing.T) {
 
 	// Test with token signed with different key
 	differentConfig := jwt.Config{
-		SecretKey:     "different-secret",
+		SecretKey:     "different-secret-that-is-at-least-32-chars",
 		TokenDuration: 1 * time.Hour,
 		Issuer:        "test-issuer",
 	}
-	differentService := jwt.NewService(differentConfig, logger)
+	differentService, err := jwt.NewService(differentConfig, logger)
+	require.NoError(t, err)
 	differentToken, err := differentService.GenerateToken(ctx, userID, roles, []string{}, []string{})
 	require.NoError(t, err)
 
@@ -173,11 +179,12 @@ func TestExtractTokenFromHeader(t *testing.T) {
 func TestWithRemoteValidator(t *testing.T) {
 	logger := zap.NewNop()
 	config := jwt.Config{
-		SecretKey:     "test-secret",
+		SecretKey:     "test-secret-that-is-at-least-32-chars",
 		TokenDuration: 1 * time.Hour,
 		Issuer:        "test-issuer",
 	}
-	service := jwt.NewService(config, logger)
+	service, err := jwt.NewService(config, logger)
+	require.NoError(t, err)
 
 	// Add a remote validator
 	remoteConfig := jwt.RemoteConfig{
@@ -186,7 +193,8 @@ func TestWithRemoteValidator(t *testing.T) {
 		ClientSecret:  "test-client-secret",
 		Timeout:       15 * time.Second,
 	}
-	result := service.WithRemoteValidator(remoteConfig)
+	result, err := service.WithRemoteValidator(remoteConfig)
+	require.NoError(t, err)
 
 	// Check that the method returns the service itself for chaining
 	assert.Equal(t, service, result)
@@ -211,11 +219,12 @@ func TestWithRemoteValidator(t *testing.T) {
 func TestTokenWithMalformedClaims(t *testing.T) {
 	logger := zap.NewNop()
 	config := jwt.Config{
-		SecretKey:     "test-secret",
+		SecretKey:     "test-secret-that-is-at-least-32-chars",
 		TokenDuration: 1 * time.Hour,
 		Issuer:        "test-issuer",
 	}
-	service := jwt.NewService(config, logger)
+	service, err := jwt.NewService(config, logger)
+	require.NoError(t, err)
 	ctx := context.Background()
 
 	// Create a token with valid signature but missing user ID

@@ -10,6 +10,7 @@ import (
 
 	"github.com/abitofhelp/servicelib/auth/errors"
 	"github.com/abitofhelp/servicelib/auth/middleware"
+	"github.com/abitofhelp/servicelib/logging"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -50,7 +51,7 @@ type Service struct {
 	config Config
 
 	// logger is used for logging service operations and errors
-	logger *zap.Logger
+	logger *logging.ContextLogger
 
 	// tracer is used for tracing service operations
 	tracer trace.Tracer
@@ -64,7 +65,7 @@ func NewService(config Config, logger *zap.Logger) *Service {
 
 	return &Service{
 		config: config,
-		logger: logger,
+		logger: logging.NewContextLogger(logger),
 		tracer: otel.Tracer("auth.service"),
 	}
 }
@@ -80,7 +81,7 @@ func (s *Service) IsAuthorized(ctx context.Context, operation string) (bool, err
 	if !middleware.IsAuthenticated(ctx) {
 		err := errors.WithOp(errors.ErrUnauthorized, "service.IsAuthorized")
 		err = errors.WithMessage(err, "user is not authenticated")
-		s.logger.Debug("User is not authenticated")
+		s.logger.Debug(ctx, "User is not authenticated")
 		return false, err
 	}
 
@@ -89,7 +90,7 @@ func (s *Service) IsAuthorized(ctx context.Context, operation string) (bool, err
 	if !ok || len(roles) == 0 {
 		err := errors.WithOp(errors.ErrUnauthorized, "service.IsAuthorized")
 		err = errors.WithMessage(err, "user has no roles")
-		s.logger.Debug("User has no roles")
+		s.logger.Debug(ctx, "User has no roles")
 		return false, err
 	}
 
@@ -101,7 +102,7 @@ func (s *Service) IsAuthorized(ctx context.Context, operation string) (bool, err
 
 	if isAdmin {
 		// Admins can do anything
-		s.logger.Debug("User is admin, authorization granted", zap.String("operation", operation))
+		s.logger.Debug(ctx, "User is admin, authorization granted", zap.String("operation", operation))
 		return true, nil
 	}
 
@@ -125,7 +126,7 @@ func (s *Service) IsAuthorized(ctx context.Context, operation string) (bool, err
 
 	// Read-only users can only perform read operations
 	if hasReadOnlyRole && isReadOperation {
-		s.logger.Debug("User has read-only role and operation is read-only, authorization granted",
+		s.logger.Debug(ctx, "User has read-only role and operation is read-only, authorization granted",
 			zap.String("operation", operation))
 		return true, nil
 	}
@@ -134,13 +135,13 @@ func (s *Service) IsAuthorized(ctx context.Context, operation string) (bool, err
 	err = errors.WithOp(errors.ErrForbidden, "service.IsAuthorized")
 	err = errors.WithContext(err, "operation", operation)
 	err = errors.WithMessage(err, "user is not authorized to perform this operation")
-	s.logger.Debug("User is not authorized",
+	s.logger.Debug(ctx, "User is not authorized",
 		zap.String("operation", operation),
 		zap.Strings("roles", roles))
 	return false, err
 }
 
-// IsAdmin checks if the user has admin role.
+	// IsAdmin checks if the user has admin role.
 func (s *Service) IsAdmin(ctx context.Context) (bool, error) {
 	ctx, span := s.tracer.Start(ctx, "service.IsAdmin")
 	defer span.End()
@@ -150,7 +151,7 @@ func (s *Service) IsAdmin(ctx context.Context) (bool, error) {
 	if !ok {
 		err := errors.WithOp(errors.ErrUnauthorized, "service.IsAdmin")
 		err = errors.WithMessage(err, "user roles not found in context")
-		s.logger.Debug("User roles not found in context")
+		s.logger.Debug(ctx, "User roles not found in context")
 		return false, err
 	}
 
@@ -164,7 +165,7 @@ func (s *Service) IsAdmin(ctx context.Context) (bool, error) {
 	return false, nil
 }
 
-// HasRole checks if the user has a specific role.
+	// HasRole checks if the user has a specific role.
 func (s *Service) HasRole(ctx context.Context, role string) (bool, error) {
 	ctx, span := s.tracer.Start(ctx, "service.HasRole")
 	defer span.End()
@@ -176,7 +177,7 @@ func (s *Service) HasRole(ctx context.Context, role string) (bool, error) {
 	if !ok {
 		err := errors.WithOp(errors.ErrUnauthorized, "service.HasRole")
 		err = errors.WithMessage(err, "user roles not found in context")
-		s.logger.Debug("User roles not found in context")
+		s.logger.Debug(ctx, "User roles not found in context")
 		return false, err
 	}
 
@@ -190,25 +191,25 @@ func (s *Service) HasRole(ctx context.Context, role string) (bool, error) {
 	return false, nil
 }
 
-// GetUserID retrieves the user ID from the context.
+	// GetUserID retrieves the user ID from the context.
 func (s *Service) GetUserID(ctx context.Context) (string, error) {
 	userID, ok := middleware.GetUserID(ctx)
 	if !ok {
 		err := errors.WithOp(errors.ErrUnauthorized, "service.GetUserID")
 		err = errors.WithMessage(err, "user ID not found in context")
-		s.logger.Debug("User ID not found in context")
+		s.logger.Debug(ctx, "User ID not found in context")
 		return "", err
 	}
 	return userID, nil
 }
 
-// GetUserRoles retrieves the user roles from the context.
+	// GetUserRoles retrieves the user roles from the context.
 func (s *Service) GetUserRoles(ctx context.Context) ([]string, error) {
 	roles, ok := middleware.GetUserRoles(ctx)
 	if !ok {
 		err := errors.WithOp(errors.ErrUnauthorized, "service.GetUserRoles")
 		err = errors.WithMessage(err, "user roles not found in context")
-		s.logger.Debug("User roles not found in context")
+		s.logger.Debug(ctx, "User roles not found in context")
 		return nil, err
 	}
 	return roles, nil

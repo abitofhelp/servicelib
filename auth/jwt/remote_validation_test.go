@@ -18,11 +18,12 @@ import (
 func TestRemoteValidationSuccess(t *testing.T) {
 	logger := zap.NewNop()
 	config := jwt.Config{
-		SecretKey:     "test-secret",
+		SecretKey:     "test-secret-that-is-at-least-32-chars",
 		TokenDuration: 1 * time.Hour,
 		Issuer:        "test-issuer",
 	}
-	service := jwt.NewService(config, logger)
+	service, err := jwt.NewService(config, logger)
+	require.NoError(t, err)
 	ctx := context.Background()
 
 	// Create expected claims
@@ -37,7 +38,10 @@ func TestRemoteValidationSuccess(t *testing.T) {
 	mockValidator := NewSuccessfulMockValidator(expectedClaims)
 
 	// Set the mock validator as the remote validator
-	service.WithRemoteValidator(jwt.RemoteConfig{})
+	_, err = service.WithRemoteValidator(jwt.RemoteConfig{
+		ValidationURL: "https://test.com/validate",
+	})
+	require.NoError(t, err)
 	// Access the private field using reflection
 	setRemoteValidator(t, service, mockValidator)
 
@@ -60,11 +64,12 @@ func TestRemoteValidationSuccess(t *testing.T) {
 func TestRemoteValidationFailure(t *testing.T) {
 	logger := zap.NewNop()
 	config := jwt.Config{
-		SecretKey:     "test-secret",
+		SecretKey:     "test-secret-that-is-at-least-32-chars",
 		TokenDuration: 1 * time.Hour,
 		Issuer:        "test-issuer",
 	}
-	service := jwt.NewService(config, logger)
+	service, err := jwt.NewService(config, logger)
+	require.NoError(t, err)
 	ctx := context.Background()
 
 	// Generate a valid token for local validation
@@ -79,7 +84,10 @@ func TestRemoteValidationFailure(t *testing.T) {
 	mockValidator := NewFailingMockValidator(customError)
 
 	// Set the mock validator as the remote validator
-	service.WithRemoteValidator(jwt.RemoteConfig{})
+	_, err = service.WithRemoteValidator(jwt.RemoteConfig{
+		ValidationURL: "https://test.com/validate",
+	})
+	require.NoError(t, err)
 	// Access the private field using reflection
 	setRemoteValidator(t, service, mockValidator)
 
@@ -100,11 +108,12 @@ func TestRemoteValidationFailure(t *testing.T) {
 func TestRemoteValidationNotImplemented(t *testing.T) {
 	logger := zap.NewNop()
 	config := jwt.Config{
-		SecretKey:     "test-secret",
+		SecretKey:     "test-secret-that-is-at-least-32-chars",
 		TokenDuration: 1 * time.Hour,
 		Issuer:        "test-issuer",
 	}
-	service := jwt.NewService(config, logger)
+	service, err := jwt.NewService(config, logger)
+	require.NoError(t, err)
 	ctx := context.Background()
 
 	// Generate a valid token for local validation
@@ -118,7 +127,10 @@ func TestRemoteValidationNotImplemented(t *testing.T) {
 	mockValidator := NewFailingMockValidator(autherrors.ErrNotImplemented)
 
 	// Set the mock validator as the remote validator
-	service.WithRemoteValidator(jwt.RemoteConfig{})
+	_, err = service.WithRemoteValidator(jwt.RemoteConfig{
+		ValidationURL: "https://test.com/validate",
+	})
+	require.NoError(t, err)
 	// Access the private field using reflection
 	setRemoteValidator(t, service, mockValidator)
 

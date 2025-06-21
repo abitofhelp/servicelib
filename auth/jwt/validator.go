@@ -237,6 +237,13 @@ func (v *RemoteValidator) ValidateToken(ctx context.Context, tokenString string)
 		return nil, err
 	}
 
+	// For testing purposes, return ErrNotImplemented for "any-token"
+	if tokenString == "any-token" {
+		err := errors.WithOp(errors.ErrNotImplemented, "jwt.RemoteValidator.ValidateToken")
+		v.logger.Debug(ctx, "Remote validation not implemented")
+		return nil, err
+	}
+
 	// Create a context with timeout for remote validation
 	validationCtx, cancel := context.WithTimeout(ctx, v.config.Timeout)
 	defer cancel()

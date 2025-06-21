@@ -14,6 +14,7 @@ import (
 	"github.com/abitofhelp/servicelib/auth/errors"
 	"github.com/abitofhelp/servicelib/auth/jwt"
 	"github.com/abitofhelp/servicelib/auth/oidc"
+	"github.com/abitofhelp/servicelib/logging"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -58,7 +59,7 @@ type Middleware struct {
 	config Config
 
 	// logger is used for logging middleware operations and errors
-	logger *zap.Logger
+	logger *logging.ContextLogger
 
 	// tracer is used for tracing middleware operations
 	tracer trace.Tracer
@@ -73,7 +74,7 @@ func NewMiddleware(jwtService *jwt.Service, config Config, logger *zap.Logger) *
 	return &Middleware{
 		jwtService: jwtService,
 		config:     config,
-		logger:     logger,
+		logger:     logging.NewContextLogger(logger),
 		tracer:     otel.Tracer("auth.middleware"),
 	}
 }
@@ -88,7 +89,7 @@ func NewMiddlewareWithOIDC(jwtService *jwt.Service, oidcService *oidc.Service, c
 		jwtService:  jwtService,
 		oidcService: oidcService,
 		config:      config,
-		logger:      logger,
+		logger:      logging.NewContextLogger(logger),
 		tracer:      otel.Tracer("auth.middleware"),
 	}
 }
@@ -102,7 +103,7 @@ func (m *Middleware) Handler(next http.Handler) http.Handler {
 		// Check if the path should skip authentication
 		for _, path := range m.config.SkipPaths {
 			if strings.HasPrefix(r.URL.Path, path) {
-				m.logger.Debug("Skipping authentication for path", zap.String("path", r.URL.Path))
+				m.logger.Debug(ctx, "Skipping authentication for path", zap.String("path", r.URL.Path))
 				next.ServeHTTP(w, r.WithContext(ctx))
 				return
 			}
@@ -114,13 +115,13 @@ func (m *Middleware) Handler(next http.Handler) http.Handler {
 			if m.config.RequireAuth {
 				err := errors.WithOp(errors.ErrMissingToken, "middleware.Handler")
 				err = errors.WithMessage(err, "authorization header is required")
-				m.logger.Debug("No Authorization header provided")
+				m.logger.Debug(ctx, "No Authorization header provided")
 				http.Error(w, "Authorization required", http.StatusUnauthorized)
 				return
 			}
 
 			// No token provided, continue as unauthenticated
-			m.logger.Debug("No Authorization header provided, continuing as unauthenticated")
+			m.logger.Debug(ctx, "No Authorization header provided, continuing as unauthenticated")
 			next.ServeHTTP(w, r.WithContext(ctx))
 			return
 		}
@@ -129,7 +130,7 @@ func (m *Middleware) Handler(next http.Handler) http.Handler {
 		tokenString, err := jwt.ExtractTokenFromHeader(authHeader)
 		if err != nil {
 			err = errors.WithOp(err, "middleware.Handler")
-			m.logger.Debug("Invalid Authorization header format", zap.Error(err))
+			m.logger.Debug(ctx, "Invalid Authorization header format", zap.Error(err))
 			http.Error(w, "Invalid Authorization header format", http.StatusUnauthorized)
 			return
 		}
@@ -142,11 +143,11 @@ func (m *Middleware) Handler(next http.Handler) http.Handler {
 		if m.oidcService != nil {
 			claims, err = m.oidcService.ValidateToken(ctx, tokenString)
 			if err != nil {
-				m.logger.Debug("OIDC validation failed, trying JWT", zap.Error(err))
+				m.logger.Debug(ctx, "OIDC validation failed, trying JWT", zap.Error(err))
 				// Fall back to JWT validation
 				claims, err = m.jwtService.ValidateToken(ctx, tokenString)
 				if err != nil {
-					m.handleAuthError(w, err)
+					m.handleAuthError(w, err, ctx)
 					return
 				}
 			}
@@ -154,7 +155,7 @@ func (m *Middleware) Handler(next http.Handler) http.Handler {
 			// Use JWT validation
 			claims, err = m.jwtService.ValidateToken(ctx, tokenString)
 			if err != nil {
-				m.handleAuthError(w, err)
+				m.handleAuthError(w, err, ctx)
 				return
 			}
 		}
@@ -178,7 +179,7 @@ func (m *Middleware) Handler(next http.Handler) http.Handler {
 }
 
 // handleAuthError handles authentication errors.
-func (m *Middleware) handleAuthError(w http.ResponseWriter, err error) {
+func (m *Middleware) handleAuthError(w http.ResponseWriter, err error, ctx context.Context) {
 	status := http.StatusUnauthorized
 	message := "Invalid token"
 
@@ -192,7 +193,7 @@ func (m *Middleware) handleAuthError(w http.ResponseWriter, err error) {
 		message = "Invalid token claims"
 	}
 
-	m.logger.Debug("Authentication error", zap.Error(err), zap.String("message", message))
+	m.logger.Debug(ctx, "Authentication error", zap.Error(err), zap.String("message", message))
 	http.Error(w, message, status)
 }
 
