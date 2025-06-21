@@ -1,6 +1,6 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
-// Package logging provides centralized logging functionality for the family service.
+// Package logging provides centralized logging functionality for services.
 // It wraps the zap logging library and adds features like trace ID extraction from context
 // and context-aware logging methods. This package is part of the infrastructure layer
 // and provides logging capabilities to all other layers of the application.

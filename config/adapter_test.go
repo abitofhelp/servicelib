@@ -297,7 +297,7 @@ func TestGenericDatabaseConfigAdapter_GetCollectionName(t *testing.T) {
 		{
 			name:         "Family",
 			entityType:   "family",
-			expectedName: "familys", // Simple pluralization
+			expectedName: "families",
 		},
 		{
 			name:         "User",

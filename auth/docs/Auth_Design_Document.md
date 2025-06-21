@@ -3,7 +3,7 @@
 ## 1. Introduction
 
 ### 1.1 Purpose
-This document outlines the design for implementing authentication and authorization in the Family Service using JWT tokens. The solution ensures that all requests have a valid access token and that users are authorized to access specific endpoints based on their roles.
+This document outlines the design for implementing authentication and authorization in the Application using JWT tokens. The solution ensures that all requests have a valid access token and that users are authorized to access specific endpoints based on their roles.
 
 ### 1.2 Scope
 The authentication and authorization system will:
@@ -15,7 +15,7 @@ The authentication and authorization system will:
 ### 1.3 References
 - OAuth 2.0 and OpenID Connect (OIDC) standards
 - JWT (JSON Web Token) specification
-- Family Service GraphQL schema
+- Application GraphQL schema
 
 ## 2. Requirements
 
@@ -208,7 +208,7 @@ The JWT token will have the following structure:
 {
   "sub": "user-id",
   "roles": ["admin", "authuser"],
-  "iss": "family-service",
+  "iss": "application",
   "exp": 1619712000,
   "iat": 1619625600,
   "nbf": 1619625600
@@ -270,7 +270,7 @@ Remote validation provides additional security by checking if a token has been r
 ```
 +------------------+     +------------------+     +------------------+
 |                  |     |                  |     |                  |
-|  Client          |---->|  API Gateway     |---->|  Family Service  |
+|  Client          |---->|  API Gateway     |---->|  Application     |
 |                  |     |                  |     |                  |
 +------------------+     +------------------+     +------------------+
                                |
@@ -292,7 +292,7 @@ auth:
   jwt:
     secretKey: ${JWT_SECRET_KEY}
     tokenDuration: 24h
-    issuer: family-service
+    issuer: application
     remote:
       enabled: ${JWT_REMOTE_ENABLED:-false}
       validationURL: ${JWT_REMOTE_VALIDATION_URL}
@@ -337,6 +337,6 @@ auth:
 
 ## 7. Conclusion
 
-This design document outlines a comprehensive approach to implementing authentication and authorization in the Family Service using JWT tokens. The solution ensures that all requests have a valid access token and that users are authorized to access specific endpoints based on their roles.
+This design document outlines a comprehensive approach to implementing authentication and authorization in the Application using JWT tokens. The solution ensures that all requests have a valid access token and that users are authorized to access specific endpoints based on their roles.
 
 The implementation will leverage the existing auth-related code in the repository and follow the architectural patterns established in the project. The solution is designed to be secure, performant, and maintainable.

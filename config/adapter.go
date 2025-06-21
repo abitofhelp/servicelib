@@ -137,6 +137,10 @@ func (a *GenericDatabaseConfigAdapter[T]) GetDatabaseName() string {
 
 // GetCollectionName returns the collection/table name for a given entity type
 func (a *GenericDatabaseConfigAdapter[T]) GetCollectionName(entityType string) string {
-	// Simple pluralization
+	// Special case for "family" -> "families"
+	if entityType == "family" {
+		return "families"
+	}
+	// Simple pluralization for other cases
 	return entityType + "s"
 }
