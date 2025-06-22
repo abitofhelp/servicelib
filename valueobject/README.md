@@ -17,7 +17,7 @@ This package provides a collection of common Value Objects that can be used in y
 
 | Value Object | Description |
 |--------------|-------------|
-| Address | Represents a physical address with validation |
+| Address | Represents a physical address with validation (moved to contact package) |
 | Color | Represents a color in various formats (RGB, HEX, etc.) |
 | Coordinate | Represents a geographic coordinate (latitude and longitude) |
 | DateOfBirth | Represents a person's date of birth with validation |
@@ -75,6 +75,8 @@ See the [Email example](../examples/valueobject/email_example.go) for a complete
 
 ### Address
 
+The Address value object has been moved to the contact package. Use it as follows:
+
 ```go
 // Example usage of the Address value object
 package main
@@ -82,12 +84,12 @@ package main
 import (
 	"fmt"
 
-	"github.com/abitofhelp/servicelib/valueobject"
+	"github.com/abitofhelp/servicelib/valueobject/contact"
 )
 
 func main() {
 	// Create a new address
-	address, err := valueobject.NewAddress("123 Main St, Anytown, CA 12345")
+	address, err := contact.NewAddress("123 Main St, Anytown, CA 12345")
 	if err != nil {
 		// Handle error
 		fmt.Println("Error creating address:", err)
@@ -102,9 +104,15 @@ func main() {
 	fmt.Printf("Is address empty? %v\n", isEmpty)
 
 	// Compare addresses (case insensitive)
-	otherAddress, _ := valueobject.NewAddress("123 Main St, Anytown, CA 12345")
+	otherAddress, _ := contact.NewAddress("123 Main St, Anytown, CA 12345")
 	areEqual := address.Equals(otherAddress)
 	fmt.Printf("Are addresses equal? %v\n", areEqual)
+
+	// Validate the address
+	err = address.Validate()
+	if err != nil {
+		fmt.Println("Address validation failed:", err)
+	}
 }
 ```
 
@@ -621,6 +629,204 @@ func main() {
 	fmt.Println(versionWithMeta.String()) // "2.0.0-alpha.1+build.123"
 }
 ```
+
+## Package Structure
+
+The value object package is organized into several sub-packages:
+  - `base`: Common interfaces and utilities for value objects
+    - Provides core interfaces like `ValueObject`, `Equatable`, `Comparable`, etc.
+    - Contains validation utilities for common value types
+    - Includes helper functions for string and numeric comparisons
+    - Provides base types like `StringValueObject` and `BaseStructValueObject` that can be embedded in specific value objects
+  - `contact`: Value objects related to contact information
+    - Address: Represents and validates physical addresses
+    - Email: Represents and validates email addresses
+    - Phone: Represents and validates phone numbers with formatting options
+    - More contact-related value objects will be added in the future
+  - `measurement`: Value objects related to measurements and units
+    - Temperature: Represents and validates temperature values with unit conversion
+    - More measurement-related value objects will be added in the future
+  - `identification`: Value objects related to identification
+    - ID: Represents and validates unique identifiers
+    - Username: Represents and validates usernames
+    - Password: Represents and validates passwords with security features
+    - Name: Represents and validates person names
+    - Gender: Represents and validates gender information
+    - DateOfBirth: Represents and validates dates of birth
+    - DateOfDeath: Represents and validates dates of death
+  - `generator`: Code generation tools for value objects
+    - Provides a generator for creating new value objects
+    - Includes templates for string-based and struct-based value objects
+    - Offers a command-line tool for generating value objects from a configuration file
+  - More subpackages will be added in the future for other categories of value objects
+
+## Generic Value Object Framework
+
+The value object package provides a generic framework for creating value objects. This framework consists of interfaces, base types, and utilities that can be used to create new value objects with minimal code.
+
+### Interfaces
+
+The `base` package provides several interfaces that define the common behaviors of value objects:
+
+- `ValueObject`: The base interface for all value objects, with methods for String() and IsEmpty()
+- `Equatable`: Interface for value objects that can be compared for equality
+- `Comparable`: Interface for value objects that can be compared for ordering
+- `Validatable`: Interface for value objects that can be validated
+- `JSONMarshallable` and `JSONUnmarshallable`: Interfaces for value objects that can be marshalled to and unmarshalled from JSON
+
+### Base Types
+
+The `base` package also provides base types that can be embedded in specific value objects:
+
+- `StringValueObject`: A base type for string-based value objects
+- `BaseStructValueObject`: A base type for struct-based value objects
+
+These base types provide default implementations of the common methods, which can be overridden by specific value objects.
+
+### Creating a New Value Object
+
+There are three ways to create a new value object:
+
+1. **Using the Generator**: The easiest way is to use the generator, which can create both string-based and struct-based value objects from a configuration file. See the [Generator README](generator/README.md) for details.
+
+2. **Embedding a Base Type**: You can create a new value object by embedding one of the base types:
+
+```go
+// StringValueObject example
+type Email struct {
+    base.StringValueObject
+}
+
+func NewEmail(email string) (Email, error) {
+    // Validate the email
+    if err := base.ValidateEmail(email); err != nil {
+        return Email{}, err
+    }
+
+    // Create a new StringValueObject
+    vo := base.NewStringValueObject(email)
+
+    // Return the Email value object
+    return Email{StringValueObject: vo}, nil
+}
+
+// Override methods as needed
+func (e Email) Validate() error {
+    return base.ValidateEmail(e.Value())
+}
+```
+
+```go
+// BaseStructValueObject example
+type Currency struct {
+    base.BaseStructValueObject
+    Code   string
+    Symbol string
+    Name   string
+}
+
+func NewCurrency(code, symbol, name string) (Currency, error) {
+    currency := Currency{
+        Code:   code,
+        Symbol: symbol,
+        Name:   name,
+    }
+
+    // Validate the currency
+    if err := currency.Validate(); err != nil {
+        return Currency{}, err
+    }
+
+    return currency, nil
+}
+
+func (c Currency) Validate() error {
+    if c.Code == "" {
+        return errors.New("currency code cannot be empty")
+    }
+
+    if len(c.Code) != 3 {
+        return errors.New("currency code must be 3 characters")
+    }
+
+    if c.Symbol == "" {
+        return errors.New("currency symbol cannot be empty")
+    }
+
+    return nil
+}
+
+func (c Currency) String() string {
+    return fmt.Sprintf("%s (%s)", c.Name, c.Code)
+}
+
+func (c Currency) IsEmpty() bool {
+    return c.Code == "" && c.Symbol == "" && c.Name == ""
+}
+
+func (c Currency) Equals(other Currency) bool {
+    return c.Code == other.Code && c.Symbol == other.Symbol && c.Name == other.Name
+}
+```
+
+3. **Implementing the Interfaces Directly**: You can also create a new value object by implementing the interfaces directly:
+
+```go
+type Email string
+
+func NewEmail(email string) (Email, error) {
+    // Validate the email
+    if err := base.ValidateEmail(email); err != nil {
+        return "", err
+    }
+
+    return Email(email), nil
+}
+
+func (e Email) String() string {
+    return string(e)
+}
+
+func (e Email) IsEmpty() bool {
+    return e == ""
+}
+
+func (e Email) Equals(other Email) bool {
+    return base.StringsEqualFold(string(e), string(other))
+}
+
+func (e Email) Validate() error {
+    return base.ValidateEmail(string(e))
+}
+```
+
+### Using the New Structure
+
+For backward compatibility, the main value object types are still available through the top-level package:
+
+```go
+import "github.com/abitofhelp/servicelib/valueobject"
+
+// Create a new email
+email, err := valueobject.NewEmail("user@example.com")
+
+// Create a new phone number
+phone, err := valueobject.NewPhone("+1-555-123-4567")
+```
+
+However, for new code, it's recommended to use the subpackages directly:
+
+```go
+import "github.com/abitofhelp/servicelib/valueobject/contact"
+
+// Create a new email
+email, err := contact.NewEmail("user@example.com")
+
+// Create a new phone number
+phone, err := contact.NewPhone("+1-555-123-4567")
+```
+
+This provides access to additional functionality and a more organized structure.
 
 ## Common Patterns
 

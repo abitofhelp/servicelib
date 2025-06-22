@@ -106,7 +106,7 @@ func TestContextualError_MarshalJSON(t *testing.T) {
 }
 
 func TestGetCallerInfo(t *testing.T) {
-	file, line := getCallerInfo(1)
+	file, line := GetCallerInfo(1)
 	assert.NotEmpty(t, file)
 	assert.NotZero(t, line)
 }

@@ -1,0 +1,63 @@
+// Copyright (c) 2025 A Bit of Help, Inc.
+
+// Package {{.Package}} provides value objects related to {{.Package}} information.
+package {{.Package}}
+
+import (
+	"strings"
+{{range .Imports}}
+	"{{.}}"
+{{end}}
+	"github.com/abitofhelp/servicelib/valueobject/base"
+)
+
+// {{.Name}} represents {{.Description}}
+type {{.Name}} {{.BaseType}}
+
+// New{{.Name}} creates a new {{.Name}} with validation
+func New{{.Name}}(value string) ({{.Name}}, error) {
+	// Trim whitespace
+	trimmedValue := strings.TrimSpace(value)
+
+	// Empty value is allowed (optional field)
+	if trimmedValue == "" {
+		return "", nil
+	}
+
+	// Validate the value
+{{range $field, $validation := .Validations}}
+	{{$validation}}
+{{end}}
+
+	return {{.Name}}(trimmedValue), nil
+}
+
+// String returns the string representation of the {{.Name}}
+func (v {{.Name}}) String() string {
+	return string(v)
+}
+
+// Equals checks if two {{.Name}}s are equal
+func (v {{.Name}}) Equals(other {{.Name}}) bool {
+	return base.StringsEqualFold(string(v), string(other))
+}
+
+// IsEmpty checks if the {{.Name}} is empty
+func (v {{.Name}}) IsEmpty() bool {
+	return v == ""
+}
+
+// Validate checks if the {{.Name}} is valid
+func (v {{.Name}}) Validate() error {
+	// Empty value is allowed (optional field)
+	if v.IsEmpty() {
+		return nil
+	}
+
+	// Validate the value
+{{range $field, $validation := .Validations}}
+	{{$validation}}
+{{end}}
+
+	return nil
+}

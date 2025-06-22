@@ -1,0 +1,160 @@
+// Copyright (c) 2025 A Bit of Help, Inc.
+
+package {{.Package}}
+
+import (
+	"encoding/json"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestNew{{.Name}}(t *testing.T) {
+	tests := []struct {
+		name        string
+{{range $field, $type := .Fields}}
+		{{$field | ToLower}} {{$type}}
+{{end}}
+		expectError bool
+	}{
+		{
+			name: "Valid Value",
+{{range $field, $type := .Fields}}
+			{{$field | ToLower}}: {{if eq $type "string"}}"valid"{{else if eq $type "float64"}}42.0{{else}}42{{end}},
+{{end}}
+			expectError: false,
+		},
+		// Add more test cases specific to this value object
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			value, err := New{{.Name}}({{range $i, $field := .Fields | Keys}}{{if $i}}, {{end}}tt.{{$field | ToLower}}{{end}})
+
+			if tt.expectError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+{{range $field, $type := .Fields}}
+				assert.Equal(t, tt.{{$field | ToLower}}, value.{{$field}})
+{{end}}
+			}
+		})
+	}
+}
+
+func Test{{.Name}}_String(t *testing.T) {
+	value := {{.Name}}{
+{{range $field, $type := .Fields}}
+		{{$field}}: {{if eq $type "string"}}"test"{{else if eq $type "float64"}}42.0{{else}}42{{end}},
+{{end}}
+	}
+
+	// The exact string representation depends on the fields
+	assert.Contains(t, value.String(), "{{index .Fields | Keys | First}}")
+}
+
+func Test{{.Name}}_Equals(t *testing.T) {
+	value1 := {{.Name}}{
+{{range $field, $type := .Fields}}
+		{{$field}}: {{if eq $type "string"}}"test"{{else if eq $type "float64"}}42.0{{else}}42{{end}},
+{{end}}
+	}
+
+	value2 := {{.Name}}{
+{{range $field, $type := .Fields}}
+		{{$field}}: {{if eq $type "string"}}"test"{{else if eq $type "float64"}}42.0{{else}}42{{end}},
+{{end}}
+	}
+
+	value3 := {{.Name}}{
+{{range $field, $type := .Fields}}
+		{{$field}}: {{if eq $type "string"}}"other"{{else if eq $type "float64"}}43.0{{else}}43{{end}},
+{{end}}
+	}
+
+	assert.True(t, value1.Equals(value2))
+	assert.False(t, value1.Equals(value3))
+}
+
+func Test{{.Name}}_IsEmpty(t *testing.T) {
+	emptyValue := {{.Name}}{}
+	assert.True(t, emptyValue.IsEmpty())
+
+	nonEmptyValue := {{.Name}}{
+{{range $field, $type := .Fields}}
+		{{$field}}: {{if eq $type "string"}}"test"{{else if eq $type "float64"}}42.0{{else}}42{{end}},
+{{end}}
+	}
+	assert.False(t, nonEmptyValue.IsEmpty())
+}
+
+func Test{{.Name}}_Validate(t *testing.T) {
+	tests := []struct {
+		name        string
+		value       {{.Name}}
+		expectError bool
+	}{
+		{
+			name: "Valid Value",
+			value: {{.Name}}{
+{{range $field, $type := .Fields}}
+				{{$field}}: {{if eq $type "string"}}"valid"{{else if eq $type "float64"}}42.0{{else}}42{{end}},
+{{end}}
+			},
+			expectError: false,
+		},
+		// Add more test cases specific to this value object
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.value.Validate()
+
+			if tt.expectError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func Test{{.Name}}_ToMap(t *testing.T) {
+	value := {{.Name}}{
+{{range $field, $type := .Fields}}
+		{{$field}}: {{if eq $type "string"}}"test"{{else if eq $type "float64"}}42.0{{else}}42{{end}},
+{{end}}
+	}
+
+	expected := map[string]interface{}{
+{{range $field, $type := .Fields}}
+		"{{$field}}": {{if eq $type "string"}}"test"{{else if eq $type "float64"}}42.0{{else}}42{{end}},
+{{end}}
+	}
+
+	assert.Equal(t, expected, value.ToMap())
+}
+
+func Test{{.Name}}_MarshalJSON(t *testing.T) {
+	value := {{.Name}}{
+{{range $field, $type := .Fields}}
+		{{$field}}: {{if eq $type "string"}}"test"{{else if eq $type "float64"}}42.0{{else}}42{{end}},
+{{end}}
+	}
+
+	data, err := value.MarshalJSON()
+	assert.NoError(t, err)
+
+	var result map[string]interface{}
+	err = json.Unmarshal(data, &result)
+	assert.NoError(t, err)
+
+	expected := map[string]interface{}{
+{{range $field, $type := .Fields}}
+		"{{$field}}": {{if eq $type "string"}}"test"{{else if eq $type "float64"}}42.0{{else}}float64(42){{end}},
+{{end}}
+	}
+
+	assert.Equal(t, expected, result)
+}

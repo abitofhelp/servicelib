@@ -52,7 +52,7 @@ func (e *ContextualError) Error() string {
 
 	// Add operation if available
 	if e.Context.Operation != "" {
-		builder.WriteString(fmt.Sprintf("operation %s: ", e.Context.Operation))
+		builder.WriteString(fmt.Sprintf("%s: ", e.Context.Operation))
 	}
 
 	// Add original error message
@@ -92,11 +92,21 @@ func (e *ContextualError) HTTPStatus() int {
 // MarshalJSON implements the json.Marshaler interface.
 func (e *ContextualError) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
-		Message string       `json:"message"`
-		Context ErrorContext `json:"context,omitempty"`
+		Message    string                 `json:"message"`
+		Operation  string                 `json:"operation,omitempty"`
+		Source     string                 `json:"source,omitempty"`
+		Line       int                    `json:"line,omitempty"`
+		Code       ErrorCode              `json:"code,omitempty"`
+		HTTPStatus int                    `json:"http_status,omitempty"`
+		Details    map[string]interface{} `json:"details,omitempty"`
 	}{
-		Message: e.Error(),
-		Context: e.Context,
+		Message:    e.Error(),
+		Operation:  e.Context.Operation,
+		Source:     e.Context.Source,
+		Line:       e.Context.Line,
+		Code:       e.Context.Code,
+		HTTPStatus: e.Context.HTTPStatus,
+		Details:    e.Context.Details,
 	})
 }
 

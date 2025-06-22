@@ -1,0 +1,88 @@
+// Copyright (c) 2025 A Bit of Help, Inc.
+
+// Package {{.Package}} provides value objects related to {{.Package}} information.
+package {{.Package}}
+
+import (
+	"fmt"
+{{range .Imports}}
+	"{{.}}"
+{{end}}
+	"github.com/abitofhelp/servicelib/valueobject/base"
+)
+
+// {{.Name}} represents {{.Description}}
+type {{.Name}} struct {
+	base.BaseStructValueObject
+{{range $field, $type := .Fields}}
+	{{$field}} {{$type}}
+{{end}}
+}
+
+// New{{.Name}} creates a new {{.Name}} with validation
+func New{{.Name}}({{range $field, $type := .Fields}}{{$field | ToLower}} {{$type}}, {{end}}) ({{.Name}}, error) {
+	vo := {{.Name}}{
+{{range $field, $type := .Fields}}
+		{{$field}}: {{$field | ToLower}},
+{{end}}
+	}
+
+	// Validate the value object
+	if err := vo.Validate(); err != nil {
+		return {{.Name}}{}, err
+	}
+
+	return vo, nil
+}
+
+// String returns the string representation of the {{.Name}}
+func (v {{.Name}}) String() string {
+	return fmt.Sprintf("{{range $i, $field := .Fields | Keys}}{{if $i}} {{end}}{{$field}}=%v{{end}}", {{range $i, $field := .Fields | Keys}}{{if $i}}, {{end}}v.{{$field}}{{end}})
+}
+
+// Equals checks if two {{.Name}}s are equal
+func (v {{.Name}}) Equals(other {{.Name}}) bool {
+{{range $field, $type := .Fields}}
+	{{if eq $type "string"}}
+	if !base.StringsEqualFold(v.{{$field}}, other.{{$field}}) {
+		return false
+	}
+	{{else if eq $type "float64"}}
+	if !base.FloatsEqual(v.{{$field}}, other.{{$field}}) {
+		return false
+	}
+	{{else}}
+	if v.{{$field}} != other.{{$field}} {
+		return false
+	}
+	{{end}}
+{{end}}
+	return true
+}
+
+// IsEmpty checks if the {{.Name}} is empty (zero value)
+func (v {{.Name}}) IsEmpty() bool {
+	return {{range $i, $field := .Fields | Keys}}{{if $i}} && {{end}}v.{{$field}} == {{index $.Fields $field}}(0){{end}}
+}
+
+// Validate checks if the {{.Name}} is valid
+func (v {{.Name}}) Validate() error {
+{{range $field, $validation := .Validations}}
+	{{$validation}}
+{{end}}
+	return nil
+}
+
+// ToMap converts the {{.Name}} to a map[string]interface{}
+func (v {{.Name}}) ToMap() map[string]interface{} {
+	return map[string]interface{}{
+{{range $field, $type := .Fields}}
+		"{{$field}}": v.{{$field}},
+{{end}}
+	}
+}
+
+// MarshalJSON implements the json.Marshaler interface
+func (v {{.Name}}) MarshalJSON() ([]byte, error) {
+	return json.Marshal(v.ToMap())
+}

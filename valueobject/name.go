@@ -1,44 +1,20 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
+// Package valueobject provides a collection of common Value Objects that can be used in applications.
 package valueobject
 
 import (
-	"errors"
-	"strings"
+	"github.com/abitofhelp/servicelib/valueobject/identification"
 )
 
 // Name represents a person's name value object
-type Name string
+// This is a wrapper around identification.Name for backward compatibility.
+// New code should use identification.Name directly.
+type Name = identification.Name
 
 // NewName creates a new Name with validation
+// This function is provided for backward compatibility.
+// New code should use identification.NewName directly.
 func NewName(name string) (Name, error) {
-	// Trim whitespace
-	trimmedName := strings.TrimSpace(name)
-
-	// Validate name is not empty
-	if trimmedName == "" {
-		return "", errors.New("name cannot be empty")
-	}
-
-	// Validate name length
-	if len(trimmedName) > 100 {
-		return "", errors.New("name is too long")
-	}
-
-	return Name(trimmedName), nil
-}
-
-// String returns the string representation of the Name
-func (n Name) String() string {
-	return string(n)
-}
-
-// Equals checks if two Names are equal
-func (n Name) Equals(other Name) bool {
-	return strings.EqualFold(string(n), string(other))
-}
-
-// IsEmpty checks if the Name is empty
-func (n Name) IsEmpty() bool {
-	return n == ""
+	return identification.NewName(name)
 }

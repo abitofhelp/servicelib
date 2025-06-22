@@ -5,9 +5,12 @@ This package provides a comprehensive error handling system for the application.
 ## Package Structure
 
 The error handling package is organized into several sub-packages:
-  - Infrastructure errors
-  - Application errors
-  - Validation errors
+  - `core`: Core error handling functionality (error codes, error context, utility functions)
+  - `types`: Specific error types (validation errors, application errors, domain errors, repository errors)
+  - `interfaces`: Error interfaces for type checking and HTTP status mapping
+  - `recovery`: Error recovery mechanisms (circuit breakers, retries)
+  - `utils`: Utility functions for error handling
+  - `wrappers`: Error wrapping utilities
 
 - **Features**:
   - Error wrapping with context
@@ -15,6 +18,8 @@ The error handling package is organized into several sub-packages:
   - Localized error messages
   - Stack traces
   - Error categorization
+  - HTTP status mapping
+  - Error recovery mechanisms
 
 ## Installation
 
@@ -127,7 +132,7 @@ func main() {
 
     // Add more context to an existing error
     enrichedErr := errors.AddContext(err, "request_id", "req-456")
-    
+
     // Get the enriched context
     if ctx, ok := errors.GetContext(enrichedErr); ok {
         fmt.Printf("Enriched context: %v\n", ctx)

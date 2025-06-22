@@ -1,10 +1,13 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
-package valueobject
+// Package contact provides value objects related to contact information.
+package contact
 
 import (
 	"errors"
 	"strings"
+
+	"github.com/abitofhelp/servicelib/valueobject/base"
 )
 
 // Address represents a postal address value object
@@ -40,10 +43,29 @@ func (a Address) String() string {
 
 // Equals checks if two Addresses are equal
 func (a Address) Equals(other Address) bool {
-	return strings.EqualFold(string(a), string(other))
+	return base.StringsEqualFold(string(a), string(other))
 }
 
 // IsEmpty checks if the Address is empty
 func (a Address) IsEmpty() bool {
 	return a == ""
+}
+
+// Validate checks if the Address is valid
+func (a Address) Validate() error {
+	if a.IsEmpty() {
+		return nil
+	}
+
+	// Basic validation - ensure minimum length
+	if len(a) < 5 {
+		return errors.New("address is too short")
+	}
+
+	// Maximum length validation to prevent abuse
+	if len(a) > 200 {
+		return errors.New("address is too long")
+	}
+
+	return nil
 }

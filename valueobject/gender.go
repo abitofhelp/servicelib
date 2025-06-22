@@ -1,46 +1,27 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
+// Package valueobject provides a collection of common Value Objects that can be used in applications.
 package valueobject
 
 import (
-	"errors"
-	"strings"
+	"github.com/abitofhelp/servicelib/valueobject/identification"
 )
 
 // Gender represents a person's gender value object
-type Gender string
+// This is a wrapper around identification.Gender for backward compatibility.
+// New code should use identification.Gender directly.
+type Gender = identification.Gender
 
+// Gender constants
 const (
-	GenderMale   Gender = "male"
-	GenderFemale Gender = "female"
-	GenderOther  Gender = "other"
+	GenderMale   = identification.GenderMale
+	GenderFemale = identification.GenderFemale
+	GenderOther  = identification.GenderOther
 )
 
 // NewGender creates a new Gender with validation
+// This function is provided for backward compatibility.
+// New code should use identification.NewGender directly.
 func NewGender(gender string) (Gender, error) {
-	// Trim whitespace and convert to lowercase
-	trimmedGender := strings.ToLower(strings.TrimSpace(gender))
-
-	// Validate gender
-	switch trimmedGender {
-	case string(GenderMale), string(GenderFemale), string(GenderOther):
-		return Gender(trimmedGender), nil
-	default:
-		return "", errors.New("invalid gender value")
-	}
-}
-
-// String returns the string representation of the Gender
-func (g Gender) String() string {
-	return string(g)
-}
-
-// Equals checks if two Genders are equal
-func (g Gender) Equals(other Gender) bool {
-	return g == other
-}
-
-// IsEmpty checks if the Gender is empty
-func (g Gender) IsEmpty() bool {
-	return g == ""
+	return identification.NewGender(gender)
 }

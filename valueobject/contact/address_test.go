@@ -1,6 +1,6 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
-package valueobject
+package contact
 
 import (
 	"strings"
@@ -105,6 +105,38 @@ func TestAddress_IsEmpty(t *testing.T) {
 			address, _ := NewAddress(tt.address)
 			if address.IsEmpty() != tt.expected {
 				t.Errorf("Expected IsEmpty to return %v for %s", tt.expected, tt.address)
+			}
+		})
+	}
+}
+
+func TestAddress_Validate(t *testing.T) {
+	tests := []struct {
+		name        string
+		address     string
+		expectError bool
+	}{
+		{"Valid Address", "123 Main St, City, State 12345", false},
+		{"Empty Address", "", false}, // Empty is allowed
+		{"Too Short Address", "123", true},
+		{"Minimum Length Address", "12345", false},
+		{"Too Long Address", strings.Repeat("a", 201), true},
+		{"Maximum Length Address", strings.Repeat("a", 200), false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			address, _ := NewAddress(tt.address)
+			err := address.Validate()
+
+			if tt.expectError {
+				if err == nil {
+					t.Errorf("Expected error but got none")
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Unexpected error: %v", err)
+				}
 			}
 		})
 	}

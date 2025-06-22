@@ -1,0 +1,31 @@
+[
+  {
+    "Name": "PostalCode",
+    "Package": "contact",
+    "Type": "string",
+    "BaseType": "string",
+    "Description": "a postal code value object",
+    "Validations": {
+      "PostalCode": "if len(trimmedValue) < 5 {\n\t\treturn \"\", errors.New(\"postal code is too short\")\n\t}\n\n\tif len(trimmedValue) > 10 {\n\t\treturn \"\", errors.New(\"postal code is too long\")\n\t}"
+    },
+    "Imports": []
+  },
+  {
+    "Name": "Currency",
+    "Package": "measurement",
+    "Type": "struct",
+    "Description": "a currency value object",
+    "Fields": {
+      "Code": "string",
+      "Symbol": "string",
+      "Name": "string"
+    },
+    "Validations": {
+      "Code": "if v.Code == \"\" {\n\t\treturn errors.New(\"currency code cannot be empty\")\n\t}\n\n\tif len(v.Code) != 3 {\n\t\treturn errors.New(\"currency code must be 3 characters\")\n\t}",
+      "Symbol": "if v.Symbol == \"\" {\n\t\treturn errors.New(\"currency symbol cannot be empty\")\n\t}"
+    },
+    "Imports": [
+      "errors"
+    ]
+  }
+]

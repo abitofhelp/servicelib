@@ -1,27 +1,46 @@
 // Copyright (c) 2024 A Bit of Help, Inc.
 
+// Package types provides specific error types for the errors package.
 package types
 
-import "fmt"
+import (
+	"fmt"
+	"net/http"
+)
 
-// ApplicationError represents an error that occurred in the application layer
+// ApplicationError represents an error that occurred in the application layer.
 type ApplicationError struct {
-	Err     error
+	// Err is the original error
+	Err error
+
+	// Message is a human-readable error message
 	Message string
-	Code    string
+
+	// Code is a machine-readable error code
+	Code string
 }
 
-// Error returns a string representation of the error
+// Error returns a string representation of the error.
 func (e *ApplicationError) Error() string {
 	return fmt.Sprintf("Application error (%s): %s", e.Code, e.Message)
 }
 
-// Unwrap returns the original error
+// Unwrap returns the original error.
 func (e *ApplicationError) Unwrap() error {
 	return e.Err
 }
 
-// NewApplicationError creates a new ApplicationError
+// HTTPStatus returns the HTTP status code for application errors.
+func (e *ApplicationError) HTTPStatus() int {
+	return http.StatusInternalServerError
+}
+
+// IsApplicationError identifies this as an application error.
+func (e *ApplicationError) IsApplicationError() bool {
+	return true
+}
+
+// NewApplicationError creates a new ApplicationError.
 func NewApplicationError(err error, message, code string) *ApplicationError {
 	return &ApplicationError{
 		Err:     err,
@@ -30,30 +49,47 @@ func NewApplicationError(err error, message, code string) *ApplicationError {
 	}
 }
 
-// AppError is a generic error type that can be used for different error categories
+// AppError is a generic error type that can be used for different error categories.
 type AppError[T any] struct {
-	Err     error
+	// Err is the original error
+	Err error
+
+	// Message is a human-readable error message
 	Message string
-	Code    string
-	Type    T
+
+	// Code is a machine-readable error code
+	Code string
+
+	// Type is the error type
+	Type T
 }
 
-// Error returns the error message
+// Error returns a string representation of the error.
 func (e *AppError[T]) Error() string {
 	return fmt.Sprintf("%v (%s): %s", e.Type, e.Code, e.Message)
 }
 
-// Unwrap returns the original error
+// Unwrap returns the original error.
 func (e *AppError[T]) Unwrap() error {
 	return e.Err
 }
 
-// ErrorType returns the error type
+// HTTPStatus returns the HTTP status code for application errors.
+func (e *AppError[T]) HTTPStatus() int {
+	return http.StatusInternalServerError
+}
+
+// IsApplicationError identifies this as an application error.
+func (e *AppError[T]) IsApplicationError() bool {
+	return true
+}
+
+// ErrorType returns the error type.
 func (e *AppError[T]) ErrorType() T {
 	return e.Type
 }
 
-// NewAppError creates a new AppError
+// NewAppError creates a new AppError.
 func NewAppError[T any](err error, message, code string, errorType T) *AppError[T] {
 	return &AppError[T]{
 		Err:     err,

@@ -85,6 +85,6 @@ func BenchmarkErrorJSONMarshaling(b *testing.B) {
 func BenchmarkGetCallerInfo(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, _ = getCallerInfo(1)
+		_, _ = GetCallerInfo(1)
 	}
 }
