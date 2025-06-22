@@ -250,3 +250,4 @@ plantuml.jar
 # serverlib
 pkg
 /.output.txt
+/refactoring_recommendations.md
