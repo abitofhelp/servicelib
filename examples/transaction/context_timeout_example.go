@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of using context with timeout in transactions
-package main
+package example_transaction
 
 import (
 	"context"

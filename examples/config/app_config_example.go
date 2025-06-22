@@ -4,7 +4,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of implementing and using the AppConfig interface
-package main
+package example_config
 
 import (
 	"fmt"

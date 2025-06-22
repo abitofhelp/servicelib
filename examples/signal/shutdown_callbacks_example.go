@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of using shutdown callbacks
-package main
+package example_signal
 
 import (
 	"context"

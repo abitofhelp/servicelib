@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of using the service container from the dependency injection package
-package main
+package example_di
 
 import (
 	"context"

@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of programmatic shutdown initiation
-package main
+package example_shutdown
 
 import (
 	"context"

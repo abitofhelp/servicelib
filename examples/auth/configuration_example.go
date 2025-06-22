@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example usage of the Auth module configuration
-package main
+package example_auth
 
 import (
 	"fmt"

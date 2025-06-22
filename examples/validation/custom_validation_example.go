@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of custom validation using the validation package
-package main
+package example_validation
 
 import (
 	"fmt"

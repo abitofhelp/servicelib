@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example demonstrating authorization concepts
-package main
+package example_auth
 
 import (
 	"context"

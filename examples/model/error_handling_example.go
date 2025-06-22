@@ -4,7 +4,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of error handling with model package
-package main
+package example_model
 
 import (
 	"fmt"

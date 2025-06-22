@@ -4,7 +4,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of integrating environment variables with a configuration structure
-package main
+package example_env
 
 import (
 	"fmt"

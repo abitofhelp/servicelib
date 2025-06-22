@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example demonstrating how to generate JWT tokens for testing GraphQL RBAC
-package main
+package example_graphql
 
 import (
 	"context"

@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of integration with dependency injection
-package main
+package example_repository
 
 import (
 	"context"

@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of shutting down multiple resources
-package main
+package example_shutdown
 
 import (
 	"context"

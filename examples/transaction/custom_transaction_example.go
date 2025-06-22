@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of custom transaction execution
-package main
+package example_transaction
 
 import (
 	"context"

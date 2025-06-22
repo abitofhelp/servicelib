@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of implementing the repository pattern with the db package
-package main
+package example_db
 
 import (
 	"context"

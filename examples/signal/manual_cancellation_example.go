@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of manual cancellation with HandleShutdown
-package main
+package example_signal
 
 import (
 	"context"

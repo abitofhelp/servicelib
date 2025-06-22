@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of using the error handling middleware
-package main
+package example_middleware
 
 import (
 	"fmt"

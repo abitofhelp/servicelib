@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example usage of the Auth module for a quick start
-package main
+package example_auth
 
 import (
 	"context"

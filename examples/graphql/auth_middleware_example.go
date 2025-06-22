@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example demonstrating how to apply the auth middleware to a GraphQL handler
-package main
+package example_graphql
 
 import (
 	"context"

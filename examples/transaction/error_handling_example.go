@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of error handling with checked rollbacks
-package main
+package example_transaction
 
 import (
 	"context"
@@ -35,11 +35,15 @@ func main() {
 			return nil
 		},
 		// Rollback operation with error checking
-		saga.CheckedRollback(func(ctx context.Context) error {
-			fmt.Println("Rolling back account balance update...")
-			// Simulate a rollback error
-			return errors.New("failed to rollback account balance update")
-		}),
+		saga.CheckedRollback(
+			func(ctx context.Context) error {
+				fmt.Println("Rolling back account balance update...")
+				// Simulate a rollback error
+				return errors.New("failed to rollback account balance update")
+			},
+			"update_balance",
+			"Failed to rollback account balance update",
+		),
 	)
 
 	tx.AddOperation(
@@ -48,35 +52,23 @@ func main() {
 			fmt.Println("Creating order...")
 			return errors.New("order creation failed")
 		},
-		// Rollback operation that will not be called because the operation fails
-		func(ctx context.Context) error {
-			fmt.Println("This rollback should not be called")
-			return nil
-		},
+		saga.CheckedRollback(
+			func(ctx context.Context) error {
+				fmt.Println("Rolling back order creation...")
+				return nil
+			},
+			"create_order",
+			"Failed to rollback order creation",
+		),
 	)
 
 	// Execute the transaction
 	err = tx.Execute(ctx)
 	if err != nil {
-		fmt.Printf("Transaction failed as expected: %v\n", err)
-
-		// Check if it's a rollback error
-		var rollbackErr *saga.RollbackError
-		if errors.As(err, &rollbackErr) {
-			fmt.Printf("Rollback error details: %v\n", rollbackErr.Error())
-			fmt.Printf("Original error: %v\n", rollbackErr.OriginalError())
-			fmt.Printf("Rollback errors: %v\n", rollbackErr.RollbackErrors())
-		}
-	} else {
-		fmt.Println("Transaction completed successfully (unexpected)")
+		logger.Error("Transaction failed",
+			zap.Error(err))
+		return
 	}
 
-	// Expected output:
-	// Updating account balance...
-	// Creating order...
-	// Rolling back account balance update...
-	// Transaction failed as expected: transaction execution failed: transaction operation failed: order creation failed
-	// Rollback error details: transaction rollback failed: failed to rollback account balance update
-	// Original error: order creation failed
-	// Rollback errors: [failed to rollback account balance update]
+	logger.Info("Transaction completed successfully")
 }

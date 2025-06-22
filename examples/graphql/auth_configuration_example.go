@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example demonstrating how to configure the auth service for GraphQL
-package main
+package example_graphql
 
 import (
 	"context"

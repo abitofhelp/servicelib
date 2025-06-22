@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of connecting to different database types
-package main
+package example_db
 
 import (
 	"context"

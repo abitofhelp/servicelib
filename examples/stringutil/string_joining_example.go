@@ -4,7 +4,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of string joining with natural language formatting
-package main
+package example_stringutil
 
 import (
 	"fmt"

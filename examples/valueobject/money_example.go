@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example usage of the Money value object
-package main
+package example_valueobject
 
 import (
 	"fmt"

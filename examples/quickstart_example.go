@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of a basic ServiceLib application
-package main
+package example_quickstart_example
 
 import (
 	"context"
@@ -10,14 +10,12 @@ import (
 
 	"github.com/abitofhelp/servicelib/logging"
 	"github.com/abitofhelp/servicelib/middleware"
+	"go.uber.org/zap"
 )
 
 func main() {
 	// Create a logger
-	logger, err := logging.NewLogger(logging.Config{
-		Level:  "info",
-		Format: "json",
-	})
+	logger, err := logging.NewLogger("info", true)
 	if err != nil {
 		log.Fatalf("Failed to initialize logger: %v", err)
 	}
@@ -32,14 +30,14 @@ func main() {
 	// Add middleware for logging, metrics, and recovery
 	handler := middleware.Chain(
 		mux,
-		middleware.RequestID(),
+		middleware.RequestID(context.Background()),
 		middleware.Logging(logger),
 		middleware.Recovery(logger),
 	)
 
 	// Start the server
-	logger.Info(context.Background(), "Starting server", "address", ":8080")
+	logger.Info("Starting server", zap.String("address", ":8080"))
 	if err := http.ListenAndServe(":8080", handler); err != nil {
-		logger.Fatal(context.Background(), "Server failed", "error", err)
+		logger.Fatal("Server failed", zap.Error(err))
 	}
 }

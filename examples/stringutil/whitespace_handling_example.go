@@ -4,7 +4,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of whitespace handling operations
-package main
+package example_stringutil
 
 import (
 	"fmt"

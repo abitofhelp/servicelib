@@ -1,6 +1,6 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
-package main
+package example_recovery
 
 import (
 	"context"

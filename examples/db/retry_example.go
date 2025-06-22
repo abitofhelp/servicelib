@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of executing queries with retries
-package main
+package example_db
 
 import (
 	"context"

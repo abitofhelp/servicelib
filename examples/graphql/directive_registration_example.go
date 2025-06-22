@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example demonstrating how to register the @isAuthorized directive in a GraphQL server
-package main
+package example_graphql
 
 import (
 	"fmt"

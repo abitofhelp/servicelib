@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of error handling with the date package
-package main
+package example_date
 
 import (
 	"fmt"

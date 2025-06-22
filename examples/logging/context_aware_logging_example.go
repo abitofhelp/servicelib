@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of context-aware logging
-package main
+package example_logging
 
 import (
 	"context"

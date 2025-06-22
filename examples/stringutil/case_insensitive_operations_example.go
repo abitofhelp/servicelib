@@ -4,7 +4,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of case-insensitive string operations
-package main
+package example_stringutil
 
 import (
 	"fmt"

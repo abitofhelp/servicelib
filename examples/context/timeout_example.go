@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of using timeouts with the context package
-package main
+package example_context
 
 import (
 	"context" // Standard context package

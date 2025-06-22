@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of creating a custom health status response
-package main
+package example_health
 
 import (
 	"encoding/json"

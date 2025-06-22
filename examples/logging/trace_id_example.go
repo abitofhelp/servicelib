@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of adding trace IDs to logs
-package main
+package example_logging
 
 import (
 	"context"

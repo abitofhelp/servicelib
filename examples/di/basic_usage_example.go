@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of basic usage of the dependency injection package
-package main
+package example_di
 
 import (
 	"context"

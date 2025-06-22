@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example demonstrating the concept of token handling in authentication
-package main
+package example_auth
 
 import (
 	"fmt"

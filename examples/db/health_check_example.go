@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of checking database health
-package main
+package example_db
 
 import (
 	"context"

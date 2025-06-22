@@ -4,7 +4,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of creating deep copies of objects
-package main
+package example_model
 
 import (
 	"fmt"

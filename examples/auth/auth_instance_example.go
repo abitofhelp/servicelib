@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example usage of creating an Auth instance
-package main
+package example_auth
 
 import (
 	"context"

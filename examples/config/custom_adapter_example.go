@@ -4,7 +4,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of creating a custom adapter for the config package
-package main
+package example_config
 
 import (
 	"fmt"

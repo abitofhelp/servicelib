@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of basic usage of the logging package
-package main
+package example_logging
 
 import (
 	"errors"

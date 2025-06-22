@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of basic saga transaction
-package main
+package example_transaction
 
 import (
 	"context"

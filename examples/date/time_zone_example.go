@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of working with time zones using the date package
-package main
+package example_date
 
 import (
 	"fmt"
