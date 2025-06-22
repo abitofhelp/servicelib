@@ -18,13 +18,13 @@ type ValidationResult struct {
 // NewValidationResult creates a new ValidationResult
 func NewValidationResult() *ValidationResult {
 	return &ValidationResult{
-		errors: errors.NewValidationErrors(),
+		errors: errors.NewValidationErrors("Validation failed"),
 	}
 }
 
 // AddError adds an error to the validation result
 func (v *ValidationResult) AddError(msg, field string) {
-	v.errors.AddError(errors.NewFieldValidationError(msg, field))
+	v.errors.AddError(errors.NewValidationError(msg, field, nil))
 }
 
 // IsValid returns true if there are no validation errors

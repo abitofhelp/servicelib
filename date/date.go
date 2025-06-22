@@ -24,7 +24,7 @@ const (
 func ParseDate(dateStr string) (time.Time, error) {
 	parsedDate, err := time.Parse(StandardDateFormat, dateStr)
 	if err != nil {
-		return time.Time{}, errors.NewValidationError("invalid date format")
+		return time.Time{}, errors.NewValidationError("invalid date format", "date", err)
 	}
 	return parsedDate, nil
 }
@@ -43,7 +43,7 @@ func ParseOptionalDate(dateStr *string) (*time.Time, error) {
 
 	parsedDate, err := time.Parse(StandardDateFormat, *dateStr)
 	if err != nil {
-		return nil, errors.NewValidationError("invalid date format")
+		return nil, errors.NewValidationError("invalid date format", "date", err)
 	}
 
 	return &parsedDate, nil

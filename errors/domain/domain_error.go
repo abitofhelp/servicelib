@@ -25,6 +25,18 @@ func (e *DomainError) IsDomainError() bool {
 	return true
 }
 
+// As implements the errors.As interface for DomainError.
+func (e *DomainError) As(target interface{}) bool {
+	// Check if target is *DomainError
+	if t, ok := target.(*DomainError); ok {
+		*t = *e
+		return true
+	}
+
+	// Delegate to BaseError.As for other types
+	return e.BaseError.As(target)
+}
+
 // ValidationError represents a validation error.
 // It extends DomainError with field-specific information.
 type ValidationError struct {
@@ -43,6 +55,34 @@ func NewValidationError(message string, field string, cause error) *ValidationEr
 // IsValidationError identifies this as a validation error.
 func (e *ValidationError) IsValidationError() bool {
 	return true
+}
+
+// As implements the errors.As interface for ValidationError.
+func (e *ValidationError) As(target interface{}) bool {
+	// Debug print
+	println("ValidationError.As called with target type:", target)
+
+	// Check if target is *ValidationError
+	_, isValidationErr := target.(*ValidationError)
+	println("Is target *ValidationError?", isValidationErr)
+	if isValidationErr {
+		println("Target is *ValidationError")
+		*target.(*ValidationError) = *e
+		return true
+	}
+
+	// Check if target is *DomainError
+	_, isDomainErr := target.(*DomainError)
+	println("Is target *DomainError?", isDomainErr)
+	if isDomainErr {
+		println("Target is *DomainError")
+		*target.(*DomainError) = *e.DomainError
+		return true
+	}
+
+	// Delegate to DomainError.As for other types
+	println("Delegating to DomainError.As")
+	return e.DomainError.As(target)
 }
 
 // ValidationErrors represents multiple validation errors.
@@ -69,6 +109,24 @@ func (e *ValidationErrors) HasErrors() bool {
 	return len(e.Errors) > 0
 }
 
+// As implements the errors.As interface for ValidationErrors.
+func (e *ValidationErrors) As(target interface{}) bool {
+	// Check if target is *ValidationErrors
+	if t, ok := target.(*ValidationErrors); ok {
+		*t = *e
+		return true
+	}
+
+	// Check if target is *DomainError
+	if t, ok := target.(*DomainError); ok {
+		*t = *e.DomainError
+		return true
+	}
+
+	// Delegate to DomainError.As for other types
+	return e.DomainError.As(target)
+}
+
 // BusinessRuleError represents a business rule violation.
 // It extends DomainError with rule-specific information.
 type BusinessRuleError struct {
@@ -87,6 +145,24 @@ func NewBusinessRuleError(message string, rule string, cause error) *BusinessRul
 // IsBusinessRuleError identifies this as a business rule error.
 func (e *BusinessRuleError) IsBusinessRuleError() bool {
 	return true
+}
+
+// As implements the errors.As interface for BusinessRuleError.
+func (e *BusinessRuleError) As(target interface{}) bool {
+	// Check if target is *BusinessRuleError
+	if t, ok := target.(*BusinessRuleError); ok {
+		*t = *e
+		return true
+	}
+
+	// Check if target is *DomainError
+	if t, ok := target.(*DomainError); ok {
+		*t = *e.DomainError
+		return true
+	}
+
+	// Delegate to DomainError.As for other types
+	return e.DomainError.As(target)
 }
 
 // NotFoundError represents a resource not found error.
@@ -110,4 +186,22 @@ func NewNotFoundError(resourceType string, resourceID string, cause error) *NotF
 // IsNotFoundError identifies this as a not found error.
 func (e *NotFoundError) IsNotFoundError() bool {
 	return true
+}
+
+// As implements the errors.As interface for NotFoundError.
+func (e *NotFoundError) As(target interface{}) bool {
+	// Check if target is *NotFoundError
+	if t, ok := target.(*NotFoundError); ok {
+		*t = *e
+		return true
+	}
+
+	// Check if target is *DomainError
+	if t, ok := target.(*DomainError); ok {
+		*t = *e.DomainError
+		return true
+	}
+
+	// Delegate to DomainError.As for other types
+	return e.DomainError.As(target)
 }

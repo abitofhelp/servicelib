@@ -227,12 +227,12 @@ func CheckContext(ctx context.Context) error {
 		if err == context.Canceled {
 			operation := GetOperation(ctx)
 			if operation != "" {
-				// Wrap ErrCancelled with additional context
-				return fmt.Errorf("operation '%s' was canceled: %w", operation, errors.ErrCancelled)
+				// Wrap ErrCanceled with additional context
+				return fmt.Errorf("operation '%s' was canceled: %w", operation, errors.ErrCanceled)
 			}
-			return errors.ErrCancelled
+			return errors.ErrCanceled
 		}
-		return errors.Internal(err, "context error")
+		return errors.Wrap(err, errors.InternalErrorCode, "context error")
 	default:
 		return nil
 	}

@@ -421,13 +421,13 @@ func handleError(w http.ResponseWriter, r *http.Request, err error) {
 	w.Header().Set("Content-Type", "application/json")
 
 	// Map error types to status codes using the generic error interfaces
-	statusCode := errors.GetHTTPStatusFromError(err)
+	statusCode := errors.GetHTTPStatus(err)
 	errorMessage := "Internal server error"
 
 	// Get appropriate error message based on error type
 	if errors.IsValidationError(err) || errors.IsNotFoundError(err) || errors.IsApplicationError(err) {
 		errorMessage = err.Error()
-	} else if errors.IsRepositoryError(err) {
+	} else if errors.IsDatabaseError(err) {
 		errorMessage = "Database error"
 	}
 

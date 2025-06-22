@@ -25,6 +25,18 @@ func (e *ApplicationError) IsApplicationError() bool {
 	return true
 }
 
+// As implements the errors.As interface for ApplicationError.
+func (e *ApplicationError) As(target interface{}) bool {
+	// Check if target is *ApplicationError
+	if t, ok := target.(*ApplicationError); ok {
+		*t = *e
+		return true
+	}
+
+	// Delegate to BaseError.As for other types
+	return e.BaseError.As(target)
+}
+
 // ConfigurationError represents a configuration error.
 // It extends ApplicationError with configuration-specific information.
 type ConfigurationError struct {
@@ -47,6 +59,34 @@ func (e *ConfigurationError) IsConfigurationError() bool {
 	return true
 }
 
+// As implements the errors.As interface for ConfigurationError.
+func (e *ConfigurationError) As(target interface{}) bool {
+	// Debug print
+	println("ConfigurationError.As called with target type:", target)
+
+	// Check if target is *ConfigurationError
+	_, isConfigErr := target.(*ConfigurationError)
+	println("Is target *ConfigurationError?", isConfigErr)
+	if isConfigErr {
+		println("Target is *ConfigurationError")
+		*target.(*ConfigurationError) = *e
+		return true
+	}
+
+	// Check if target is *ApplicationError
+	_, isAppErr := target.(*ApplicationError)
+	println("Is target *ApplicationError?", isAppErr)
+	if isAppErr {
+		println("Target is *ApplicationError")
+		*target.(*ApplicationError) = *e.ApplicationError
+		return true
+	}
+
+	// Delegate to ApplicationError.As for other types
+	println("Delegating to ApplicationError.As")
+	return e.ApplicationError.As(target)
+}
+
 // AuthenticationError represents an authentication failure.
 // It extends ApplicationError with authentication-specific information.
 type AuthenticationError struct {
@@ -65,6 +105,24 @@ func NewAuthenticationError(message string, username string, cause error) *Authe
 // IsAuthenticationError identifies this as an authentication error.
 func (e *AuthenticationError) IsAuthenticationError() bool {
 	return true
+}
+
+// As implements the errors.As interface for AuthenticationError.
+func (e *AuthenticationError) As(target interface{}) bool {
+	// Check if target is *AuthenticationError
+	if t, ok := target.(*AuthenticationError); ok {
+		*t = *e
+		return true
+	}
+
+	// Check if target is *ApplicationError
+	if t, ok := target.(*ApplicationError); ok {
+		*t = *e.ApplicationError
+		return true
+	}
+
+	// Delegate to ApplicationError.As for other types
+	return e.ApplicationError.As(target)
 }
 
 // AuthorizationError represents an authorization failure.
@@ -89,4 +147,22 @@ func NewAuthorizationError(message string, username string, resource string, act
 // IsAuthorizationError identifies this as an authorization error.
 func (e *AuthorizationError) IsAuthorizationError() bool {
 	return true
+}
+
+// As implements the errors.As interface for AuthorizationError.
+func (e *AuthorizationError) As(target interface{}) bool {
+	// Check if target is *AuthorizationError
+	if t, ok := target.(*AuthorizationError); ok {
+		*t = *e
+		return true
+	}
+
+	// Check if target is *ApplicationError
+	if t, ok := target.(*ApplicationError); ok {
+		*t = *e.ApplicationError
+		return true
+	}
+
+	// Delegate to ApplicationError.As for other types
+	return e.ApplicationError.As(target)
 }

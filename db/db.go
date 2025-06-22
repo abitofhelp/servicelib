@@ -7,6 +7,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -44,12 +45,12 @@ func InitMongoClient(ctx context.Context, uri string, timeout time.Duration) (*m
 	// Connect to MongoDB
 	client, err := mongo.Connect(connectCtx, clientOptions)
 	if err != nil {
-		return nil, dberrors.DatabaseOperation(err, "failed to connect to MongoDB")
+		return nil, dberrors.NewDatabaseError("failed to connect to MongoDB", "connect", "MongoDB", err)
 	}
 
 	// Ping the database to verify connection
 	if err := client.Ping(connectCtx, nil); err != nil {
-		return nil, dberrors.DatabaseOperation(err, "failed to ping MongoDB")
+		return nil, dberrors.NewDatabaseError("failed to ping MongoDB", "ping", "MongoDB", err)
 	}
 
 	return client, nil
@@ -94,13 +95,13 @@ func InitPostgresPool(ctx context.Context, config PostgresConfig) (*pgxpool.Pool
 
 	// Validate configuration
 	if config.URI == "" {
-		return nil, dberrors.Configuration("invalid PostgreSQL URI: cannot be empty")
+		return nil, dberrors.NewConfigurationError("invalid PostgreSQL URI: cannot be empty", "PostgresURI", "", nil)
 	}
 
 	// Create pool configuration
 	poolConfig, err := pgxpool.ParseConfig(config.URI)
 	if err != nil {
-		return nil, dberrors.DatabaseOperation(err, "failed to parse PostgreSQL URI")
+		return nil, dberrors.NewDatabaseError("failed to parse PostgreSQL URI", "parse", "PostgreSQL", err)
 	}
 
 	// Set pool settings if provided
@@ -123,13 +124,13 @@ func InitPostgresPool(ctx context.Context, config PostgresConfig) (*pgxpool.Pool
 	// Connect to PostgreSQL
 	pool, err := pgxpool.NewWithConfig(connectCtx, poolConfig)
 	if err != nil {
-		return nil, dberrors.DatabaseOperation(err, "failed to connect to PostgreSQL")
+		return nil, dberrors.NewDatabaseError("failed to connect to PostgreSQL", "connect", "PostgreSQL", err)
 	}
 
 	// Ping the database to verify connection
 	if err := pool.Ping(connectCtx); err != nil {
 		pool.Close()
-		return nil, dberrors.DatabaseOperation(err, "failed to ping PostgreSQL")
+		return nil, dberrors.NewDatabaseError("failed to ping PostgreSQL", "ping", "PostgreSQL", err)
 	}
 
 	return pool, nil
@@ -155,7 +156,7 @@ func InitSQLiteDB(ctx context.Context, uri string, timeout, connMaxLifetime time
 	// Connect to SQLite
 	db, err := sql.Open("sqlite3", uri)
 	if err != nil {
-		return nil, dberrors.DatabaseOperation(err, "failed to open SQLite database")
+		return nil, dberrors.NewDatabaseError("failed to open SQLite database", "open", "SQLite", err)
 	}
 
 	// Set connection pool settings
@@ -165,7 +166,7 @@ func InitSQLiteDB(ctx context.Context, uri string, timeout, connMaxLifetime time
 
 	// Ping the database to verify connection
 	if err := db.PingContext(connectCtx); err != nil {
-		return nil, dberrors.DatabaseOperation(err, "failed to ping SQLite database")
+		return nil, dberrors.NewDatabaseError("failed to ping SQLite database", "ping", "SQLite", err)
 	}
 
 	return db, nil
@@ -194,7 +195,7 @@ func CheckPostgresHealth(ctx context.Context, pool *pgxpool.Pool) error {
 
 	// Ping the database to verify connection
 	if err := pool.Ping(healthCtx); err != nil {
-		return dberrors.DatabaseOperation(err, "failed to ping PostgreSQL during health check")
+		return dberrors.NewDatabaseError("failed to ping PostgreSQL during health check", "health_check", "PostgreSQL", err)
 	}
 
 	return nil
@@ -214,7 +215,7 @@ func CheckMongoHealth(ctx context.Context, client *mongo.Client) error {
 
 	// Ping the database to verify connection
 	if err := client.Ping(healthCtx, nil); err != nil {
-		return dberrors.DatabaseOperation(err, "failed to ping MongoDB during health check")
+		return dberrors.NewDatabaseError("failed to ping MongoDB during health check", "health_check", "MongoDB", err)
 	}
 
 	return nil
@@ -234,7 +235,7 @@ func CheckSQLiteHealth(ctx context.Context, db *sql.DB) error {
 
 	// Ping the database to verify connection
 	if err := db.PingContext(healthCtx); err != nil {
-		return dberrors.DatabaseOperation(err, "failed to ping SQLite during health check")
+		return dberrors.NewDatabaseError("failed to ping SQLite during health check", "health_check", "SQLite", err)
 	}
 
 	return nil
@@ -347,7 +348,7 @@ func ExecutePostgresTransaction(ctx context.Context, pool *pgxpool.Pool, fn func
 
 			select {
 			case <-ctx.Done():
-				return dberrors.DatabaseOperation(ctx.Err(), "context canceled during transaction retry")
+				return dberrors.NewDatabaseError("context canceled during transaction retry", "retry", "PostgreSQL", ctx.Err())
 			case <-time.After(backoff):
 				// Continue with retry
 			}
@@ -364,27 +365,27 @@ func ExecutePostgresTransaction(ctx context.Context, pool *pgxpool.Pool, fn func
 			if IsTransientError(err) {
 				continue // Retry if this is a transient error
 			}
-			return dberrors.DatabaseOperation(err, "failed to begin transaction")
+			return dberrors.NewDatabaseError("failed to begin transaction", "begin", "PostgreSQL", err)
 		}
 
-		// Execute function
-		err = fn(tx)
-		if err != nil {
-			// Rollback transaction
-			rollbackCtx, rollbackCancel := context.WithTimeout(ctx, 5*time.Second)
-			rollbackErr := tx.Rollback(rollbackCtx)
-			rollbackCancel()
-			cancel()
+ 	// Execute function
+ 	err = fn(tx)
+ 	if err != nil {
+ 		// Rollback transaction
+ 		rollbackCtx, rollbackCancel := context.WithTimeout(ctx, 5*time.Second)
+ 		rollbackErr := tx.Rollback(rollbackCtx)
+ 		rollbackCancel()
+ 		cancel()
 
-			if rollbackErr != nil {
-				config.Logger.Warn(ctx, "Failed to rollback transaction", zap.Error(rollbackErr))
-			}
+ 		if rollbackErr != nil {
+ 			config.Logger.Warn(ctx, "Failed to rollback transaction", zap.Error(rollbackErr))
+ 		}
 
-			lastErr = err
-			if IsTransientError(err) {
-				continue // Retry if this is a transient error
-			}
-			return dberrors.DatabaseOperation(err, "transaction function failed")
+ 		lastErr = err
+ 		if IsTransientError(err) {
+ 			continue // Retry if this is a transient error
+ 		}
+ 		return dberrors.NewDatabaseError("transaction function failed", "execute", "PostgreSQL", err)
 		}
 
 		// Commit transaction
@@ -396,7 +397,7 @@ func ExecutePostgresTransaction(ctx context.Context, pool *pgxpool.Pool, fn func
 			if IsTransientError(err) {
 				continue // Retry if this is a transient error
 			}
-			return dberrors.DatabaseOperation(err, "failed to commit transaction")
+			return dberrors.NewDatabaseError("failed to commit transaction", "commit", "PostgreSQL", err)
 		}
 
 		// Transaction succeeded
@@ -404,7 +405,7 @@ func ExecutePostgresTransaction(ctx context.Context, pool *pgxpool.Pool, fn func
 	}
 
 	// If we get here, we've exhausted our retries
-	return dberrors.DatabaseOperation(lastErr, "transaction failed after %d retries", config.MaxRetries)
+	return dberrors.NewDatabaseError(fmt.Sprintf("transaction failed after %d retries", config.MaxRetries), "retry", "PostgreSQL", lastErr)
 }
 
 // ExecuteSQLTransaction executes a function within a SQL transaction.
@@ -439,7 +440,7 @@ func ExecuteSQLTransaction(ctx context.Context, db *sql.DB, fn func(tx *sql.Tx) 
 
 			select {
 			case <-ctx.Done():
-				return dberrors.DatabaseOperation(ctx.Err(), "context canceled during transaction retry")
+				return dberrors.NewDatabaseError("context canceled during transaction retry", "retry", "SQL", ctx.Err())
 			case <-time.After(backoff):
 				// Continue with retry
 			}
@@ -456,7 +457,7 @@ func ExecuteSQLTransaction(ctx context.Context, db *sql.DB, fn func(tx *sql.Tx) 
 			if IsTransientError(err) {
 				continue // Retry if this is a transient error
 			}
-			return dberrors.DatabaseOperation(err, "failed to begin transaction")
+			return dberrors.NewDatabaseError("failed to begin transaction", "begin", "SQL", err)
 		}
 
 		// Execute function

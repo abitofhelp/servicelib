@@ -189,8 +189,31 @@ func ToJSON(err error) string {
 
 // Error type checking functions
 func IsDomainError(err error) bool {
-	var e *DomainError
-	return As(err, &e)
+	// Check if the error is a DomainError
+	var domainErr *DomainError
+	if As(err, &domainErr) {
+		return true
+	}
+
+	// Check if the error is a ValidationError
+	var validationErr *ValidationError
+	if As(err, &validationErr) {
+		return true
+	}
+
+	// Check if the error is a BusinessRuleError
+	var businessRuleErr *BusinessRuleError
+	if As(err, &businessRuleErr) {
+		return true
+	}
+
+	// Check if the error is a NotFoundError
+	var notFoundErr *NotFoundError
+	if As(err, &notFoundErr) {
+		return true
+	}
+
+	return false
 }
 
 func IsValidationError(err error) bool {
@@ -209,8 +232,31 @@ func IsNotFoundError(err error) bool {
 }
 
 func IsInfrastructureError(err error) bool {
-	var e *InfrastructureError
-	return As(err, &e)
+	// Check if the error is an InfrastructureError
+	var infraErr *InfrastructureError
+	if As(err, &infraErr) {
+		return true
+	}
+
+	// Check if the error is a DatabaseError
+	var dbErr *DatabaseError
+	if As(err, &dbErr) {
+		return true
+	}
+
+	// Check if the error is a NetworkError
+	var networkErr *NetworkError
+	if As(err, &networkErr) {
+		return true
+	}
+
+	// Check if the error is an ExternalServiceError
+	var externalErr *ExternalServiceError
+	if As(err, &externalErr) {
+		return true
+	}
+
+	return false
 }
 
 func IsDatabaseError(err error) bool {
@@ -244,6 +290,29 @@ func IsAuthorizationError(err error) bool {
 }
 
 func IsApplicationError(err error) bool {
-	var e *ApplicationError
-	return As(err, &e)
+	// Check if the error is an ApplicationError
+	var appErr *ApplicationError
+	if As(err, &appErr) {
+		return true
+	}
+
+	// Check if the error is a ConfigurationError
+	var configErr *ConfigurationError
+	if As(err, &configErr) {
+		return true
+	}
+
+	// Check if the error is an AuthenticationError
+	var authErr *AuthenticationError
+	if As(err, &authErr) {
+		return true
+	}
+
+	// Check if the error is an AuthorizationError
+	var authzErr *AuthorizationError
+	if As(err, &authzErr) {
+		return true
+	}
+
+	return false
 }

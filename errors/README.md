@@ -15,14 +15,41 @@ The error handling package is organized into several sub-packages:
   - `trace`: Tracing integration
   - `utils`: Utility functions for error handling
 
-- **Features**:
-  - Clear error type hierarchy
-  - Consistent error creation and wrapping
-  - Error codes and HTTP status mapping
-  - Contextual information (operation, source location, details)
-  - Error categorization and type checking
-  - JSON serialization
-  - Integration with logging, metrics, and tracing
+## Features
+
+- **Clear Error Type Hierarchy**:
+  - BaseError: The foundation for all error types
+  - DomainError: Domain-specific errors (validation, business rules, not found)
+  - InfrastructureError: Infrastructure-related errors (database, network, external services)
+  - ApplicationError: Application-level errors (configuration, authentication, authorization)
+
+- **Consistent Error Creation and Wrapping**:
+  - Factory functions for creating different error types
+  - Wrap functions for adding context to errors
+  - Support for error cause chains
+
+- **Error Codes and HTTP Status Mapping**:
+  - Predefined error codes for common error scenarios
+  - Automatic mapping of error codes to HTTP status codes
+
+- **Contextual Information**:
+  - Operation name
+  - Source location (file and line)
+  - Additional details as key-value pairs
+  - Error cause chain
+
+- **Error Categorization and Type Checking**:
+  - Type-specific checking functions (IsValidationError, IsDatabaseError, etc.)
+  - Support for standard errors.Is and errors.As functions
+
+- **JSON Serialization**:
+  - Convert errors to JSON for API responses
+  - Include all contextual information in JSON output
+
+- **Integration with Logging, Metrics, and Tracing**:
+  - Log errors with all contextual information
+  - Record error metrics with error type and code
+  - Add error information to traces
 
 ## Installation
 

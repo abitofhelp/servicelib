@@ -115,11 +115,20 @@ func (e *BaseError) GetHTTPStatus() int {
 // MarshalJSON implements the json.Marshaler interface.
 func (e *BaseError) MarshalJSON() ([]byte, error) {
 	type Alias BaseError
+
+	// Create a custom message that includes the message and cause, but not operation or source
+	message := e.Message
+	if e.Cause != nil {
+		message = message + ": " + e.Cause.Error()
+	}
+
 	return json.Marshal(&struct {
 		*Alias
-		Cause string `json:"cause,omitempty"`
+		Message string `json:"message"`
+		Cause   string `json:"cause,omitempty"`
 	}{
-		Alias: (*Alias)(e),
+		Alias:   (*Alias)(e),
+		Message: message,
 		Cause: func() string {
 			if e.Cause != nil {
 				return e.Cause.Error()
