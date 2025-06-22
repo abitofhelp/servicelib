@@ -101,7 +101,27 @@ func ToJSON(err error) string {
 
 	var baseErr *BaseError
 	if errors.As(err, &baseErr) {
-		jsonBytes, jsonErr := json.Marshal(baseErr)
+		// Create a JSON object with the error details
+		jsonObj := map[string]interface{}{
+			"message": baseErr.Error(),
+			"code":    baseErr.Code,
+		}
+
+		// Add other fields if available
+		if baseErr.Operation != "" {
+			jsonObj["operation"] = baseErr.Operation
+		}
+		if baseErr.Source != "" {
+			jsonObj["source"] = baseErr.Source
+		}
+		if baseErr.Line > 0 {
+			jsonObj["line"] = baseErr.Line
+		}
+		if baseErr.Details != nil && len(baseErr.Details) > 0 {
+			jsonObj["details"] = baseErr.Details
+		}
+
+		jsonBytes, jsonErr := json.Marshal(jsonObj)
 		if jsonErr != nil {
 			return fmt.Sprintf(`{"message":"Error marshaling error to JSON: %s"}`, jsonErr.Error())
 		}

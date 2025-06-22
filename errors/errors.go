@@ -242,3 +242,8 @@ func IsAuthorizationError(err error) bool {
 	var e *AuthorizationError
 	return As(err, &e)
 }
+
+func IsApplicationError(err error) bool {
+	var e *ApplicationError
+	return As(err, &e)
+}
