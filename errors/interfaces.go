@@ -55,13 +55,13 @@ type RepositoryErrorInterface interface {
 
 // IsValidationError checks if an error is a validation error
 func IsValidationError(err error) bool {
-	var validationErr ValidationErrorInterface
+	var validationErr *ValidationError
 	return As(err, &validationErr)
 }
 
 // IsNotFoundError checks if an error is a not found error
 func IsNotFoundError(err error) bool {
-	var notFoundErr NotFoundErrorInterface
+	var notFoundErr *NotFoundError
 	return As(err, &notFoundErr)
 }
 

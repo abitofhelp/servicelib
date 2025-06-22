@@ -5,21 +5,24 @@ This package provides a comprehensive error handling system for the application.
 ## Package Structure
 
 The error handling package is organized into several sub-packages:
-  - `core`: Core error handling functionality (error codes, error context, utility functions)
-  - `types`: Specific error types (validation errors, application errors, domain errors, repository errors)
-  - `interfaces`: Error interfaces for type checking and HTTP status mapping
-  - `recovery`: Error recovery mechanisms (circuit breakers, retries)
+  - `core`: Core error handling functionality (error codes, base error type, utility functions)
+  - `domain`: Domain-specific error types (validation errors, business rule errors, not found errors)
+  - `infra`: Infrastructure-related error types (database errors, network errors, external service errors)
+  - `app`: Application-level error types (configuration errors, authentication errors, authorization errors)
+  - `http`: HTTP-related error utilities
+  - `log`: Logging integration
+  - `metrics`: Metrics integration
+  - `trace`: Tracing integration
   - `utils`: Utility functions for error handling
-  - `wrappers`: Error wrapping utilities
 
 - **Features**:
-  - Error wrapping with context
-  - Error codes
-  - Localized error messages
-  - Stack traces
-  - Error categorization
-  - HTTP status mapping
-  - Error recovery mechanisms
+  - Clear error type hierarchy
+  - Consistent error creation and wrapping
+  - Error codes and HTTP status mapping
+  - Contextual information (operation, source location, details)
+  - Error categorization and type checking
+  - JSON serialization
+  - Integration with logging, metrics, and tracing
 
 ## Installation
 
@@ -41,28 +44,32 @@ import (
 
 func main() {
     // Create a simple error
-    err := errors.New("something went wrong")
-    fmt.Println(err) // Output: something went wrong
-
-    // Create an error with a code
-    err = errors.NewWithCode("invalid_input", "Invalid input provided")
-    fmt.Println(err) // Output: invalid_input: Invalid input provided
+    err := errors.New(errors.InvalidInputCode, "Invalid input provided")
+    fmt.Println(err) // Output: Invalid input provided
 
     // Create a domain error
-    err = errors.NewDomainError("user_not_found", "User not found")
-    fmt.Println(err) // Output: domain error: user_not_found: User not found
-
-    // Create an infrastructure error
-    err = errors.NewInfrastructureError("database_connection", "Failed to connect to database")
-    fmt.Println(err) // Output: infrastructure error: database_connection: Failed to connect to database
-
-    // Create an application error
-    err = errors.NewApplicationError("invalid_state", "Application is in an invalid state")
-    fmt.Println(err) // Output: application error: invalid_state: Application is in an invalid state
+    err = errors.NewDomainError(errors.NotFoundCode, "User not found", nil)
+    fmt.Println(err) // Output: User not found
 
     // Create a validation error
-    err = errors.NewValidationError("required_field", "Field 'name' is required")
-    fmt.Println(err) // Output: validation error: required_field: Field 'name' is required
+    err = errors.NewValidationError("Field 'name' is required", "name", nil)
+    fmt.Println(err) // Output: Field 'name' is required
+
+    // Create a business rule error
+    err = errors.NewBusinessRuleError("User must be at least 18 years old", "MinimumAge", nil)
+    fmt.Println(err) // Output: User must be at least 18 years old
+
+    // Create a not found error
+    err = errors.NewNotFoundError("User", "123", nil)
+    fmt.Println(err) // Output: User with ID 123 not found
+
+    // Create an infrastructure error
+    err = errors.NewDatabaseError("Failed to query database", "SELECT", "users", nil)
+    fmt.Println(err) // Output: Failed to query database
+
+    // Create an application error
+    err = errors.NewConfigurationError("Invalid configuration value", "MAX_CONNECTIONS", "abc", nil)
+    fmt.Println(err) // Output: Invalid configuration value
 }
 ```
 
@@ -80,67 +87,33 @@ import (
 func main() {
     // Wrap a standard error
     originalErr := sql.ErrNoRows
-    wrappedErr := errors.Wrap(originalErr, "failed to find user")
-    fmt.Println(wrappedErr) // Output: failed to find user: sql: no rows in result set
+    wrappedErr := errors.Wrap(originalErr, errors.NotFoundCode, "Failed to find user")
+    fmt.Println(wrappedErr) // Output: Failed to find user: sql: no rows in result set
 
-    // Wrap with a code
-    wrappedWithCode := errors.WrapWithCode(originalErr, "user_not_found", "failed to find user")
-    fmt.Println(wrappedWithCode) // Output: user_not_found: failed to find user: sql: no rows in result set
+    // Wrap with an operation
+    wrappedWithOp := errors.WrapWithOperation(originalErr, errors.NotFoundCode, "Failed to find user", "GetUserByID")
+    fmt.Println(wrappedWithOp) // Output: GetUserByID: Failed to find user: sql: no rows in result set
 
-    // Wrap multiple times
-    deeplyWrapped := errors.Wrap(wrappedErr, "error in GetUserByID")
-    fmt.Println(deeplyWrapped) // Output: error in GetUserByID: failed to find user: sql: no rows in result set
+    // Wrap with details
+    details := map[string]interface{}{
+        "user_id": "123",
+        "table":   "users",
+    }
+    wrappedWithDetails := errors.WrapWithDetails(originalErr, errors.NotFoundCode, "Failed to find user", details)
+    fmt.Println(wrappedWithDetails) // Output: Failed to find user: sql: no rows in result set
 
     // Unwrap to get the original error
-    unwrapped := errors.Unwrap(deeplyWrapped)
-    fmt.Println(unwrapped) // Output: failed to find user: sql: no rows in result set
+    unwrapped := errors.Unwrap(wrappedErr)
+    fmt.Println(unwrapped) // Output: sql: no rows in result set
 
     // Check if an error is of a specific type
-    if errors.Is(deeplyWrapped, sql.ErrNoRows) {
+    if errors.Is(wrappedErr, sql.ErrNoRows) {
         fmt.Println("The original error was sql.ErrNoRows")
     }
 }
 ```
 
-### Error Context
-
-```go
-package main
-
-import (
-    "fmt"
-    "github.com/abitofhelp/servicelib/errors"
-)
-
-func main() {
-    // Create an error with context
-    err := errors.NewWithContext("failed to process request", map[string]interface{}{
-        "user_id": "123",
-        "action":  "create_order",
-        "status":  "failed",
-    })
-
-    // Get context from the error
-    if ctx, ok := errors.GetContext(err); ok {
-        fmt.Printf("Error context: %v\n", ctx)
-    }
-
-    // Get a specific context value
-    if userID, ok := errors.GetContextValue(err, "user_id"); ok {
-        fmt.Printf("User ID: %v\n", userID)
-    }
-
-    // Add more context to an existing error
-    enrichedErr := errors.AddContext(err, "request_id", "req-456")
-
-    // Get the enriched context
-    if ctx, ok := errors.GetContext(enrichedErr); ok {
-        fmt.Printf("Enriched context: %v\n", ctx)
-    }
-}
-```
-
-### Error Categorization
+### Error Type Checking
 
 ```go
 package main
@@ -152,41 +125,41 @@ import (
 
 func main() {
     // Create errors of different types
-    notFoundErr := errors.NewDomainError("user_not_found", "User not found")
-    validationErr := errors.NewValidationError("invalid_email", "Email is invalid")
-    authErr := errors.NewApplicationError("unauthorized", "User is not authorized")
-    dbErr := errors.NewInfrastructureError("db_connection", "Failed to connect to database")
+    notFoundErr := errors.NewNotFoundError("User", "123", nil)
+    validationErr := errors.NewValidationError("Email is invalid", "email", nil)
+    dbErr := errors.NewDatabaseError("Failed to query database", "SELECT", "users", nil)
+    authErr := errors.NewAuthenticationError("Invalid credentials", "john.doe", nil)
 
-    // Check error categories
-    fmt.Printf("Is not found: %v\n", errors.IsNotFound(notFoundErr))
-    fmt.Printf("Is validation: %v\n", errors.IsValidation(validationErr))
-    fmt.Printf("Is unauthorized: %v\n", errors.IsUnauthorized(authErr))
-    fmt.Printf("Is infrastructure: %v\n", errors.IsInfrastructure(dbErr))
+    // Check error types
+    fmt.Printf("Is not found error: %v\n", errors.IsNotFoundError(notFoundErr))
+    fmt.Printf("Is validation error: %v\n", errors.IsValidationError(validationErr))
+    fmt.Printf("Is database error: %v\n", errors.IsDatabaseError(dbErr))
+    fmt.Printf("Is authentication error: %v\n", errors.IsAuthenticationError(authErr))
 
     // Use in error handling
     handleError(notFoundErr)
     handleError(validationErr)
-    handleError(authErr)
     handleError(dbErr)
+    handleError(authErr)
 }
 
 func handleError(err error) {
     switch {
-    case errors.IsNotFound(err):
+    case errors.IsNotFoundError(err):
         fmt.Println("Handle not found error:", err)
-    case errors.IsValidation(err):
+    case errors.IsValidationError(err):
         fmt.Println("Handle validation error:", err)
-    case errors.IsUnauthorized(err):
-        fmt.Println("Handle unauthorized error:", err)
-    case errors.IsInfrastructure(err):
-        fmt.Println("Handle infrastructure error:", err)
+    case errors.IsDatabaseError(err):
+        fmt.Println("Handle database error:", err)
+    case errors.IsAuthenticationError(err):
+        fmt.Println("Handle authentication error:", err)
     default:
         fmt.Println("Handle generic error:", err)
     }
 }
 ```
 
-### Stack Traces
+### HTTP Status Mapping
 
 ```go
 package main
@@ -194,32 +167,39 @@ package main
 import (
     "fmt"
     "github.com/abitofhelp/servicelib/errors"
+    "net/http"
 )
 
 func main() {
-    // Create an error with a stack trace
-    err := errors.NewWithStack("something went wrong")
+    // Create errors of different types
+    notFoundErr := errors.NewNotFoundError("User", "123", nil)
+    validationErr := errors.NewValidationError("Email is invalid", "email", nil)
+    dbErr := errors.NewDatabaseError("Failed to query database", "SELECT", "users", nil)
+    authErr := errors.NewAuthenticationError("Invalid credentials", "john.doe", nil)
 
-    // Print the error with stack trace
-    fmt.Println(errors.StackTrace(err))
+    // Get HTTP status codes
+    fmt.Printf("Not found error HTTP status: %d\n", errors.GetHTTPStatus(notFoundErr))
+    fmt.Printf("Validation error HTTP status: %d\n", errors.GetHTTPStatus(validationErr))
+    fmt.Printf("Database error HTTP status: %d\n", errors.GetHTTPStatus(dbErr))
+    fmt.Printf("Authentication error HTTP status: %d\n", errors.GetHTTPStatus(authErr))
 
-    // Create a function that returns an error
-    err = someFunction()
-
-    // Print the stack trace
-    fmt.Println(errors.StackTrace(err))
+    // Use in HTTP handler
+    handleHTTPError(notFoundErr, http.ResponseWriter(nil))
 }
 
-func someFunction() error {
-    return anotherFunction()
-}
+func handleHTTPError(err error, w http.ResponseWriter) {
+    status := errors.GetHTTPStatus(err)
+    if status == 0 {
+        status = http.StatusInternalServerError
+    }
 
-func anotherFunction() error {
-    return errors.NewWithStack("error in anotherFunction")
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(status)
+    w.Write([]byte(errors.ToJSON(err)))
 }
 ```
 
-### Error Codes
+### JSON Serialization
 
 ```go
 package main
@@ -230,115 +210,184 @@ import (
 )
 
 func main() {
-    // Create an error with a code
-    err := errors.NewWithCode("invalid_input", "Invalid input provided")
-
-    // Get the error code
-    if code, ok := errors.GetCode(err); ok {
-        fmt.Printf("Error code: %s\n", code)
+    // Create an error with details
+    details := map[string]interface{}{
+        "user_id": "123",
+        "action":  "create_order",
+        "status":  "failed",
     }
+    err := errors.WrapWithDetails(
+        errors.New(errors.ValidationErrorCode, "Invalid input"),
+        errors.ValidationErrorCode,
+        "Failed to process request",
+        details,
+    )
 
-    // Check if an error has a specific code
-    if errors.HasCode(err, "invalid_input") {
-        fmt.Println("This is an invalid input error")
-    }
+    // Convert the error to JSON
+    jsonStr := errors.ToJSON(err)
+    fmt.Println(jsonStr)
 
-    // Create a wrapped error with a code
-    originalErr := fmt.Errorf("value out of range")
-    wrappedErr := errors.WrapWithCode(originalErr, "validation_error", "Input validation failed")
-
-    // Get the code from the wrapped error
-    if code, ok := errors.GetCode(wrappedErr); ok {
-        fmt.Printf("Wrapped error code: %s\n", code)
-    }
+    // Output:
+    // {
+    //   "message": "Failed to process request: Invalid input",
+    //   "code": "VALIDATION_ERROR",
+    //   "details": {
+    //     "user_id": "123",
+    //     "action": "create_order",
+    //     "status": "failed"
+    //   },
+    //   "source": "main.go",
+    //   "line": 15
+    // }
 }
 ```
 
-### Localized Error Messages
+### Integration with Logging
 
 ```go
 package main
 
 import (
-    "fmt"
+    "context"
     "github.com/abitofhelp/servicelib/errors"
+    "log"
 )
 
 func main() {
-    // Create an error with localized messages
-    err := errors.NewLocalized("invalid_input", map[string]string{
-        "en": "Invalid input provided",
-        "es": "Entrada no válida proporcionada",
-        "fr": "Entrée invalide fournie",
-    })
+    // Create a context
+    ctx := context.Background()
 
-    // Get the default message (usually English)
-    fmt.Println(err) // Output: invalid_input: Invalid input provided
+    // Create an error
+    err := errors.NewDatabaseError("Failed to query database", "SELECT", "users", nil)
 
-    // Get a localized message
-    if msg, ok := errors.GetLocalizedMessage(err, "es"); ok {
-        fmt.Printf("Spanish error message: %s\n", msg)
+    // Log the error with context
+    logError(ctx, err)
+}
+
+func logError(ctx context.Context, err error) {
+    // Get error details
+    code := ""
+    if e, ok := err.(interface{ GetCode() errors.ErrorCode }); ok {
+        code = string(e.GetCode())
     }
 
-    // Get a localized message with fallback
-    msg := errors.GetLocalizedMessageWithFallback(err, "de", "en")
-    fmt.Printf("German message (fallback to English): %s\n", msg)
+    // Log the error with context
+    log.Printf(
+        "Error occurred: code=%s, message=%s, http_status=%d",
+        code,
+        err.Error(),
+        errors.GetHTTPStatus(err),
+    )
 }
 ```
 
 ## Best Practices
 
-1. **Use Structured Errors**: Create structured errors with codes and context information to make debugging easier.
+### 1. Use the Appropriate Error Type
 
-   ```go
-   return errors.NewWithContext("failed to process order", map[string]interface{}{
-       "order_id": orderID,
-       "user_id": userID,
-       "status": "failed",
-   })
-   ```
+Choose the most specific error type for your situation:
 
-2. **Error Categorization**: Categorize errors to handle them appropriately at the API boundary.
+```go
+// For domain validation errors
+err := errors.NewValidationError("Email is invalid", "email", nil)
 
-   ```go
-   switch {
-   case errors.IsNotFound(err):
-       return http.StatusNotFound, errorResponse(err)
-   case errors.IsValidation(err):
-       return http.StatusBadRequest, errorResponse(err)
-   case errors.IsUnauthorized(err):
-       return http.StatusUnauthorized, errorResponse(err)
-   default:
-       return http.StatusInternalServerError, errorResponse(err)
-   }
-   ```
+// For not found errors
+err := errors.NewNotFoundError("User", "123", nil)
 
-3. **Wrap Errors**: Wrap errors to add context as they propagate up the call stack.
+// For database errors
+err := errors.NewDatabaseError("Failed to query database", "SELECT", "users", nil)
 
-   ```go
-   if err := repository.GetUser(id); err != nil {
-       return errors.Wrap(err, "failed to get user")
-   }
-   ```
+// For authentication errors
+err := errors.NewAuthenticationError("Invalid credentials", "john.doe", nil)
+```
 
-4. **Error Codes**: Use consistent error codes across your application.
+### 2. Add Context to Errors
 
-   ```go
-   const (
-       ErrNotFound      = "not_found"
-       ErrInvalidInput  = "invalid_input"
-       ErrUnauthorized  = "unauthorized"
-       ErrInternal      = "internal_error"
-   )
-   ```
+Wrap errors with additional context:
 
-5. **Stack Traces**: Include stack traces for unexpected errors to aid debugging.
+```go
+// Wrap with operation name
+err = errors.WrapWithOperation(err, errors.DatabaseErrorCode, "Database query failed", "GetUserByID")
 
-   ```go
-   if err != nil && !isExpectedError(err) {
-       return errors.NewWithStack(fmt.Sprintf("unexpected error: %v", err))
-   }
-   ```
+// Wrap with details
+details := map[string]interface{}{
+    "user_id": "123",
+    "query":   "SELECT * FROM users WHERE id = ?",
+}
+err = errors.WrapWithDetails(err, errors.DatabaseErrorCode, "Database query failed", details)
+```
+
+### 3. Check Error Types
+
+Use the type checking functions to handle different error types:
+
+```go
+switch {
+case errors.IsNotFoundError(err):
+    // Handle not found error
+case errors.IsValidationError(err):
+    // Handle validation error
+case errors.IsDatabaseError(err):
+    // Handle database error
+default:
+    // Handle other errors
+}
+```
+```
+
+### 4. Map Errors to HTTP Status Codes
+
+Use the GetHTTPStatus function to map errors to HTTP status codes:
+
+```go
+func handleHTTPError(w http.ResponseWriter, err error) {
+    status := errors.GetHTTPStatus(err)
+    if status == 0 {
+        status = http.StatusInternalServerError
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(status)
+    w.Write([]byte(errors.ToJSON(err)))
+}
+```
+
+### 5. Provide Detailed Error Messages
+
+Include detailed error messages that help identify the issue:
+
+```go
+// Instead of this:
+err := errors.New(errors.ValidationErrorCode, "Invalid input")
+
+// Do this:
+err := errors.NewValidationError("Email must be a valid email address", "email", nil)
+```
+
+### 6. Use Standard Error Codes
+
+Use the standard error codes defined in the package:
+
+```go
+// Standard error codes
+errors.NotFoundCode
+errors.InvalidInputCode
+errors.DatabaseErrorCode
+errors.InternalErrorCode
+errors.UnauthorizedCode
+errors.ForbiddenCode
+errors.ValidationErrorCode
+errors.BusinessRuleViolationCode
+```
+
+### 7. Include Source Information
+
+The error handling system automatically includes source file and line information, which helps with debugging:
+
+```go
+// The error will include the source file and line number
+err := errors.New(errors.InternalErrorCode, "Something went wrong")
+```
 
 ## License
 

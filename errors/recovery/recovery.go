@@ -15,13 +15,13 @@ import (
 
 var (
 	// ErrCircuitBreakerOpen is returned when the circuit breaker is in the open state
-	ErrCircuitBreakerOpen = errors.New("circuit-breaker", "circuit-breaker", "circuit breaker is open", nil)
+	ErrCircuitBreakerOpen = errors.New(errors.InternalErrorCode, "circuit breaker is open")
 	// ErrServiceUnavailable is returned when a service is not available
-	ErrServiceUnavailable = errors.New("service", "availability", "service unavailable", nil)
+	ErrServiceUnavailable = errors.New(errors.NetworkErrorCode, "service unavailable")
 	// ErrContextCanceled is returned when the context is canceled
-	ErrContextCanceled = errors.New("context", "canceled", "context canceled", nil)
+	ErrContextCanceled = errors.New(errors.CanceledCode, "context canceled")
 	// ErrContextDeadlineExceeded is returned when the context deadline is exceeded
-	ErrContextDeadlineExceeded = errors.New("context", "deadline-exceeded", "context deadline exceeded", nil)
+	ErrContextDeadlineExceeded = errors.New(errors.TimeoutCode, "context deadline exceeded")
 )
 
 // RecoveryHandler handles panic recovery and error rate limiting
@@ -50,7 +50,7 @@ func (h *RecoveryHandler) WithRecovery(ctx context.Context, operation string, fn
 			default:
 				// Rate limit exceeded, skip logging
 			}
-			err = errors.New("panic", operation, fmt.Sprintf("panic in %s: %v", operation, r), nil)
+			err = errors.New(errors.InternalErrorCode, fmt.Sprintf("panic in %s: %v", operation, r))
 		}
 	}()
 

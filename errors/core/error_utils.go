@@ -87,7 +87,7 @@ func GetHTTPStatusFromError(err error) int {
 }
 
 // ToJSON converts an error to a JSON string.
-// If the error is a ContextualError, it uses the MarshalJSON method.
+// If the error is a BaseError, it uses the MarshalJSON method.
 // Otherwise, it creates a simple JSON object with the error message.
 // Parameters:
 //   - err: The error to convert to JSON
@@ -99,16 +99,16 @@ func ToJSON(err error) string {
 		return "{}"
 	}
 
-	var contextualErr *ContextualError
-	if errors.As(err, &contextualErr) {
-		jsonBytes, jsonErr := json.Marshal(contextualErr)
+	var baseErr *BaseError
+	if errors.As(err, &baseErr) {
+		jsonBytes, jsonErr := json.Marshal(baseErr)
 		if jsonErr != nil {
 			return fmt.Sprintf(`{"message":"Error marshaling error to JSON: %s"}`, jsonErr.Error())
 		}
 		return string(jsonBytes)
 	}
 
-	// For non-ContextualError errors, create a simple JSON object
+	// For non-BaseError errors, create a simple JSON object
 	jsonBytes, jsonErr := json.Marshal(struct {
 		Message string `json:"message"`
 	}{
