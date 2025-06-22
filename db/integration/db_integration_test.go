@@ -3,13 +3,14 @@
 //go:build integration
 // +build integration
 
-package db
+package integration
 
 import (
 	"context"
 	"database/sql"
 	"testing"
 
+	"github.com/abitofhelp/servicelib/db"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/assert"
@@ -31,7 +32,7 @@ func TestCheckPostgresHealthDirect(t *testing.T) {
 	defer pool.Close()
 
 	// Test case: Healthy connection
-	err = CheckPostgresHealth(context.Background(), pool)
+	err = db.CheckPostgresHealth(context.Background(), pool)
 	assert.NoError(t, err)
 }
 
@@ -49,7 +50,7 @@ func TestCheckMongoHealthDirect(t *testing.T) {
 	defer client.Disconnect(context.Background())
 
 	// Test case: Healthy connection
-	err = CheckMongoHealth(context.Background(), client)
+	err = db.CheckMongoHealth(context.Background(), client)
 	assert.NoError(t, err)
 }
 
@@ -67,7 +68,7 @@ func TestCheckSQLiteHealthDirect(t *testing.T) {
 	defer db.Close()
 
 	// Test case: Healthy connection
-	err = CheckSQLiteHealth(context.Background(), db)
+	err = db.CheckSQLiteHealth(context.Background(), db)
 	assert.NoError(t, err)
 }
 
@@ -85,7 +86,7 @@ func TestExecutePostgresTransactionDirect(t *testing.T) {
 	defer pool.Close()
 
 	// Test case: Successful transaction
-	err = ExecutePostgresTransaction(context.Background(), pool, func(tx pgx.Tx) error {
+	err = db.ExecutePostgresTransaction(context.Background(), pool, func(tx pgx.Tx) error {
 		// Execute a simple query
 		_, err := tx.Exec(context.Background(), "SELECT 1")
 		return err
@@ -107,7 +108,7 @@ func TestExecuteSQLTransactionDirect(t *testing.T) {
 	defer db.Close()
 
 	// Test case: Successful transaction
-	err = ExecuteSQLTransaction(context.Background(), db, func(tx *sql.Tx) error {
+	err = db.ExecuteSQLTransaction(context.Background(), db, func(tx *sql.Tx) error {
 		// Execute a simple query
 		_, err := tx.Exec("SELECT 1")
 		return err

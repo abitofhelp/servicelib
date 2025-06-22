@@ -16,11 +16,28 @@ Integration tests are organized by package:
   - [`jwt_integration_test.go`](../auth/integration/jwt_integration_test.go) - Tests JWT token validation flow
   - [`oidc_integration_test.go`](../auth/integration/oidc_integration_test.go) - Tests OIDC integration with a mock provider
 
+- `db/integration/` - Tests for database components
+  - [`db_integration_test.go`](../db/integration/db_integration_test.go) - Tests direct database connections and operations
+
 - `telemetry/integration/` - Tests for telemetry components
   - [`metrics_integration_test.go`](../telemetry/integration/metrics_integration_test.go) - Tests metrics recording and Prometheus endpoint
   - [`http_integration_test.go`](../telemetry/integration/http_integration_test.go) - Tests HTTP instrumentation
 
 ## Running Integration Tests
+
+> **Important**: In order to ensure that developers can build and work with this package within different IDEs and environments, please use the Makefile to build, test, etc.
+
+Using the Makefile (recommended):
+
+```bash
+# Run all integration tests
+make test-integration
+
+# Run integration tests with coverage
+make coverage-integration
+```
+
+Alternatively, you can use Go commands directly:
 
 To run all integration tests:
 
@@ -53,6 +70,19 @@ The OIDC integration tests are skipped by default because they require an extern
 1. Set up an OIDC provider (e.g., Keycloak, Auth0)
 2. Update the test configuration with your provider details
 3. Remove the `t.Skip()` line from the tests
+
+### DB Integration Tests
+
+The database integration tests are skipped by default because they require real database connections:
+- PostgreSQL health check and transaction tests
+- MongoDB health check tests
+- SQLite health check and transaction tests
+
+To run these tests:
+
+1. Set up the required database (PostgreSQL, MongoDB, or SQLite)
+2. Update the connection strings in the tests
+3. Remove the `t.Skip()` line from the tests you want to run
 
 ### Telemetry Integration Tests
 
@@ -121,6 +151,17 @@ go test -tags=integration -run TestHTTPInstrumentation ./telemetry/integration
 
 See [http_integration_test.go](../telemetry/integration/http_integration_test.go) for implementation details.
 
+### Testing Database Connections
+
+The database connection tests verify that the database health check and transaction functions work correctly:
+
+```bash
+go test -tags=integration -run TestCheckPostgresHealthDirect ./db/integration
+go test -tags=integration -run TestExecutePostgresTransactionDirect ./db/integration
+```
+
+See [db_integration_test.go](../db/integration/db_integration_test.go) for implementation details.
+
 ## Troubleshooting
 
 ### Common Issues
@@ -150,6 +191,8 @@ See [http_integration_test.go](../telemetry/integration/http_integration_test.go
 - **Metrics Recording Failures**: These may occur if the OpenTelemetry collector is not properly configured or not running. Check the collector configuration and status.
 
 - **HTTP Instrumentation Failures**: These may occur if the HTTP server or client is not properly configured. Check the HTTP configuration in the test.
+
+- **Database Connection Failures**: These may occur if the database is not running or if the connection string is incorrect. Check that the database is running and accessible, and that the connection string is correct.
 
 ### Debugging Test Failures
 
@@ -182,3 +225,5 @@ When a test fails, follow these steps to debug the issue:
 - **Metrics Recording Failures**: These may occur if the OpenTelemetry collector is not properly configured or not running. Check the collector configuration and status.
 
 - **HTTP Instrumentation Failures**: These may occur if the HTTP server or client is not properly configured. Check the HTTP configuration in the test.
+
+- **Database Connection Failures**: These may occur if the database is not running or if the connection string is incorrect. Check that the database is running and accessible, and that the connection string is correct.

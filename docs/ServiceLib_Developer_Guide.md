@@ -29,6 +29,8 @@
 
 ServiceLib is a comprehensive Go library designed to accelerate the development of robust, production-ready microservices. It provides a collection of reusable components and utilities that address common challenges in service development, allowing developers to focus on business logic rather than infrastructure concerns.
 
+> **Important**: In order to ensure that developers can build and work with this package within different IDEs and environments, please use the Makefile to build, test, etc.
+
 The library follows modern Go practices and design patterns, with a focus on:
 
 - **Modularity**: Each component can be used independently or together with others

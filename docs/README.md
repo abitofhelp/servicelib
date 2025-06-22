@@ -75,6 +75,8 @@ To get started with ServiceLib, follow these steps:
 
 5. For testing your implementation, refer to the [Integration Tests](Integration_Tests.md) documentation.
 
+> **Important**: In order to ensure that developers can build and work with this package within different IDEs and environments, please use the Makefile to build, test, etc.
+
 ## Contributing
 
 Contributions to ServiceLib are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.

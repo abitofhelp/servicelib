@@ -84,6 +84,8 @@ go get github.com/abitofhelp/servicelib
 
 ## Getting Started
 
+> **Important**: In order to ensure that developers can build and work with this package within different IDEs and environments, please use the Makefile to build, test, etc.
+
 To get started with ServiceLib, you can create a simple HTTP server with logging and middleware:
 
 1. Create a new Go module:
