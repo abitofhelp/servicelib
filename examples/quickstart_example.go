@@ -21,6 +21,9 @@ func main() {
 	}
 	defer logger.Sync()
 
+	// Create a context logger
+	contextLogger := logging.NewContextLogger(logger)
+
 	// Create a simple HTTP handler
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -30,14 +33,14 @@ func main() {
 	// Add middleware for logging, metrics, and recovery
 	handler := middleware.Chain(
 		mux,
-		middleware.RequestID(context.Background()),
-		middleware.Logging(logger),
-		middleware.Recovery(logger),
+		middleware.WithRequestID(context.Background()),
+		middleware.Logging(contextLogger),
+		middleware.Recovery(contextLogger),
 	)
 
 	// Start the server
-	logger.Info("Starting server", zap.String("address", ":8080"))
+	contextLogger.Info(context.Background(), "Starting server", zap.String("address", ":8080"))
 	if err := http.ListenAndServe(":8080", handler); err != nil {
-		logger.Fatal("Server failed", zap.Error(err))
+		contextLogger.Fatal(context.Background(), "Server failed", zap.Error(err))
 	}
 }
