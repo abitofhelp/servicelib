@@ -1,0 +1,63 @@
+[
+  {
+    "Name": "Money",
+    "Package": "measurement",
+    "Type": "struct",
+    "Description": "a monetary value object with amount and currency",
+    "Fields": {
+      "amount": "decimal.Decimal",
+      "currency": "string"
+    },
+    "Validations": {
+      "currency": "// Trim whitespace from currency\n\ttrimmedCurrency := strings.TrimSpace(v.currency)\n\n\t// Currency is required\n\tif trimmedCurrency == \"\" {\n\t\treturn errors.New(\"currency cannot be empty\")\n\t}\n\n\t// Basic currency code validation (assuming 3-letter ISO currency codes)\n\tif len(trimmedCurrency) != 3 {\n\t\treturn errors.New(\"currency must be a 3-letter ISO code\")\n\t}"
+    },
+    "Imports": [
+      "encoding/json",
+      "errors",
+      "fmt",
+      "github.com/shopspring/decimal",
+      "regexp",
+      "strings"
+    ]
+  },
+  {
+    "Name": "Percentage",
+    "Package": "measurement",
+    "Type": "struct",
+    "Description": "a percentage value object",
+    "Fields": {
+      "value": "float64"
+    },
+    "Validations": {
+      "value": "// Validate percentage range\n\tif v.value < 0 {\n\t\treturn errors.New(\"percentage cannot be negative\")\n\t}\n\n\tif v.value > 100 {\n\t\treturn errors.New(\"percentage cannot exceed 100\")\n\t}"
+    },
+    "Imports": [
+      "errors",
+      "fmt",
+      "strconv",
+      "strings"
+    ]
+  },
+  {
+    "Name": "Rating",
+    "Package": "measurement",
+    "Type": "struct",
+    "Description": "a rating value object (e.g., 1-5 stars)",
+    "Fields": {
+      "value": "float64",
+      "maxValue": "float64"
+    },
+    "Validations": {
+      "value": "// Validate value range\n\tif v.value < 0 {\n\t\treturn errors.New(\"rating cannot be negative\")\n\t}\n\tif v.value > v.maxValue {\n\t\treturn fmt.Errorf(\"rating cannot exceed maximum value of %.2f\", v.maxValue)\n\t}",
+      "maxValue": "// Validate max value\n\tif v.maxValue <= 0 {\n\t\treturn errors.New(\"maximum rating value must be positive\")\n\t}"
+    },
+    "Imports": [
+      "errors",
+      "fmt",
+      "math",
+      "regexp",
+      "strconv",
+      "strings"
+    ]
+  }
+]

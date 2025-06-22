@@ -18,16 +18,17 @@ This package provides a collection of common Value Objects that can be used in y
 | Value Object | Description |
 |--------------|-------------|
 | Address | Represents a physical address with validation (moved to contact package) |
-| Color | Represents a color in various formats (RGB, HEX, etc.) |
+| Color | Represents a color in various formats (RGB, HEX, etc.) (moved to appearance package) |
 | Coordinate | Represents a geographic coordinate (latitude and longitude) |
 | DateOfBirth | Represents a person's date of birth with validation |
 | DateOfDeath | Represents a person's date of death with validation |
 | Duration | Represents a time duration with various units |
 | Email | Represents an email address with validation |
-| FileSize | Represents a file size with various units (bytes, KB, MB, etc.) |
+| FileSize | Represents a file size with various units using base 10 values (bytes, KB, MB, etc.) per ISO standards (moved to measurement package) |
 | Gender | Represents a person's gender |
 | ID | Represents a unique identifier |
-| IPAddress | Represents an IP address (IPv4 or IPv6) |
+| IPAddress | Represents an IP address (IPv4 or IPv6) (moved to network package) |
+| MemSize | Represents a computer memory size with various units using base 2 binary values (bytes, KiB, MiB, etc.) (in measurement package) |
 | Money | Represents a monetary value with currency |
 | Name | Represents a person's name |
 | Password | Represents a password with validation and security features |
@@ -35,13 +36,113 @@ This package provides a collection of common Value Objects that can be used in y
 | Phone | Represents a phone number with validation |
 | Rating | Represents a rating value (e.g., 1-5 stars) |
 | Temperature | Represents a temperature value with various units |
-| URL | Represents a URL with validation |
+| URL | Represents a URL with validation (moved to network package) |
 | Username | Represents a username with validation |
-| Version | Represents a version number (e.g., semantic versioning) |
+| Version | Represents a version number (e.g., semantic versioning) (moved to temporal package) |
 
 ## Usage Examples
 
 ### FileSize
+
+The FileSize value object has been moved to the measurement package and updated to use base 10 values per ISO standards. Use it as follows:
+
+```go
+// Example usage of the FileSize value object
+package main
+
+import (
+	"fmt"
+
+	"github.com/abitofhelp/servicelib/valueobject/measurement"
+)
+
+func main() {
+	// Create a new file size (using base 10 values per ISO standards)
+	fileSize, err := measurement.NewFileSize(1.5, measurement.Gigabytes)
+	if err != nil {
+		// Handle error
+		fmt.Println("Error creating file size:", err)
+		return
+	}
+
+	// Access the size in different units
+	bytes := fileSize.Bytes()
+	kb := fileSize.Kilobytes()
+	mb := fileSize.Megabytes()
+	gb := fileSize.Gigabytes()
+
+	fmt.Printf("File size: %.2f GB\n", gb)
+	fmt.Printf("Same size in different units: %d bytes, %.2f KB, %.2f MB\n", 
+		bytes, kb, mb)
+
+	// Format with different units
+	fmt.Println(fileSize.Format("B"))     // In bytes
+	fmt.Println(fileSize.Format("KB"))    // In kilobytes
+	fmt.Println(fileSize.Format("MB"))    // In megabytes
+	fmt.Println(fileSize.Format("GB"))    // In gigabytes
+	fmt.Println(fileSize.Format("auto"))  // Automatic (uses the most appropriate unit)
+
+	// Parse from string
+	parsedSize, err := measurement.ParseFileSize("2.5GB")
+	if err != nil {
+		// Handle error
+		fmt.Println("Error parsing file size:", err)
+		return
+	}
+	fmt.Println(parsedSize.String())
+}
+```
+
+### MemSize
+
+The MemSize value object is in the measurement package and uses base 2 binary values for computer memory. Use it as follows:
+
+```go
+// Example usage of the MemSize value object
+package main
+
+import (
+	"fmt"
+
+	"github.com/abitofhelp/servicelib/valueobject/measurement"
+)
+
+func main() {
+	// Create a new memory size (using base 2 binary values)
+	memSize, err := measurement.NewMemSize(1.5, measurement.Gibibytes)
+	if err != nil {
+		// Handle error
+		fmt.Println("Error creating memory size:", err)
+		return
+	}
+
+	// Access the size in different units
+	bytes := memSize.Bytes()
+	kib := memSize.Kibibytes()
+	mib := memSize.Mebibytes()
+	gib := memSize.Gibibytes()
+
+	fmt.Printf("Memory size: %.2f GiB\n", gib)
+	fmt.Printf("Same size in different units: %d bytes, %.2f KiB, %.2f MiB\n", 
+		bytes, kib, mib)
+
+	// Format with different units
+	fmt.Println(memSize.Format("B"))     // In bytes
+	fmt.Println(memSize.Format("KiB"))   // In kibibytes
+	fmt.Println(memSize.Format("MiB"))   // In mebibytes
+	fmt.Println(memSize.Format("GiB"))   // In gibibytes
+	fmt.Println(memSize.Format("auto"))  // Automatic (uses the most appropriate unit)
+
+	// Parse from string
+	parsedSize, err := measurement.ParseMemSize("2.5GiB")
+	if err != nil {
+		// Handle error
+		fmt.Println("Error parsing memory size:", err)
+		return
+	}
+	fmt.Println(parsedSize.String())
+}
+```
 
 See the [FileSize example](../examples/valueobject/filesize_example.go) for a complete, runnable example of how to use the FileSize value object.
 
@@ -54,6 +155,47 @@ See the [ID example](../examples/valueobject/id_example.go) for a complete, runn
 See the [IPAddress example](../examples/valueobject/ipaddress_example.go) for a complete, runnable example of how to use the IPAddress value object.
 
 ### URL
+
+The URL value object has been moved to the network package. Use it as follows:
+
+```go
+// Example usage of the URL value object
+package main
+
+import (
+	"fmt"
+
+	"github.com/abitofhelp/servicelib/valueobject/network"
+)
+
+func main() {
+	// Create a new URL
+	url, err := network.NewURL("https://example.com/path?param=value")
+	if err != nil {
+		// Handle error
+		fmt.Println("Error creating URL:", err)
+		return
+	}
+
+	// Get components
+	domain, _ := url.Domain()
+	path, _ := url.Path()
+	query, _ := url.Query()
+
+	fmt.Printf("Domain: %s\n", domain)
+	fmt.Printf("Path: %s\n", path)
+	fmt.Printf("Query parameters: %v\n", query)
+
+	// Check if URL is empty
+	isEmpty := url.IsEmpty()
+	fmt.Printf("Is URL empty? %v\n", isEmpty)
+
+	// Compare URLs
+	otherURL, _ := network.NewURL("https://example.com/path?param=value")
+	areEqual := url.Equals(otherURL)
+	fmt.Printf("Are URLs equal? %v\n", areEqual)
+}
+```
 
 See the [URL example](../examples/valueobject/url_example.go) for a complete, runnable example of how to use the URL value object.
 
@@ -118,6 +260,8 @@ func main() {
 
 ### Color
 
+The Color value object has been moved to the appearance package. Use it as follows:
+
 ```go
 // Example usage of the Color value object
 package main
@@ -125,12 +269,12 @@ package main
 import (
 	"fmt"
 
-	"github.com/abitofhelp/servicelib/valueobject"
+	"github.com/abitofhelp/servicelib/valueobject/appearance"
 )
 
 func main() {
 	// Create a new color
-	color, err := valueobject.NewColor("#FF5733")
+	color, err := appearance.NewColor("#FF5733")
 	if err != nil {
 		// Handle error
 		fmt.Println("Error creating color:", err)
@@ -138,7 +282,7 @@ func main() {
 	}
 
 	// Create from shorthand notation
-	shortColor, _ := valueobject.NewColor("#F53")
+	shortColor, _ := appearance.NewColor("#F53")
 	fmt.Printf("Expanded color: %s\n", shortColor.String()) // #FF5533
 
 	// Get RGB components
@@ -166,6 +310,8 @@ func main() {
 
 ### DateOfBirth
 
+The DateOfBirth value object has been moved to the identification package. Use it as follows:
+
 ```go
 // Example usage of the DateOfBirth value object
 package main
@@ -174,12 +320,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/abitofhelp/servicelib/valueobject"
+	"github.com/abitofhelp/servicelib/valueobject/identification"
 )
 
 func main() {
 	// Create a new date of birth
-	dob, err := valueobject.NewDateOfBirth("1990-01-15")
+	dob, err := identification.NewDateOfBirth("1990-01-15")
 	if err != nil {
 		// Handle error
 		fmt.Println("Error creating date of birth:", err)
@@ -188,7 +334,7 @@ func main() {
 
 	// Create from time.Time
 	dobTime := time.Date(1990, 1, 15, 0, 0, 0, 0, time.UTC)
-	dob, err = valueobject.NewDateOfBirthFromTime(dobTime)
+	dob, err = identification.NewDateOfBirthFromTime(dobTime)
 	if err != nil {
 		// Handle error
 		fmt.Println("Error creating date of birth from time:", err)
@@ -210,6 +356,8 @@ func main() {
 
 ### DateOfDeath
 
+The DateOfDeath value object has been moved to the identification package. Use it as follows:
+
 ```go
 // Example usage of the DateOfDeath value object
 package main
@@ -218,15 +366,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/abitofhelp/servicelib/valueobject"
+	"github.com/abitofhelp/servicelib/valueobject/identification"
 )
 
 func main() {
 	// Create a date of birth first
-	dob, _ := valueobject.NewDateOfBirth("1930-01-15")
+	dob, _ := identification.NewDateOfBirth("1930-01-15")
 
 	// Create a new date of death
-	dod, err := valueobject.NewDateOfDeath("2020-05-20", dob)
+	dod, err := identification.NewDateOfDeath("2020-05-20", dob)
 	if err != nil {
 		// Handle error
 		fmt.Println("Error creating date of death:", err)
@@ -235,7 +383,7 @@ func main() {
 
 	// Create from time.Time
 	dodTime := time.Date(2020, 5, 20, 0, 0, 0, 0, time.UTC)
-	dod, err = valueobject.NewDateOfDeathFromTime(dodTime, dob)
+	dod, err = identification.NewDateOfDeathFromTime(dodTime, dob)
 	if err != nil {
 		// Handle error
 		fmt.Println("Error creating date of death from time:", err)
@@ -253,6 +401,8 @@ func main() {
 
 ### Duration
 
+The Duration value object has been moved to the temporal package. Use it as follows:
+
 ```go
 // Example usage of the Duration value object
 package main
@@ -261,12 +411,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/abitofhelp/servicelib/valueobject"
+	"github.com/abitofhelp/servicelib/valueobject/temporal"
 )
 
 func main() {
 	// Create a new duration
-	duration, err := valueobject.NewDuration(3, 30, 15)
+	duration, err := temporal.NewDuration(3, 30, 15)
 	if err != nil {
 		// Handle error
 		fmt.Println("Error creating duration:", err)
@@ -275,7 +425,7 @@ func main() {
 
 	// Create from time.Duration
 	timeDuration := 2*time.Hour + 45*time.Minute + 30*time.Second
-	duration, err = valueobject.NewDurationFromTimeDuration(timeDuration)
+	duration, err = temporal.NewDurationFromTimeDuration(timeDuration)
 	if err != nil {
 		// Handle error
 		fmt.Println("Error creating duration from time.Duration:", err)
@@ -283,7 +433,7 @@ func main() {
 	}
 
 	// Parse from string
-	duration, err = valueobject.ParseDuration("1h30m45s")
+	duration, err = temporal.ParseDuration("1h30m45s")
 	if err != nil {
 		// Handle error
 		fmt.Println("Error parsing duration:", err)
@@ -307,6 +457,8 @@ func main() {
 
 ### Gender
 
+The Gender value object has been moved to the identification package. Use it as follows:
+
 ```go
 // Example usage of the Gender value object
 package main
@@ -314,12 +466,12 @@ package main
 import (
 	"fmt"
 
-	"github.com/abitofhelp/servicelib/valueobject"
+	"github.com/abitofhelp/servicelib/valueobject/identification"
 )
 
 func main() {
 	// Create a new gender
-	gender, err := valueobject.NewGender("male")
+	gender, err := identification.NewGender("male")
 	if err != nil {
 		// Handle error
 		fmt.Println("Error creating gender:", err)
@@ -336,12 +488,14 @@ func main() {
 	fmt.Printf("Gender: %s\n", gender.String())
 
 	// Create with different case
-	gender, _ = valueobject.NewGender("FEMALE")
+	gender, _ = identification.NewGender("FEMALE")
 	fmt.Printf("Normalized gender: %s\n", gender.String()) // "female"
 }
 ```
 
 ### Name
+
+The Name value object has been moved to the identification package. Use it as follows:
 
 ```go
 // Example usage of the Name value object
@@ -350,12 +504,12 @@ package main
 import (
 	"fmt"
 
-	"github.com/abitofhelp/servicelib/valueobject"
+	"github.com/abitofhelp/servicelib/valueobject/identification"
 )
 
 func main() {
 	// Create a new name
-	name, err := valueobject.NewName("John", "Doe")
+	name, err := identification.NewName("John", "Doe")
 	if err != nil {
 		// Handle error
 		fmt.Println("Error creating name:", err)
@@ -363,7 +517,7 @@ func main() {
 	}
 
 	// Create with middle name
-	nameWithMiddle, _ := valueobject.NewNameWithMiddle("Jane", "Marie", "Smith")
+	nameWithMiddle, _ := identification.NewNameWithMiddle("Jane", "Marie", "Smith")
 
 	// Access components
 	firstName := name.FirstName()
@@ -387,6 +541,8 @@ func main() {
 
 ### Password
 
+The Password value object has been moved to the identification package. Use it as follows:
+
 ```go
 // Example usage of the Password value object
 package main
@@ -394,12 +550,12 @@ package main
 import (
 	"fmt"
 
-	"github.com/abitofhelp/servicelib/valueobject"
+	"github.com/abitofhelp/servicelib/valueobject/identification"
 )
 
 func main() {
 	// Create a new password
-	password, err := valueobject.NewPassword("P@ssw0rd123!")
+	password, err := identification.NewPassword("P@ssw0rd123!")
 	if err != nil {
 		// Handle error
 		fmt.Println("Error creating password:", err)
@@ -429,6 +585,8 @@ func main() {
 
 ### Percentage
 
+The Percentage value object has been moved to the measurement package. Use it as follows:
+
 ```go
 // Example usage of the Percentage value object
 package main
@@ -436,12 +594,12 @@ package main
 import (
 	"fmt"
 
-	"github.com/abitofhelp/servicelib/valueobject"
+	"github.com/abitofhelp/servicelib/valueobject/measurement"
 )
 
 func main() {
 	// Create a new percentage
-	percentage, err := valueobject.NewPercentage(75.5)
+	percentage, err := measurement.NewPercentage(75.5)
 	if err != nil {
 		// Handle error
 		fmt.Println("Error creating percentage:", err)
@@ -468,6 +626,8 @@ func main() {
 
 ### Phone
 
+The Phone value object has been moved to the contact package. Use it as follows:
+
 ```go
 // Example usage of the Phone value object
 package main
@@ -475,12 +635,12 @@ package main
 import (
 	"fmt"
 
-	"github.com/abitofhelp/servicelib/valueobject"
+	"github.com/abitofhelp/servicelib/valueobject/contact"
 )
 
 func main() {
 	// Create a new phone number
-	phone, err := valueobject.NewPhone("+1-555-123-4567")
+	phone, err := contact.NewPhone("+1-555-123-4567")
 	if err != nil {
 		// Handle error
 		fmt.Println("Error creating phone:", err)
@@ -509,6 +669,8 @@ func main() {
 
 ### Rating
 
+The Rating value object has been moved to the measurement package. Use it as follows:
+
 ```go
 // Example usage of the Rating value object
 package main
@@ -516,12 +678,12 @@ package main
 import (
 	"fmt"
 
-	"github.com/abitofhelp/servicelib/valueobject"
+	"github.com/abitofhelp/servicelib/valueobject/measurement"
 )
 
 func main() {
 	// Create a new rating (1-5 scale)
-	rating, err := valueobject.NewRating(4.5, 5)
+	rating, err := measurement.NewRating(4.5, 5)
 	if err != nil {
 		// Handle error
 		fmt.Println("Error creating rating:", err)
@@ -548,6 +710,8 @@ func main() {
 
 ### Temperature
 
+The Temperature value object has been moved to the measurement package. Use it as follows:
+
 ```go
 // Example usage of the Temperature value object
 package main
@@ -555,12 +719,12 @@ package main
 import (
 	"fmt"
 
-	"github.com/abitofhelp/servicelib/valueobject"
+	"github.com/abitofhelp/servicelib/valueobject/measurement"
 )
 
 func main() {
 	// Create a new temperature in Celsius
-	temp, err := valueobject.NewTemperature(25.5, valueobject.Celsius)
+	temp, err := measurement.NewTemperature(25.5, measurement.Celsius)
 	if err != nil {
 		// Handle error
 		fmt.Println("Error creating temperature:", err)
@@ -573,18 +737,20 @@ func main() {
 	fmt.Printf("%.1f°C = %.1f°F = %.1fK\n", temp.Value(), fahrenheit, kelvin)
 
 	// Create from Fahrenheit
-	tempF, _ := valueobject.NewTemperature(98.6, valueobject.Fahrenheit)
+	tempF, _ := measurement.NewTemperature(98.6, measurement.Fahrenheit)
 	celsius := tempF.ToCelsius()
 	fmt.Printf("%.1f°F = %.1f°C\n", tempF.Value(), celsius)
 
 	// Format with unit
 	fmt.Println(temp.String())                     // "25.5°C"
-	fmt.Println(temp.Format(valueobject.Fahrenheit)) // "77.9°F"
-	fmt.Println(temp.Format(valueobject.Kelvin))     // "298.7K"
+	fmt.Println(temp.Format(measurement.Fahrenheit)) // "77.9°F"
+	fmt.Println(temp.Format(measurement.Kelvin))     // "298.7K"
 }
 ```
 
 ### Version
+
+The Version value object has been moved to the temporal package. Use it as follows:
 
 ```go
 // Example usage of the Version value object
@@ -593,12 +759,12 @@ package main
 import (
 	"fmt"
 
-	"github.com/abitofhelp/servicelib/valueobject"
+	"github.com/abitofhelp/servicelib/valueobject/temporal"
 )
 
 func main() {
 	// Create a new semantic version
-	version, err := valueobject.NewVersion("1.2.3")
+	version, err := temporal.NewVersion(1, 2, 3, "", "")
 	if err != nil {
 		// Handle error
 		fmt.Println("Error creating version:", err)
@@ -606,7 +772,7 @@ func main() {
 	}
 
 	// Create with pre-release and build metadata
-	versionWithMeta, _ := valueobject.NewVersion("2.0.0-alpha.1+build.123")
+	versionWithMeta, _ := temporal.NewVersion(2, 0, 0, "alpha.1", "build.123")
 
 	// Access components
 	major := version.Major()
@@ -616,17 +782,26 @@ func main() {
 
 	// Get pre-release and build info
 	preRelease := versionWithMeta.PreRelease()
-	buildMeta := versionWithMeta.BuildMetadata()
-	fmt.Printf("Pre-release: %s, Build metadata: %s\n", preRelease, buildMeta)
+	build := versionWithMeta.Build()
+	fmt.Printf("Pre-release: %s, Build metadata: %s\n", preRelease, build)
 
 	// Compare versions
-	otherVersion, _ := valueobject.NewVersion("1.3.0")
-	isGreater := otherVersion.IsGreaterThan(version)
-	fmt.Printf("Is 1.3.0 greater than 1.2.3? %v\n", isGreater) // true
+	otherVersion, _ := temporal.NewVersion(1, 3, 0, "", "")
+	comparison := otherVersion.CompareTo(version)
+	fmt.Printf("Is 1.3.0 greater than 1.2.3? %v\n", comparison > 0) // true
 
 	// Format as string
 	fmt.Println(version.String())         // "1.2.3"
 	fmt.Println(versionWithMeta.String()) // "2.0.0-alpha.1+build.123"
+
+	// Parse from string
+	parsedVersion, err := temporal.ParseVersion("1.2.3-beta+build.456")
+	if err != nil {
+		// Handle error
+		fmt.Println("Error parsing version:", err)
+		return
+	}
+	fmt.Println(parsedVersion.String()) // "1.2.3-beta+build.456"
 }
 ```
 
@@ -638,14 +813,21 @@ The value object package is organized into several sub-packages:
     - Contains validation utilities for common value types
     - Includes helper functions for string and numeric comparisons
     - Provides base types like `StringValueObject` and `BaseStructValueObject` that can be embedded in specific value objects
+  - `appearance`: Value objects related to visual appearance and styling
+    - Color: Represents and validates colors in various formats (RGB, HEX, etc.)
+    - More appearance-related value objects will be added in the future
   - `contact`: Value objects related to contact information
     - Address: Represents and validates physical addresses
     - Email: Represents and validates email addresses
     - Phone: Represents and validates phone numbers with formatting options
     - More contact-related value objects will be added in the future
   - `measurement`: Value objects related to measurements and units
+    - FileSize: Represents and validates file sizes with various units using base 10 values (ISO standard)
+    - MemSize: Represents and validates computer memory sizes with various units using base 2 binary values
+    - Money: Represents and validates monetary values with currency
+    - Percentage: Represents and validates percentage values
+    - Rating: Represents and validates rating values
     - Temperature: Represents and validates temperature values with unit conversion
-    - More measurement-related value objects will be added in the future
   - `identification`: Value objects related to identification
     - ID: Represents and validates unique identifiers
     - Username: Represents and validates usernames
@@ -654,11 +836,18 @@ The value object package is organized into several sub-packages:
     - Gender: Represents and validates gender information
     - DateOfBirth: Represents and validates dates of birth
     - DateOfDeath: Represents and validates dates of death
+  - `network`: Value objects related to network and internet
+    - URL: Represents and validates URLs with utility methods for parsing components
+    - IPAddress: Represents and validates IP addresses (IPv4 and IPv6)
+    - More network-related value objects will be added in the future
+  - `temporal`: Value objects related to time and versioning
+    - Duration: Represents and validates time durations
+    - Version: Represents and validates semantic version numbers
+    - More time-related value objects will be added in the future
   - `generator`: Code generation tools for value objects
     - Provides a generator for creating new value objects
     - Includes templates for string-based and struct-based value objects
     - Offers a command-line tool for generating value objects from a configuration file
-  - More subpackages will be added in the future for other categories of value objects
 
 ## Generic Value Object Framework
 
@@ -817,13 +1006,19 @@ phone, err := valueobject.NewPhone("+1-555-123-4567")
 However, for new code, it's recommended to use the subpackages directly:
 
 ```go
-import "github.com/abitofhelp/servicelib/valueobject/contact"
+import (
+    "github.com/abitofhelp/servicelib/valueobject/appearance"
+    "github.com/abitofhelp/servicelib/valueobject/contact"
+)
 
 // Create a new email
 email, err := contact.NewEmail("user@example.com")
 
 // Create a new phone number
 phone, err := contact.NewPhone("+1-555-123-4567")
+
+// Create a new color
+color, err := appearance.NewColor("#FF5733")
 ```
 
 This provides access to additional functionality and a more organized structure.

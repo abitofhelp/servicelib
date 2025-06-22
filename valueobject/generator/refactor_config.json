@@ -1,0 +1,74 @@
+[
+  {
+    "Name": "Coordinate",
+    "Package": "location",
+    "Type": "struct",
+    "Description": "a geographic coordinate (latitude and longitude)",
+    "Fields": {
+      "latitude": "float64",
+      "longitude": "float64"
+    },
+    "Validations": {
+      "latitude": "if v.latitude < -90 || v.latitude > 90 {\n\t\treturn errors.New(\"latitude must be between -90 and 90 degrees\")\n\t}",
+      "longitude": "if v.longitude < -180 || v.longitude > 180 {\n\t\treturn errors.New(\"longitude must be between -180 and 180 degrees\")\n\t}"
+    },
+    "Imports": [
+      "errors",
+      "fmt",
+      "math",
+      "strconv",
+      "strings"
+    ]
+  },
+  {
+    "Name": "Duration",
+    "Package": "temporal",
+    "Type": "struct",
+    "Description": "a time duration value object",
+    "Fields": {
+      "duration": "time.Duration"
+    },
+    "Validations": {
+      "duration": "if v.duration < 0 {\n\t\treturn errors.New(\"duration cannot be negative\")\n\t}"
+    },
+    "Imports": [
+      "errors",
+      "fmt",
+      "regexp",
+      "strings",
+      "time"
+    ]
+  },
+  {
+    "Name": "FileSize",
+    "Package": "measurement",
+    "Type": "struct",
+    "Description": "a file size value object",
+    "Fields": {
+      "bytes": "uint64"
+    },
+    "Validations": {},
+    "Imports": [
+      "errors",
+      "fmt",
+      "regexp",
+      "strconv",
+      "strings"
+    ]
+  },
+  {
+    "Name": "IPAddress",
+    "Package": "network",
+    "Type": "string",
+    "BaseType": "string",
+    "Description": "an IP address value object that supports both IPv4 and IPv6 formats",
+    "Validations": {
+      "IPAddress": "// Empty IP is allowed (optional field)\n\tif trimmedValue == \"\" {\n\t\treturn \"\", nil\n\t}\n\n\t// Validate IP format (both IPv4 and IPv6)\n\tparsedIP := net.ParseIP(trimmedValue)\n\tif parsedIP == nil {\n\t\treturn \"\", errors.New(\"invalid IP address format\")\n\t}"
+    },
+    "Imports": [
+      "errors",
+      "net",
+      "strings"
+    ]
+  }
+]
