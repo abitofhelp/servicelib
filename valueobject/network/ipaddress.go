@@ -39,17 +39,69 @@ func (ip IPAddress) String() string {
 	return string(ip)
 }
 
+// normalizeIPv4 removes leading zeros from each segment of an IPv4 address
+// e.g., "192.168.001.001" -> "192.168.1.1"
+func normalizeIPv4(ip string) string {
+	parts := strings.Split(ip, ".")
+	if len(parts) != 4 {
+		return ip // Not an IPv4 address in dotted decimal notation
+	}
+
+	for i, part := range parts {
+		// Remove leading zeros
+		parts[i] = strings.TrimLeft(part, "0")
+		if parts[i] == "" {
+			parts[i] = "0" // If the part was all zeros, keep one zero
+		}
+	}
+
+	return strings.Join(parts, ".")
+}
+
 // Equals checks if two IPAddresses are equal
 // Properly handles comparison of both IPv4 and IPv6 addresses in different representations
 // (e.g., IPv4 mapped to IPv6, or different IPv6 notations for the same address)
 func (ip IPAddress) Equals(other IPAddress) bool {
+	// Handle empty cases
+	if ip.IsEmpty() && other.IsEmpty() {
+		return true
+	}
+	if ip.IsEmpty() || other.IsEmpty() {
+		return false
+	}
+
+	// Special handling for IPv4 addresses with leading zeros
+	ipStr := string(ip)
+	otherStr := string(other)
+
+	// Check if both might be IPv4 addresses (contains dots)
+	if strings.Contains(ipStr, ".") && strings.Contains(otherStr, ".") {
+		// Normalize both addresses by removing leading zeros
+		normalizedIP := normalizeIPv4(ipStr)
+		normalizedOther := normalizeIPv4(otherStr)
+
+		// If normalization worked (both are valid IPv4), compare the normalized strings
+		if normalizedIP != ipStr || normalizedOther != otherStr {
+			return normalizedIP == normalizedOther
+		}
+	}
+
 	// Parse both IPs for comparison to handle different representations
-	parsedThis := net.ParseIP(string(ip))
-	parsedOther := net.ParseIP(string(other))
+	parsedThis := net.ParseIP(ipStr)
+	parsedOther := net.ParseIP(otherStr)
 
 	// If either IP can't be parsed, fall back to string comparison
 	if parsedThis == nil || parsedOther == nil {
-		return string(ip) == string(other)
+		return ipStr == otherStr
+	}
+
+	// For IPv4 addresses, convert to 4-byte representation for comparison
+	thisIPv4 := parsedThis.To4()
+	otherIPv4 := parsedOther.To4()
+
+	if thisIPv4 != nil && otherIPv4 != nil {
+		// Both are IPv4, compare the 4-byte representation
+		return thisIPv4.Equal(otherIPv4)
 	}
 
 	// Compare normalized IPs

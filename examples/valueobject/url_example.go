@@ -6,12 +6,12 @@ package main
 import (
 	"fmt"
 
-	"github.com/abitofhelp/servicelib/valueobject"
+	"github.com/abitofhelp/servicelib/valueobject/network"
 )
 
 func main() {
 	// Create a new URL
-	url, err := valueobject.NewURL("https://example.com/path?query=value")
+	url, err := network.NewURL("https://example.com/path?query=value")
 	if err != nil {
 		// Handle error
 		fmt.Println("Error creating URL:", err)
@@ -29,7 +29,7 @@ func main() {
 	fmt.Printf("Query parameter 'query': %s\n", query.Get("query"))
 
 	// Compare URLs
-	otherURL, _ := valueobject.NewURL("https://example.com/path?query=value")
+	otherURL, _ := network.NewURL("https://example.com/path?query=value")
 	areEqual := url.Equals(otherURL)
 	fmt.Printf("Are URLs equal? %v\n", areEqual) // true
 

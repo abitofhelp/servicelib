@@ -305,7 +305,6 @@ func (a *Auth) GenerateToken(ctx context.Context, userID string, roles []string,
 
 	// Record metrics
 	a.metrics.tokenGenerations++
-	telemetry.RecordErrorMetric(ctx, "auth", "token_generation")
 
 	// Add span attributes
 	telemetry.AddSpanAttributes(ctx,
@@ -341,7 +340,6 @@ func (a *Auth) ValidateToken(ctx context.Context, tokenString string) (*jwt.Clai
 
 	// Record metrics
 	a.metrics.tokenValidations++
-	telemetry.RecordErrorMetric(ctx, "auth", "token_validation")
 
 	// Validate token
 	start := time.Now()
@@ -374,7 +372,6 @@ func (a *Auth) IsAuthorized(ctx context.Context, operation string) (bool, error)
 
 	// Record metrics
 	a.metrics.authorizationChecks++
-	telemetry.RecordErrorMetric(ctx, "auth", "authorization_check")
 
 	// Add span attributes
 	telemetry.AddSpanAttributes(ctx,
@@ -416,17 +413,82 @@ func (a *Auth) IsAdmin(ctx context.Context) (bool, error) {
 
 // HasRole checks if the user has a specific role.
 func (a *Auth) HasRole(ctx context.Context, role string) (bool, error) {
-	return a.authService.HasRole(ctx, role)
+	ctx, span := telemetry.StartSpan(ctx, "auth.HasRole")
+	defer span.End()
+
+	// Add span attributes
+	telemetry.AddSpanAttributes(ctx,
+		attribute.String("role", role),
+	)
+
+	// Check role
+	start := time.Now()
+	hasRole, err := a.authService.HasRole(ctx, role)
+	duration := time.Since(start)
+
+	// Record result
+	if err != nil {
+		telemetry.RecordErrorSpan(ctx, err)
+		telemetry.RecordErrorMetric(ctx, "auth", "role_check_error")
+	}
+	telemetry.AddSpanAttributes(ctx,
+		attribute.Bool("has_role", hasRole),
+		attribute.Float64("duration_ms", float64(duration.Milliseconds())),
+	)
+
+	return hasRole, err
 }
 
 // GetUserID retrieves the user ID from the context.
 func (a *Auth) GetUserID(ctx context.Context) (string, error) {
-	return a.authService.GetUserID(ctx)
+	ctx, span := telemetry.StartSpan(ctx, "auth.GetUserID")
+	defer span.End()
+
+	// Get user ID
+	start := time.Now()
+	userID, err := a.authService.GetUserID(ctx)
+	duration := time.Since(start)
+
+	// Record result
+	if err != nil {
+		telemetry.RecordErrorSpan(ctx, err)
+		telemetry.RecordErrorMetric(ctx, "auth", "get_user_id_error")
+	} else {
+		telemetry.AddSpanAttributes(ctx,
+			attribute.String("user.id", userID),
+		)
+	}
+	telemetry.AddSpanAttributes(ctx,
+		attribute.Float64("duration_ms", float64(duration.Milliseconds())),
+	)
+
+	return userID, err
 }
 
 // GetUserRoles retrieves the user roles from the context.
 func (a *Auth) GetUserRoles(ctx context.Context) ([]string, error) {
-	return a.authService.GetUserRoles(ctx)
+	ctx, span := telemetry.StartSpan(ctx, "auth.GetUserRoles")
+	defer span.End()
+
+	// Get user roles
+	start := time.Now()
+	roles, err := a.authService.GetUserRoles(ctx)
+	duration := time.Since(start)
+
+	// Record result
+	if err != nil {
+		telemetry.RecordErrorSpan(ctx, err)
+		telemetry.RecordErrorMetric(ctx, "auth", "get_user_roles_error")
+	} else {
+		telemetry.AddSpanAttributes(ctx,
+			attribute.StringSlice("user.roles", roles),
+		)
+	}
+	telemetry.AddSpanAttributes(ctx,
+		attribute.Float64("duration_ms", float64(duration.Milliseconds())),
+	)
+
+	return roles, err
 }
 
 // WithUserID returns a new context with the user ID.

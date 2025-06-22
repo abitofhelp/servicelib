@@ -41,7 +41,7 @@ func NewRating(value float64, maxValue float64) (Rating, error) {
 
 // String returns the string representation of the Rating
 func (v Rating) String() string {
-	return fmt.Sprintf("%.1f/%.1f", v.value, v.maxValue)
+	return fmt.Sprintf("value=%.1f maxValue=%.1f", v.value, v.maxValue)
 }
 
 // Equals checks if two Ratings are equal

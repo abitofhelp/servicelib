@@ -48,7 +48,7 @@ func (v Money) String() string {
 // Equals checks if two Moneys are equal
 func (v Money) Equals(other Money) bool {
 
-	if v.amount != other.amount {
+	if !v.amount.Equal(other.amount) {
 		return false
 	}
 

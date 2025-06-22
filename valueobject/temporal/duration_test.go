@@ -5,6 +5,7 @@ package temporal
 import (
 	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -49,8 +50,8 @@ func TestDuration_String(t *testing.T) {
 		duration: 42,
 	}
 
-	// The exact string representation depends on the fields
-	assert.Contains(t, value.String(), "duration")
+	// The string representation is the string representation of the time.Duration value
+	assert.Equal(t, "42ns", value.String())
 }
 
 func TestDuration_Equals(t *testing.T) {
@@ -122,7 +123,7 @@ func TestDuration_ToMap(t *testing.T) {
 
 	expected := map[string]interface{}{
 
-		"duration": 42,
+		"duration": time.Duration(42),
 	}
 
 	assert.Equal(t, expected, value.ToMap())

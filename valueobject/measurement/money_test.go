@@ -23,9 +23,9 @@ func TestNewMoney(t *testing.T) {
 		{
 			name: "Valid Value",
 
-			amount: 42,
+			amount: decimal.NewFromInt(42),
 
-			currency: "valid",
+			currency: "USD",
 
 			expectError: false,
 		},
@@ -53,9 +53,9 @@ func TestNewMoney(t *testing.T) {
 func TestMoney_String(t *testing.T) {
 	value := Money{
 
-		amount: 42,
+		amount: decimal.NewFromInt(42),
 
-		currency: "test",
+		currency: "USD",
 	}
 
 	// The exact string representation depends on the fields
@@ -65,23 +65,23 @@ func TestMoney_String(t *testing.T) {
 func TestMoney_Equals(t *testing.T) {
 	value1 := Money{
 
-		amount: 42,
+		amount: decimal.NewFromInt(42),
 
-		currency: "test",
+		currency: "USD",
 	}
 
 	value2 := Money{
 
-		amount: 42,
+		amount: decimal.NewFromInt(42),
 
-		currency: "test",
+		currency: "USD",
 	}
 
 	value3 := Money{
 
-		amount: 43,
+		amount: decimal.NewFromInt(43),
 
-		currency: "other",
+		currency: "EUR",
 	}
 
 	assert.True(t, value1.Equals(value2))
@@ -94,9 +94,9 @@ func TestMoney_IsEmpty(t *testing.T) {
 
 	nonEmptyValue := Money{
 
-		amount: 42,
+		amount: decimal.NewFromInt(42),
 
-		currency: "test",
+		currency: "USD",
 	}
 	assert.False(t, nonEmptyValue.IsEmpty())
 }
@@ -111,9 +111,9 @@ func TestMoney_Validate(t *testing.T) {
 			name: "Valid Value",
 			value: Money{
 
-				amount: 42,
+				amount: decimal.NewFromInt(42),
 
-				currency: "valid",
+				currency: "USD",
 			},
 			expectError: false,
 		},
@@ -136,16 +136,16 @@ func TestMoney_Validate(t *testing.T) {
 func TestMoney_ToMap(t *testing.T) {
 	value := Money{
 
-		amount: 42,
+		amount: decimal.NewFromInt(42),
 
-		currency: "test",
+		currency: "USD",
 	}
 
 	expected := map[string]interface{}{
 
-		"amount": 42,
+		"amount": decimal.NewFromInt(42),
 
-		"currency": "test",
+		"currency": "USD",
 	}
 
 	assert.Equal(t, expected, value.ToMap())
@@ -154,9 +154,9 @@ func TestMoney_ToMap(t *testing.T) {
 func TestMoney_MarshalJSON(t *testing.T) {
 	value := Money{
 
-		amount: 42,
+		amount: decimal.NewFromInt(42),
 
-		currency: "test",
+		currency: "USD",
 	}
 
 	data, err := value.MarshalJSON()
@@ -168,9 +168,9 @@ func TestMoney_MarshalJSON(t *testing.T) {
 
 	expected := map[string]interface{}{
 
-		"amount": float64(42),
+		"amount": "42",
 
-		"currency": "test",
+		"currency": "USD",
 	}
 
 	assert.Equal(t, expected, result)

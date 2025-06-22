@@ -5,6 +5,8 @@ package measurement
 import (
 	"math"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewTemperature(t *testing.T) {
@@ -30,19 +32,11 @@ func TestNewTemperature(t *testing.T) {
 			temp, err := NewTemperature(tt.value, tt.unit)
 
 			if tt.expectError {
-				if err == nil {
-					t.Errorf("Expected error but got none")
-				}
+				assert.Error(t, err, "Expected an error but got none")
 			} else {
-				if err != nil {
-					t.Errorf("Unexpected error: %v", err)
-				}
-				if temp.value != tt.expected {
-					t.Errorf("Expected value %f, got %f", tt.expected, temp.value)
-				}
-				if temp.unit != tt.unit {
-					t.Errorf("Expected unit %s, got %s", tt.unit, temp.unit)
-				}
+				assert.NoError(t, err, "Unexpected error")
+				assert.Equal(t, tt.expected, temp.value, "Temperature value mismatch")
+				assert.Equal(t, tt.unit, temp.unit, "Temperature unit mismatch")
 			}
 		})
 	}
@@ -75,19 +69,11 @@ func TestParseTemperature(t *testing.T) {
 			temp, err := ParseTemperature(tt.input)
 
 			if tt.expectError {
-				if err == nil {
-					t.Errorf("Expected error but got none")
-				}
+				assert.Error(t, err, "Expected an error but got none")
 			} else {
-				if err != nil {
-					t.Errorf("Unexpected error: %v", err)
-				}
-				if temp.value != tt.expectedVal {
-					t.Errorf("Expected value %f, got %f", tt.expectedVal, temp.value)
-				}
-				if temp.unit != tt.expectedUnit {
-					t.Errorf("Expected unit %s, got %s", tt.expectedUnit, temp.unit)
-				}
+				assert.NoError(t, err, "Unexpected error")
+				assert.Equal(t, tt.expectedVal, temp.value, "Temperature value mismatch")
+				assert.Equal(t, tt.expectedUnit, temp.unit, "Temperature unit mismatch")
 			}
 		})
 	}
@@ -109,9 +95,7 @@ func TestTemperature_String(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := tt.temp.String()
-			if result != tt.expected {
-				t.Errorf("Expected %s, got %s", tt.expected, result)
-			}
+			assert.Equal(t, tt.expected, result, "String representation mismatch")
 		})
 	}
 }
@@ -122,44 +106,27 @@ func TestTemperature_Equals(t *testing.T) {
 	temp3, _ := NewTemperature(298.15, Kelvin) // 25°C = 298.15K
 	temp4, _ := NewTemperature(30, Celsius)
 
-	if !temp1.Equals(temp2) {
-		t.Errorf("Expected 25°C to equal 77°F")
-	}
-
-	if !temp1.Equals(temp3) {
-		t.Errorf("Expected 25°C to equal 298.15K")
-	}
-
-	if temp1.Equals(temp4) {
-		t.Errorf("Expected 25°C to not equal 30°C")
-	}
+	assert.True(t, temp1.Equals(temp2), "25°C should equal 77°F")
+	assert.True(t, temp1.Equals(temp3), "25°C should equal 298.15K")
+	assert.False(t, temp1.Equals(temp4), "25°C should not equal 30°C")
 }
 
 func TestTemperature_IsEmpty(t *testing.T) {
 	emptyTemp := Temperature{}
 	temp, _ := NewTemperature(25, Celsius)
 
-	if !emptyTemp.IsEmpty() {
-		t.Errorf("Expected empty temperature to be empty")
-	}
-
-	if temp.IsEmpty() {
-		t.Errorf("Expected non-empty temperature to not be empty")
-	}
+	assert.True(t, emptyTemp.IsEmpty(), "Empty temperature should be empty")
+	assert.False(t, temp.IsEmpty(), "Non-empty temperature should not be empty")
 }
 
 func TestTemperature_Value(t *testing.T) {
 	temp, _ := NewTemperature(25.5, Celsius)
-	if temp.Value() != 25.5 {
-		t.Errorf("Expected value 25.5, got %f", temp.Value())
-	}
+	assert.Equal(t, 25.5, temp.Value(), "Value getter should return the correct value")
 }
 
 func TestTemperature_Unit(t *testing.T) {
 	temp, _ := NewTemperature(25, Celsius)
-	if temp.Unit() != Celsius {
-		t.Errorf("Expected unit Celsius, got %s", temp.Unit())
-	}
+	assert.Equal(t, Celsius, temp.Unit(), "Unit getter should return the correct unit")
 }
 
 func TestTemperature_Conversions(t *testing.T) {
@@ -397,13 +364,9 @@ func TestTemperature_Validate(t *testing.T) {
 			err := tt.temp.Validate()
 
 			if tt.expectError {
-				if err == nil {
-					t.Errorf("Expected error but got none")
-				}
+				assert.Error(t, err, "Expected an error but got none")
 			} else {
-				if err != nil {
-					t.Errorf("Unexpected error: %v", err)
-				}
+				assert.NoError(t, err, "Unexpected error")
 			}
 		})
 	}

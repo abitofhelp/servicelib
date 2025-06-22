@@ -37,7 +37,7 @@ func NewPercentage(value float64) (Percentage, error) {
 
 // String returns the string representation of the Percentage
 func (v Percentage) String() string {
-	return fmt.Sprintf("%.2f%%", v.value)
+	return fmt.Sprintf("value=%.2f%%", v.value)
 }
 
 // Equals checks if two Percentages are equal

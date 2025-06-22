@@ -6,7 +6,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/abitofhelp/servicelib/valueobject"
+	"github.com/abitofhelp/servicelib/valueobject/identification"
 )
 
 func main() {

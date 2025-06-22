@@ -5,7 +5,6 @@ package base
 
 import (
 	"encoding/json"
-	"fmt"
 )
 
 // StructValueObject is a base interface for struct-based value objects.
@@ -34,26 +33,15 @@ func (vo BaseStructValueObject) IsEmpty() bool {
 // This is a default implementation that returns a generic string.
 // Override this method in your value object to provide a proper implementation.
 func (vo BaseStructValueObject) String() string {
-	return fmt.Sprintf("%v", vo)
+	return "BaseStructValueObject"
 }
 
 // ToMap converts the value object to a map[string]interface{}.
-// This is a default implementation that uses reflection to convert the struct to a map.
-// Override this method in your value object to provide a more efficient implementation.
+// This is a default implementation that returns an empty map.
+// Override this method in your value object to provide a proper implementation.
 func (vo BaseStructValueObject) ToMap() map[string]interface{} {
-	// Default implementation uses JSON marshaling/unmarshaling
-	// This is not the most efficient way, but it works for most cases
-	data, err := json.Marshal(vo)
-	if err != nil {
-		return map[string]interface{}{}
-	}
-
-	var result map[string]interface{}
-	if err := json.Unmarshal(data, &result); err != nil {
-		return map[string]interface{}{}
-	}
-
-	return result
+	// Return an empty map to avoid infinite recursion
+	return map[string]interface{}{}
 }
 
 // MarshalJSON implements the json.Marshaler interface.

@@ -21,6 +21,7 @@ func TestStandardErrors(t *testing.T) {
 	assert.NotNil(t, autherrors.ErrForbidden)
 	assert.NotNil(t, autherrors.ErrInvalidConfig)
 	assert.NotNil(t, autherrors.ErrInternal)
+	assert.NotNil(t, autherrors.ErrNotImplemented)
 }
 
 func TestAuthError_Error(t *testing.T) {

@@ -5,13 +5,14 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
-	"github.com/abitofhelp/servicelib/valueobject"
+	"github.com/abitofhelp/servicelib/valueobject/contact"
 )
 
 func main() {
 	// Create a new email
-	email, err := valueobject.NewEmail("user@example.com")
+	email, err := contact.NewEmail("user@example.com")
 	if err != nil {
 		// Handle error (invalid email format)
 		fmt.Println("Error creating email:", err)
@@ -19,12 +20,16 @@ func main() {
 	}
 
 	// Access values
-	address := email.Address()
-	domain := email.Domain()
+	address := email.String()
+	parts := strings.Split(address, "@")
+	domain := ""
+	if len(parts) > 1 {
+		domain = parts[1]
+	}
 	fmt.Printf("Email address: %s, Domain: %s\n", address, domain)
 
 	// Check if it's a specific domain
-	isGmail := email.IsDomain("gmail.com")
+	isGmail := domain == "gmail.com"
 	fmt.Printf("Is Gmail: %v\n", isGmail)
 
 	// Format as string

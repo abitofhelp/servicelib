@@ -73,7 +73,7 @@ func ParseCoordinate(s string) (Coordinate, error) {
 
 // String returns the string representation of the Coordinate
 func (v Coordinate) String() string {
-	return fmt.Sprintf("%f,%f", v.latitude, v.longitude)
+	return fmt.Sprintf("latitude=%f longitude=%f", v.latitude, v.longitude)
 }
 
 // Equals checks if two Coordinates are equal

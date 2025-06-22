@@ -6,13 +6,13 @@ package main
 import (
 	"fmt"
 
-	"github.com/abitofhelp/servicelib/valueobject"
+	"github.com/abitofhelp/servicelib/valueobject/measurement"
 	"github.com/shopspring/decimal"
 )
 
 func main() {
 	// Create a new money value
-	money, err := valueobject.NewMoneyFromFloat64(10.99, "USD")
+	money, err := measurement.NewMoneyFromFloat64(10.99, "USD")
 	if err != nil {
 		// Handle error
 		fmt.Println("Error creating money:", err)
@@ -25,7 +25,7 @@ func main() {
 	fmt.Printf("Money: %s %s\n", amount, currency)
 
 	// Create another money value
-	otherMoney, _ := valueobject.NewMoneyFromFloat64(5.99, "USD")
+	otherMoney, _ := measurement.NewMoneyFromFloat64(5.99, "USD")
 
 	// Add money values
 	sum, err := money.Add(otherMoney)
