@@ -25,11 +25,27 @@ func (e *ApplicationError) IsApplicationError() bool {
 	return true
 }
 
+// Unwrap returns the underlying error.
+func (e *ApplicationError) Unwrap() error {
+	return e.BaseError
+}
+
 // As implements the errors.As interface for ApplicationError.
 func (e *ApplicationError) As(target interface{}) bool {
+	// Check if target is nil
+	if target == nil {
+		return false
+	}
+
 	// Check if target is *ApplicationError
-	if t, ok := target.(*ApplicationError); ok {
-		*t = *e
+	if t, ok := target.(**ApplicationError); ok {
+		*t = e
+		return true
+	}
+
+	// Check if target is *BaseError
+	if t, ok := target.(**core.BaseError); ok {
+		*t = e.BaseError
 		return true
 	}
 
@@ -59,31 +75,37 @@ func (e *ConfigurationError) IsConfigurationError() bool {
 	return true
 }
 
+// Unwrap returns the underlying error.
+func (e *ConfigurationError) Unwrap() error {
+	return e.ApplicationError
+}
+
 // As implements the errors.As interface for ConfigurationError.
 func (e *ConfigurationError) As(target interface{}) bool {
-	// Debug print
-	println("ConfigurationError.As called with target type:", target)
+	// Check if target is nil
+	if target == nil {
+		return false
+	}
 
 	// Check if target is *ConfigurationError
-	_, isConfigErr := target.(*ConfigurationError)
-	println("Is target *ConfigurationError?", isConfigErr)
-	if isConfigErr {
-		println("Target is *ConfigurationError")
-		*target.(*ConfigurationError) = *e
+	if t, ok := target.(**ConfigurationError); ok {
+		*t = e
 		return true
 	}
 
 	// Check if target is *ApplicationError
-	_, isAppErr := target.(*ApplicationError)
-	println("Is target *ApplicationError?", isAppErr)
-	if isAppErr {
-		println("Target is *ApplicationError")
-		*target.(*ApplicationError) = *e.ApplicationError
+	if t, ok := target.(**ApplicationError); ok {
+		*t = e.ApplicationError
+		return true
+	}
+
+	// Check if target is *BaseError
+	if t, ok := target.(**core.BaseError); ok {
+		*t = e.ApplicationError.BaseError
 		return true
 	}
 
 	// Delegate to ApplicationError.As for other types
-	println("Delegating to ApplicationError.As")
 	return e.ApplicationError.As(target)
 }
 
@@ -107,17 +129,33 @@ func (e *AuthenticationError) IsAuthenticationError() bool {
 	return true
 }
 
+// Unwrap returns the underlying error.
+func (e *AuthenticationError) Unwrap() error {
+	return e.ApplicationError
+}
+
 // As implements the errors.As interface for AuthenticationError.
 func (e *AuthenticationError) As(target interface{}) bool {
+	// Check if target is nil
+	if target == nil {
+		return false
+	}
+
 	// Check if target is *AuthenticationError
-	if t, ok := target.(*AuthenticationError); ok {
-		*t = *e
+	if t, ok := target.(**AuthenticationError); ok {
+		*t = e
 		return true
 	}
 
 	// Check if target is *ApplicationError
-	if t, ok := target.(*ApplicationError); ok {
-		*t = *e.ApplicationError
+	if t, ok := target.(**ApplicationError); ok {
+		*t = e.ApplicationError
+		return true
+	}
+
+	// Check if target is *BaseError
+	if t, ok := target.(**core.BaseError); ok {
+		*t = e.ApplicationError.BaseError
 		return true
 	}
 
@@ -149,17 +187,33 @@ func (e *AuthorizationError) IsAuthorizationError() bool {
 	return true
 }
 
+// Unwrap returns the underlying error.
+func (e *AuthorizationError) Unwrap() error {
+	return e.ApplicationError
+}
+
 // As implements the errors.As interface for AuthorizationError.
 func (e *AuthorizationError) As(target interface{}) bool {
+	// Check if target is nil
+	if target == nil {
+		return false
+	}
+
 	// Check if target is *AuthorizationError
-	if t, ok := target.(*AuthorizationError); ok {
-		*t = *e
+	if t, ok := target.(**AuthorizationError); ok {
+		*t = e
 		return true
 	}
 
 	// Check if target is *ApplicationError
-	if t, ok := target.(*ApplicationError); ok {
-		*t = *e.ApplicationError
+	if t, ok := target.(**ApplicationError); ok {
+		*t = e.ApplicationError
+		return true
+	}
+
+	// Check if target is *BaseError
+	if t, ok := target.(**core.BaseError); ok {
+		*t = e.ApplicationError.BaseError
 		return true
 	}
 

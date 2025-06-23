@@ -8,9 +8,12 @@ import (
 	"strings"
 )
 
+// Override runtime.Caller for testing
+var runtimeCaller = runtime.Caller
+
 // getCallerInfo returns the file name and line number of the caller.
 func getCallerInfo(skip int) (string, int) {
-	_, file, line, ok := runtime.Caller(skip + 1)
+	_, file, line, ok := runtimeCaller(skip + 1)
 	if !ok {
 		return "unknown", 0
 	}
@@ -19,7 +22,7 @@ func getCallerInfo(skip int) (string, int) {
 
 // GetCallerPackage returns the package name of the caller.
 func GetCallerPackage(skip int) string {
-	_, file, _, ok := runtime.Caller(skip + 1)
+	_, file, _, ok := runtimeCaller(skip + 1)
 	if !ok {
 		return "unknown"
 	}
@@ -32,6 +35,9 @@ func GetCallerPackage(skip int) string {
 			pkg = parts[1]
 		}
 	}
+
+	// Remove leading slash if present
+	pkg = strings.TrimPrefix(pkg, "/")
 
 	// Replace path separators with dots
 	return strings.ReplaceAll(pkg, "/", ".")

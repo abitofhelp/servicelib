@@ -46,12 +46,13 @@ func Unwrap(err error) error {
 
 // GetCode returns the error code from an error.
 // If the error is a ContextualError, it returns the code from the context.
-// Otherwise, it returns an empty string.
+// If the error is a BaseError, it returns the code from the BaseError.
+// Otherwise, it returns InternalErrorCode.
 // Parameters:
 //   - err: The error to get the code from
 //
 // Returns:
-//   - ErrorCode: The error code, or an empty string if not available
+//   - ErrorCode: The error code, or InternalErrorCode if not available
 func GetCode(err error) ErrorCode {
 	if err == nil {
 		return ""
@@ -62,17 +63,23 @@ func GetCode(err error) ErrorCode {
 		return contextualErr.Context.Code
 	}
 
-	return ""
+	var baseErr *BaseError
+	if errors.As(err, &baseErr) {
+		return baseErr.Code
+	}
+
+	return InternalErrorCode
 }
 
 // GetHTTPStatusFromError returns the HTTP status code from an error.
 // If the error is a ContextualError, it returns the HTTP status from the context.
-// Otherwise, it returns 0.
+// If the error is a BaseError, it returns the HTTP status from the error code.
+// Otherwise, it returns 500 (Internal Server Error).
 // Parameters:
 //   - err: The error to get the HTTP status from
 //
 // Returns:
-//   - int: The HTTP status code, or 0 if not available
+//   - int: The HTTP status code, or 500 if not available
 func GetHTTPStatusFromError(err error) int {
 	if err == nil {
 		return 0
@@ -83,7 +90,12 @@ func GetHTTPStatusFromError(err error) int {
 		return contextualErr.Context.HTTPStatus
 	}
 
-	return 0
+	var baseErr *BaseError
+	if errors.As(err, &baseErr) {
+		return GetHTTPStatus(baseErr.Code)
+	}
+
+	return GetHTTPStatus(InternalErrorCode)
 }
 
 // ToJSON converts an error to a JSON string.
@@ -128,11 +140,14 @@ func ToJSON(err error) string {
 		return string(jsonBytes)
 	}
 
-	// For non-BaseError errors, create a simple JSON object
+	// For non-BaseError errors, create a simple JSON object with code
+	code := GetCode(err)
 	jsonBytes, jsonErr := json.Marshal(struct {
-		Message string `json:"message"`
+		Message string    `json:"message"`
+		Code    ErrorCode `json:"code"`
 	}{
 		Message: err.Error(),
+		Code:    code,
 	})
 	if jsonErr != nil {
 		return fmt.Sprintf(`{"message":"Error marshaling error to JSON: %s"}`, jsonErr.Error())
@@ -169,6 +184,22 @@ func WrapWithOperation(err error, operation string) error {
 				Code:       contextualErr.Context.Code,
 				HTTPStatus: contextualErr.Context.HTTPStatus,
 				Details:    contextualErr.Context.Details,
+			},
+		}
+	}
+
+	// If the error is a BaseError, preserve its code and details
+	var baseErr *BaseError
+	if errors.As(err, &baseErr) {
+		return &ContextualError{
+			Original: err,
+			Context: ErrorContext{
+				Operation:  operation,
+				Source:     source,
+				Line:       line,
+				Code:       baseErr.Code,
+				HTTPStatus: GetHTTPStatus(baseErr.Code),
+				Details:    baseErr.Details,
 			},
 		}
 	}
@@ -223,6 +254,33 @@ func WithDetails(err error, details map[string]interface{}) error {
 				Line:       line,
 				Code:       contextualErr.Context.Code,
 				HTTPStatus: contextualErr.Context.HTTPStatus,
+				Details:    newDetails,
+			},
+		}
+	}
+
+	// If the error is a BaseError, preserve its code, operation, and details
+	var baseErr *BaseError
+	if errors.As(err, &baseErr) {
+		// Merge the details
+		newDetails := make(map[string]interface{})
+		if baseErr.Details != nil {
+			for k, v := range baseErr.Details {
+				newDetails[k] = v
+			}
+		}
+		for k, v := range details {
+			newDetails[k] = v
+		}
+
+		return &ContextualError{
+			Original: err,
+			Context: ErrorContext{
+				Operation:  baseErr.Operation,
+				Source:     source,
+				Line:       line,
+				Code:       baseErr.Code,
+				HTTPStatus: GetHTTPStatus(baseErr.Code),
 				Details:    newDetails,
 			},
 		}

@@ -133,6 +133,184 @@ func TestAppErrorsAs(t *testing.T) {
 	assert.True(t, authzErr.IsApplicationError())
 }
 
+// TestApplicationErrorAsMethod tests the As method of ApplicationError
+func TestApplicationErrorAsMethod(t *testing.T) {
+	// Create an ApplicationError
+	appErr := NewApplicationError(core.ConfigurationErrorCode, "Application error", nil)
+
+	// Test As with ApplicationError target
+	var targetAppErr *ApplicationError
+	assert.True(t, errors.As(appErr, &targetAppErr), "errors.As should return true for ApplicationError target")
+	assert.Equal(t, appErr, targetAppErr, "Target should be set to the original error")
+
+	// Test As with BaseError target
+	var targetBaseErr *core.BaseError
+	assert.True(t, errors.As(appErr, &targetBaseErr), "errors.As should return true for BaseError target")
+	assert.Equal(t, appErr.BaseError, targetBaseErr, "Target should be set to the BaseError")
+
+	// Test As with wrong target type
+	var wrongTarget *ConfigurationError
+	assert.False(t, errors.As(appErr, &wrongTarget), "errors.As should return false for wrong target type")
+
+	// Test direct call to As method with ApplicationError target
+	var directTargetAppErr *ApplicationError
+	assert.True(t, appErr.As(&directTargetAppErr), "As should return true for ApplicationError target")
+	assert.Equal(t, appErr, directTargetAppErr, "Target should be set to the original error")
+
+	// Test direct call to As method with BaseError target
+	var directTargetBaseErr *core.BaseError
+	assert.True(t, appErr.As(&directTargetBaseErr), "As should return true for BaseError target")
+	assert.Equal(t, appErr.BaseError, directTargetBaseErr, "Target should be set to the BaseError")
+
+	// Test direct call to As method with wrong target type
+	var directWrongTarget *ConfigurationError
+	assert.False(t, appErr.As(&directWrongTarget), "As should return false for wrong target type")
+
+	// Test with nil target
+	assert.False(t, appErr.As(nil), "As should return false for nil target")
+}
+
+// TestConfigurationErrorAsMethod tests the As method of ConfigurationError
+func TestConfigurationErrorAsMethod(t *testing.T) {
+	// Create a ConfigurationError
+	configErr := NewConfigurationError("Invalid configuration", "MAX_CONNECTIONS", "abc", nil)
+
+	// Test As with ConfigurationError target
+	var targetConfigErr *ConfigurationError
+	assert.True(t, errors.As(configErr, &targetConfigErr), "errors.As should return true for ConfigurationError target")
+	assert.Equal(t, configErr, targetConfigErr, "Target should be set to the original error")
+
+	// Test As with ApplicationError target
+	var targetAppErr *ApplicationError
+	assert.True(t, errors.As(configErr, &targetAppErr), "errors.As should return true for ApplicationError target")
+	assert.Equal(t, configErr.ApplicationError, targetAppErr, "Target should be set to the ApplicationError")
+
+	// Test As with BaseError target
+	var targetBaseErr *core.BaseError
+	assert.True(t, errors.As(configErr, &targetBaseErr), "errors.As should return true for BaseError target")
+	assert.Equal(t, configErr.ApplicationError.BaseError, targetBaseErr, "Target should be set to the BaseError")
+
+	// Test As with wrong target type
+	var wrongTarget *AuthenticationError
+	assert.False(t, errors.As(configErr, &wrongTarget), "errors.As should return false for wrong target type")
+
+	// Test direct call to As method with ConfigurationError target
+	var directTargetConfigErr *ConfigurationError
+	assert.True(t, configErr.As(&directTargetConfigErr), "As should return true for ConfigurationError target")
+	assert.Equal(t, configErr, directTargetConfigErr, "Target should be set to the original error")
+
+	// Test direct call to As method with ApplicationError target
+	var directTargetAppErr *ApplicationError
+	assert.True(t, configErr.As(&directTargetAppErr), "As should return true for ApplicationError target")
+	assert.Equal(t, configErr.ApplicationError, directTargetAppErr, "Target should be set to the ApplicationError")
+
+	// Test direct call to As method with BaseError target
+	var directTargetBaseErr *core.BaseError
+	assert.True(t, configErr.As(&directTargetBaseErr), "As should return true for BaseError target")
+	assert.Equal(t, configErr.ApplicationError.BaseError, directTargetBaseErr, "Target should be set to the BaseError")
+
+	// Test direct call to As method with wrong target type
+	var directWrongTarget *AuthenticationError
+	assert.False(t, configErr.As(&directWrongTarget), "As should return false for wrong target type")
+
+	// Test with nil target
+	assert.False(t, configErr.As(nil), "As should return false for nil target")
+}
+
+// TestAuthenticationErrorAsMethod tests the As method of AuthenticationError
+func TestAuthenticationErrorAsMethod(t *testing.T) {
+	// Create an AuthenticationError
+	authErr := NewAuthenticationError("Invalid credentials", "john.doe", nil)
+
+	// Test As with AuthenticationError target
+	var targetAuthErr *AuthenticationError
+	assert.True(t, errors.As(authErr, &targetAuthErr), "errors.As should return true for AuthenticationError target")
+	assert.Equal(t, authErr, targetAuthErr, "Target should be set to the original error")
+
+	// Test As with ApplicationError target
+	var targetAppErr *ApplicationError
+	assert.True(t, errors.As(authErr, &targetAppErr), "errors.As should return true for ApplicationError target")
+	assert.Equal(t, authErr.ApplicationError, targetAppErr, "Target should be set to the ApplicationError")
+
+	// Test As with BaseError target
+	var targetBaseErr *core.BaseError
+	assert.True(t, errors.As(authErr, &targetBaseErr), "errors.As should return true for BaseError target")
+	assert.Equal(t, authErr.ApplicationError.BaseError, targetBaseErr, "Target should be set to the BaseError")
+
+	// Test As with wrong target type
+	var wrongTarget *ConfigurationError
+	assert.False(t, errors.As(authErr, &wrongTarget), "errors.As should return false for wrong target type")
+
+	// Test direct call to As method with AuthenticationError target
+	var directTargetAuthErr *AuthenticationError
+	assert.True(t, authErr.As(&directTargetAuthErr), "As should return true for AuthenticationError target")
+	assert.Equal(t, authErr, directTargetAuthErr, "Target should be set to the original error")
+
+	// Test direct call to As method with ApplicationError target
+	var directTargetAppErr *ApplicationError
+	assert.True(t, authErr.As(&directTargetAppErr), "As should return true for ApplicationError target")
+	assert.Equal(t, authErr.ApplicationError, directTargetAppErr, "Target should be set to the ApplicationError")
+
+	// Test direct call to As method with BaseError target
+	var directTargetBaseErr *core.BaseError
+	assert.True(t, authErr.As(&directTargetBaseErr), "As should return true for BaseError target")
+	assert.Equal(t, authErr.ApplicationError.BaseError, directTargetBaseErr, "Target should be set to the BaseError")
+
+	// Test direct call to As method with wrong target type
+	var directWrongTarget *ConfigurationError
+	assert.False(t, authErr.As(&directWrongTarget), "As should return false for wrong target type")
+
+	// Test with nil target
+	assert.False(t, authErr.As(nil), "As should return false for nil target")
+}
+
+// TestAuthorizationErrorAsMethod tests the As method of AuthorizationError
+func TestAuthorizationErrorAsMethod(t *testing.T) {
+	// Create an AuthorizationError
+	authzErr := NewAuthorizationError("Access denied", "john.doe", "users", "delete", nil)
+
+	// Test As with AuthorizationError target
+	var targetAuthzErr *AuthorizationError
+	assert.True(t, errors.As(authzErr, &targetAuthzErr), "errors.As should return true for AuthorizationError target")
+	assert.Equal(t, authzErr, targetAuthzErr, "Target should be set to the original error")
+
+	// Test As with ApplicationError target
+	var targetAppErr *ApplicationError
+	assert.True(t, errors.As(authzErr, &targetAppErr), "errors.As should return true for ApplicationError target")
+	assert.Equal(t, authzErr.ApplicationError, targetAppErr, "Target should be set to the ApplicationError")
+
+	// Test As with BaseError target
+	var targetBaseErr *core.BaseError
+	assert.True(t, errors.As(authzErr, &targetBaseErr), "errors.As should return true for BaseError target")
+	assert.Equal(t, authzErr.ApplicationError.BaseError, targetBaseErr, "Target should be set to the BaseError")
+
+	// Test As with wrong target type
+	var wrongTarget *ConfigurationError
+	assert.False(t, errors.As(authzErr, &wrongTarget), "errors.As should return false for wrong target type")
+
+	// Test direct call to As method with AuthorizationError target
+	var directTargetAuthzErr *AuthorizationError
+	assert.True(t, authzErr.As(&directTargetAuthzErr), "As should return true for AuthorizationError target")
+	assert.Equal(t, authzErr, directTargetAuthzErr, "Target should be set to the original error")
+
+	// Test direct call to As method with ApplicationError target
+	var directTargetAppErr *ApplicationError
+	assert.True(t, authzErr.As(&directTargetAppErr), "As should return true for ApplicationError target")
+	assert.Equal(t, authzErr.ApplicationError, directTargetAppErr, "Target should be set to the ApplicationError")
+
+	// Test direct call to As method with BaseError target
+	var directTargetBaseErr *core.BaseError
+	assert.True(t, authzErr.As(&directTargetBaseErr), "As should return true for BaseError target")
+	assert.Equal(t, authzErr.ApplicationError.BaseError, directTargetBaseErr, "Target should be set to the BaseError")
+
+	// Test direct call to As method with wrong target type
+	var directWrongTarget *ConfigurationError
+	assert.False(t, authzErr.As(&directWrongTarget), "As should return false for wrong target type")
+
+	// Test with nil target
+	assert.False(t, authzErr.As(nil), "As should return false for nil target")
+}
+
 func TestAppErrorWithCause(t *testing.T) {
 	// Create a cause error
 	cause := errors.New("original error")
