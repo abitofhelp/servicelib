@@ -16,6 +16,7 @@ The following diagrams can be generated from the source files in the `source` di
 - **Authentication Component** - Shows the structure of the authentication component
 - **Dependency Injection Component** - Shows the structure of the dependency injection component
 - **Health Check Component** - Shows the structure of the health check component
+- **Error Handling Component** - Shows the structure of the error handling system, including the relationships between different error types
 
 ## Diagram Formats
 
@@ -45,6 +46,7 @@ For convenience, here are links to view each diagram directly in the PlantUML On
 - [Authentication Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/docs/diagrams/source/auth_component.puml)
 - [Dependency Injection Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/docs/diagrams/source/di_component.puml)
 - [Health Check Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/docs/diagrams/source/health_component.puml)
+- [Error Handling Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/docs/diagrams/source/errors_component.puml)
 
 ### SVG Files
 
@@ -55,6 +57,7 @@ You can view the SVG files for each diagram directly:
 - [Authentication Component](svg/auth_component.svg)
 - [Dependency Injection Component](svg/di_component.svg)
 - [Health Check Component](svg/health_component.svg)
+- [Error Handling Component](svg/errors_component.svg)
 
 ### Source Files
 
@@ -65,6 +68,7 @@ You can view the source files for each diagram directly:
 - [Authentication Component](source/auth_component.puml)
 - [Dependency Injection Component](source/di_component.puml)
 - [Health Check Component](source/health_component.puml)
+- [Error Handling Component](source/errors_component.puml)
 
 ## Relationship to Code
 
@@ -79,6 +83,8 @@ The UML diagrams provide visual representations of the ServiceLib architecture a
 - **Dependency Injection Component**: Shows the internal structure of the `di` package, illustrating how the dependency injection container works and how it manages service dependencies.
 
 - **Health Check Component**: Shows the internal structure of the `health` package, including how health checks are registered, managed, and exposed via HTTP endpoints.
+
+- **Error Handling Component**: Shows the internal structure of the `errors` package, including the hierarchy of error types (BaseError, DomainError, ApplicationError, InfrastructureError) and their relationships. This helps developers understand how to use the error handling system and how different error types relate to each other.
 
 ## Generating Diagrams
 

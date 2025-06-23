@@ -2,6 +2,8 @@
 
 This package provides a comprehensive error handling system for the application. It includes error codes, HTTP status mapping, contextual information, and utilities for creating, wrapping, and serializing errors.
 
+For detailed information about the error handling design, including design principles, error type hierarchy, relationships between packages, and best practices, see [Error Handling Design](error_handling_design.md).
+
 ## Package Structure
 
 The error handling package is organized into several sub-packages:
