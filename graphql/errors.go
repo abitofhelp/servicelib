@@ -76,17 +76,17 @@ func HandleError(ctx context.Context, err error, operation string, logger *loggi
 		return &gqlerror.Error{
 			Message: e.Error(),
 			Extensions: map[string]interface{}{
-				"code": e.Code,
+				"code": string(e.GetCode()),
 			},
 		}
 	case *myerrors.ApplicationError:
 		return &gqlerror.Error{
 			Message: e.Error(),
 			Extensions: map[string]interface{}{
-				"code": e.Code,
+				"code": string(e.GetCode()),
 			},
 		}
-	case *myerrors.RepositoryError:
+	case *myerrors.DatabaseError:
 		// Don't expose internal database errors to clients
 		return &gqlerror.Error{
 			Message: "An internal error occurred",

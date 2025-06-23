@@ -475,7 +475,7 @@ func ExecuteSQLTransaction(ctx context.Context, db *sql.DB, fn func(tx *sql.Tx) 
 			if IsTransientError(err) {
 				continue // Retry if this is a transient error
 			}
-			return dberrors.DatabaseOperation(err, "transaction function failed")
+			return dberrors.NewDatabaseError("transaction function failed", "execute", "SQL", err)
 		}
 
 		// Commit transaction
@@ -487,7 +487,7 @@ func ExecuteSQLTransaction(ctx context.Context, db *sql.DB, fn func(tx *sql.Tx) 
 			if IsTransientError(err) {
 				continue // Retry if this is a transient error
 			}
-			return dberrors.DatabaseOperation(err, "failed to commit transaction")
+			return dberrors.NewDatabaseError("failed to commit transaction", "commit", "SQL", err)
 		}
 
 		// Transaction succeeded
@@ -495,5 +495,5 @@ func ExecuteSQLTransaction(ctx context.Context, db *sql.DB, fn func(tx *sql.Tx) 
 	}
 
 	// If we get here, we've exhausted our retries
-	return dberrors.DatabaseOperation(lastErr, "transaction failed after %d retries", config.MaxRetries)
+	return dberrors.NewDatabaseError(fmt.Sprintf("transaction failed after %d retries", config.MaxRetries), "retry", "SQL", lastErr)
 }

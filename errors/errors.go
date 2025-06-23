@@ -316,3 +316,41 @@ func IsApplicationError(err error) bool {
 
 	return false
 }
+
+// IsCancelled checks if an error is a cancellation error.
+func IsCancelled(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	// Check if the error is ErrContextCanceled from recovery package
+	if Is(err, ErrCanceled) {
+		return true
+	}
+
+	// Check if the error has a GetCode method and the code is CanceledCode
+	if e, ok := err.(interface{ GetCode() ErrorCode }); ok {
+		return e.GetCode() == CanceledCode
+	}
+
+	return false
+}
+
+// IsTimeout checks if an error is a timeout error.
+func IsTimeout(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	// Check if the error is ErrTimeout
+	if Is(err, ErrTimeout) {
+		return true
+	}
+
+	// Check if the error has a GetCode method and the code is TimeoutCode
+	if e, ok := err.(interface{ GetCode() ErrorCode }); ok {
+		return e.GetCode() == TimeoutCode
+	}
+
+	return false
+}

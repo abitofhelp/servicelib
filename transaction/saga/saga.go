@@ -69,12 +69,12 @@ func (t *Transaction) AddOperation(op Operation, rollback RollbackOperation) {
 func (t *Transaction) Execute(ctx context.Context) error {
 	// Check if context is done
 	if err := appctx.CheckContext(ctx); err != nil {
-		return errors.WrapWithOperation(err, "Transaction.Execute", "transaction execution aborted")
+		return errors.WrapWithOperation(err, errors.InternalErrorCode, "transaction execution aborted", "Transaction.Execute")
 	}
 
 	// Validate that operations and rollbacks have the same length
 	if len(t.operations) != len(t.rollbacks) {
-		return errors.Internal(nil, "transaction operations and rollbacks count mismatch")
+		return errors.New(errors.InternalErrorCode, "transaction operations and rollbacks count mismatch")
 	}
 
 	for i, op := range t.operations {
@@ -88,13 +88,11 @@ func (t *Transaction) Execute(ctx context.Context) error {
 					"operation_index": i,
 					"rollback_errors": rollbackErrors,
 				}
-				return errors.WithDetails(
-					errors.WrapWithOperation(err, "Transaction.Execute", "transaction operation aborted"),
-					details,
-				)
+				wrappedErr := errors.WrapWithOperation(err, errors.InternalErrorCode, "transaction operation aborted", "Transaction.Execute")
+				return errors.WrapWithDetails(wrappedErr, errors.InternalErrorCode, wrappedErr.Error(), details)
 			}
 
-			return errors.WrapWithOperation(err, "Transaction.Execute", "transaction operation aborted")
+			return errors.WrapWithOperation(err, errors.InternalErrorCode, "transaction operation aborted", "Transaction.Execute")
 		}
 
 		if err := op(ctx); err != nil {
@@ -111,10 +109,8 @@ func (t *Transaction) Execute(ctx context.Context) error {
 				details["rollback_errors"] = rollbackErrors
 			}
 
-			return errors.WithDetails(
-				errors.WrapWithOperation(err, "Transaction.Execute", "transaction operation failed"),
-				details,
-			)
+			wrappedErr := errors.WrapWithOperation(err, errors.InternalErrorCode, "transaction operation failed", "Transaction.Execute")
+			return errors.WrapWithDetails(wrappedErr, errors.InternalErrorCode, wrappedErr.Error(), details)
 		}
 	}
 	return nil
@@ -144,18 +140,18 @@ func (t *Transaction) rollback(ctx context.Context, i int) []error {
 func WithTransaction(ctx context.Context, logger *zap.Logger, fn func(tx *Transaction) error) error {
 	// Check if context is done
 	if err := appctx.CheckContext(ctx); err != nil {
-		return errors.WrapWithOperation(err, "WithTransaction", "transaction creation aborted")
+		return errors.WrapWithOperation(err, errors.InternalErrorCode, "transaction creation aborted", "WithTransaction")
 	}
 
 	tx := NewTransaction(logger)
 	if err := fn(tx); err != nil {
 		// Add operation information to the error
-		return errors.WrapWithOperation(err, "WithTransaction", "transaction setup failed")
+		return errors.WrapWithOperation(err, errors.InternalErrorCode, "transaction setup failed", "WithTransaction")
 	}
 
 	// Execute the transaction
 	if err := tx.Execute(ctx); err != nil {
-		return errors.WrapWithOperation(err, "WithTransaction", "transaction execution failed")
+		return errors.WrapWithOperation(err, errors.InternalErrorCode, "transaction execution failed", "WithTransaction")
 	}
 
 	return nil
@@ -183,7 +179,7 @@ func NoopRollback() RollbackOperation {
 func CheckedRollback(rollback RollbackOperation, operation string, errorMsg string) RollbackOperation {
 	return func(ctx context.Context) error {
 		if err := rollback(ctx); err != nil {
-			return errors.WrapWithOperation(err, operation, errorMsg)
+			return errors.WrapWithOperation(err, errors.InternalErrorCode, errorMsg, operation)
 		}
 		return nil
 	}
@@ -202,8 +198,8 @@ func CheckedRollback(rollback RollbackOperation, operation string, errorMsg stri
 func CheckedRollbackWithDetails(rollback RollbackOperation, operation string, errorMsg string, details map[string]interface{}) RollbackOperation {
 	return func(ctx context.Context) error {
 		if err := rollback(ctx); err != nil {
-			wrappedErr := errors.WrapWithOperation(err, operation, errorMsg)
-			return errors.WithDetails(wrappedErr, details)
+			wrappedErr := errors.WrapWithOperation(err, errors.InternalErrorCode, errorMsg, operation)
+			return errors.WrapWithDetails(wrappedErr, errors.InternalErrorCode, wrappedErr.Error(), details)
 		}
 		return nil
 	}

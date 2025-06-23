@@ -4,11 +4,11 @@ package saga
 
 import (
 	"context"
-	"errors"
+	stderrors "errors"
 	"testing"
 	"time"
 
-	apperrors "github.com/abitofhelp/servicelib/errors"
+	"github.com/abitofhelp/servicelib/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -138,7 +138,7 @@ func TestExecute_OperationError(t *testing.T) {
 	}
 
 	op2Called := false
-	expectedErr := errors.New("operation 2 failed")
+	expectedErr := stderrors.New("operation 2 failed")
 	op2 := func(ctx context.Context) error {
 		op2Called = true
 		return expectedErr
@@ -168,11 +168,11 @@ func TestExecute_OperationError(t *testing.T) {
 	assert.False(t, rollback2Called, "Second rollback should not have been called")
 
 	// Check that the error contains the expected details
-	var contextualErr *apperrors.ContextualError
-	assert.True(t, apperrors.As(err, &contextualErr))
-	assert.NotNil(t, contextualErr.Context.Details)
-	assert.Equal(t, 1, contextualErr.Context.Details["operation_index"])
-	assert.Equal(t, 1, contextualErr.Context.Details["failed_operation"])
+	var baseErr *errors.BaseError
+	assert.True(t, errors.As(err, &baseErr))
+	assert.NotNil(t, baseErr.Details)
+	assert.Equal(t, 1, baseErr.Details["operation_index"])
+	assert.Equal(t, 1, baseErr.Details["failed_operation"])
 }
 
 // TestExecute_RollbackError tests executing a transaction with a rollback that fails
@@ -192,14 +192,14 @@ func TestExecute_RollbackError(t *testing.T) {
 	}
 
 	rollback1Called := false
-	rollbackErr := errors.New("rollback 1 failed")
+	rollbackErr := stderrors.New("rollback 1 failed")
 	rollback1 := func(ctx context.Context) error {
 		rollback1Called = true
 		return rollbackErr
 	}
 
 	op2Called := false
-	expectedErr := errors.New("operation 2 failed")
+	expectedErr := stderrors.New("operation 2 failed")
 	op2 := func(ctx context.Context) error {
 		op2Called = true
 		return expectedErr
@@ -229,14 +229,14 @@ func TestExecute_RollbackError(t *testing.T) {
 	assert.False(t, rollback2Called, "Second rollback should not have been called")
 
 	// Check that the error contains the expected details
-	var contextualErr *apperrors.ContextualError
-	assert.True(t, apperrors.As(err, &contextualErr))
-	assert.NotNil(t, contextualErr.Context.Details)
-	assert.Equal(t, 1, contextualErr.Context.Details["operation_index"])
-	assert.Equal(t, 1, contextualErr.Context.Details["failed_operation"])
+	var baseErr *errors.BaseError
+	assert.True(t, errors.As(err, &baseErr))
+	assert.NotNil(t, baseErr.Details)
+	assert.Equal(t, 1, baseErr.Details["operation_index"])
+	assert.Equal(t, 1, baseErr.Details["failed_operation"])
 
 	// Check that rollback errors are included in the details
-	rollbackErrors, ok := contextualErr.Context.Details["rollback_errors"].([]error)
+	rollbackErrors, ok := baseErr.Details["rollback_errors"].([]error)
 	assert.True(t, ok)
 	assert.Len(t, rollbackErrors, 1)
 	assert.Equal(t, rollbackErr.Error(), rollbackErrors[0].Error())
@@ -286,7 +286,7 @@ func TestExecute_ContextCancellation(t *testing.T) {
 
 	// Assert that the transaction failed with a context error
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "operation cancelled")
+	assert.Contains(t, err.Error(), "operation canceled")
 	assert.False(t, opCalled, "Operation should not have been called")
 	assert.False(t, rollbackCalled, "Rollback should not have been called")
 }
@@ -354,7 +354,7 @@ func TestExecute_ContextCancellationDuringOperation(t *testing.T) {
 
 	// Assert that the transaction failed with a context error
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "operation cancelled")
+	assert.Contains(t, err.Error(), "operation canceled")
 
 	// Assert that operations and rollbacks were called correctly
 	assert.True(t, op1Called, "First operation should have been called")
@@ -437,7 +437,7 @@ func TestWithTransaction_SetupError(t *testing.T) {
 	ctx := context.Background()
 
 	// Expected error
-	expectedErr := errors.New("setup error")
+	expectedErr := stderrors.New("setup error")
 
 	// Call WithTransaction with a setup error
 	err := WithTransaction(ctx, testLogger, func(tx *Transaction) error {
@@ -458,7 +458,7 @@ func TestWithTransaction_ExecuteError(t *testing.T) {
 	ctx := context.Background()
 
 	// Expected error
-	expectedErr := errors.New("operation error")
+	expectedErr := stderrors.New("operation error")
 
 	// Call WithTransaction with an operation that fails
 	err := WithTransaction(ctx, testLogger, func(tx *Transaction) error {
@@ -494,7 +494,7 @@ func TestWithTransaction_ContextCancellation(t *testing.T) {
 
 	// Assert that the transaction failed with a context error
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "operation cancelled")
+	assert.Contains(t, err.Error(), "operation canceled")
 }
 
 // TestNoopRollback tests the NoopRollback function
@@ -529,7 +529,7 @@ func TestCheckedRollback_Success(t *testing.T) {
 // TestCheckedRollback_Error tests CheckedRollback with a failing rollback
 func TestCheckedRollback_Error(t *testing.T) {
 	// Expected error
-	expectedErr := errors.New("rollback error")
+	expectedErr := stderrors.New("rollback error")
 
 	// Create a rollback that fails
 	baseRollback := func(ctx context.Context) error {
@@ -545,12 +545,11 @@ func TestCheckedRollback_Error(t *testing.T) {
 	// Assert that the rollback failed with the expected error
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "rollback error")
-	assert.Contains(t, err.Error(), "operation TestOperation")
+	assert.Contains(t, err.Error(), "TestOperation")
 
 	// Check that the error is wrapped correctly
-	var contextualErr *apperrors.ContextualError
-	assert.True(t, apperrors.As(err, &contextualErr))
-	assert.Equal(t, "TestOperation", contextualErr.Context.Operation)
+	var baseErr *errors.BaseError
+	assert.True(t, errors.As(err, &baseErr))
 }
 
 // TestCheckedRollbackWithDetails_Success tests CheckedRollbackWithDetails with a successful rollback
@@ -579,7 +578,7 @@ func TestCheckedRollbackWithDetails_Success(t *testing.T) {
 // TestCheckedRollbackWithDetails_Error tests CheckedRollbackWithDetails with a failing rollback
 func TestCheckedRollbackWithDetails_Error(t *testing.T) {
 	// Expected error
-	expectedErr := errors.New("rollback error")
+	expectedErr := stderrors.New("rollback error")
 
 	// Create a rollback that fails
 	baseRollback := func(ctx context.Context) error {
@@ -601,14 +600,13 @@ func TestCheckedRollbackWithDetails_Error(t *testing.T) {
 	// Assert that the rollback failed with the expected error
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "rollback error")
-	assert.Contains(t, err.Error(), "operation TestOperation")
+	assert.Contains(t, err.Error(), "TestOperation")
 
 	// Check that the error is wrapped correctly
-	var contextualErr *apperrors.ContextualError
-	assert.True(t, apperrors.As(err, &contextualErr))
-	assert.Equal(t, "TestOperation", contextualErr.Context.Operation)
+	var baseErr *errors.BaseError
+	assert.True(t, errors.As(err, &baseErr))
 
 	// Check that the details are included
-	assert.Equal(t, "value1", contextualErr.Context.Details["key1"])
-	assert.Equal(t, 42, contextualErr.Context.Details["key2"])
+	assert.Equal(t, "value1", baseErr.Details["key1"])
+	assert.Equal(t, 42, baseErr.Details["key2"])
 }

@@ -422,11 +422,47 @@ func handleError(w http.ResponseWriter, r *http.Request, err error) {
 
 	// Map error types to status codes using the generic error interfaces
 	statusCode := errors.GetHTTPStatus(err)
+
+	// If statusCode is 0 (invalid), use a default status code
+	if statusCode == 0 {
+		// Try to determine a more specific status code based on error type
+		// First check if the error implements IsNotFoundError() bool
+		if e, ok := err.(interface{ IsNotFoundError() bool }); ok && e.IsNotFoundError() {
+			statusCode = http.StatusNotFound
+		} else if errors.IsNotFoundError(err) {
+			statusCode = http.StatusNotFound
+		} else if e, ok := err.(interface{ IsValidationError() bool }); ok && e.IsValidationError() {
+			statusCode = http.StatusBadRequest
+		} else if errors.IsValidationError(err) {
+			statusCode = http.StatusBadRequest
+		} else if e, ok := err.(interface{ IsDatabaseError() bool }); ok && e.IsDatabaseError() {
+			statusCode = http.StatusInternalServerError
+		} else if e, ok := err.(interface{ IsRepositoryError() bool }); ok && e.IsRepositoryError() {
+			statusCode = http.StatusInternalServerError
+		} else if errors.IsDatabaseError(err) {
+			statusCode = http.StatusInternalServerError
+		} else {
+			// Default to 500 Internal Server Error
+			statusCode = http.StatusInternalServerError
+		}
+	}
+
 	errorMessage := "Internal server error"
 
 	// Get appropriate error message based on error type
-	if errors.IsValidationError(err) || errors.IsNotFoundError(err) || errors.IsApplicationError(err) {
+	// First check if the error implements the specific interface methods
+	if e, ok := err.(interface{ IsValidationError() bool }); ok && e.IsValidationError() {
 		errorMessage = err.Error()
+	} else if e, ok := err.(interface{ IsNotFoundError() bool }); ok && e.IsNotFoundError() {
+		errorMessage = err.Error()
+	} else if e, ok := err.(interface{ IsApplicationError() bool }); ok && e.IsApplicationError() {
+		errorMessage = err.Error()
+	} else if errors.IsValidationError(err) || errors.IsNotFoundError(err) || errors.IsApplicationError(err) {
+		errorMessage = err.Error()
+	} else if e, ok := err.(interface{ IsDatabaseError() bool }); ok && e.IsDatabaseError() {
+		errorMessage = "Database error"
+	} else if e, ok := err.(interface{ IsRepositoryError() bool }); ok && e.IsRepositoryError() {
+		errorMessage = "Database error"
 	} else if errors.IsDatabaseError(err) {
 		errorMessage = "Database error"
 	}
