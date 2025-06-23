@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/abitofhelp/servicelib/auth/errors"
+	"github.com/abitofhelp/servicelib/errors"
 	"github.com/abitofhelp/servicelib/auth/jwt"
 	"github.com/abitofhelp/servicelib/auth/middleware"
 	"github.com/abitofhelp/servicelib/auth/oidc"
@@ -216,7 +216,7 @@ func New(ctx context.Context, config Config, logger *zap.Logger) (*Auth, error) 
 	// Validate configuration
 	validationResult := ValidateConfig(config)
 	if !validationResult.IsValid() {
-		err := errors.WithMessage(errors.ErrInvalidConfig, validationResult.Error().Error())
+		err := errors.NewConfigurationError("invalid configuration", "auth", validationResult.Error().Error(), nil)
 		telemetry.RecordErrorSpan(ctx, err)
 		return nil, err
 	}
@@ -228,7 +228,7 @@ func New(ctx context.Context, config Config, logger *zap.Logger) (*Auth, error) 
 		Issuer:        config.JWT.Issuer,
 	}, logger)
 	if jwtErr != nil {
-		return nil, errors.WithOp(jwtErr, "auth.New")
+		return nil, errors.WrapWithOperation(jwtErr, errors.InternalErrorCode, "JWT service creation failed", "auth.New")
 	}
 
 	// Add remote validator if enabled
@@ -259,7 +259,7 @@ func New(ctx context.Context, config Config, logger *zap.Logger) (*Auth, error) 
 			Timeout:       config.OIDC.Timeout,
 		}, logger)
 		if err != nil {
-			return nil, errors.WithOp(err, "auth.New")
+			return nil, errors.WrapWithOperation(err, errors.InternalErrorCode, "OIDC service creation failed", "auth.New")
 		}
 	}
 
