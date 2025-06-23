@@ -37,6 +37,7 @@ ServiceLib provides a comprehensive set of components organized by functionality
 - **[Configuration](config/README.md)** - Flexible configuration management with adapters for various sources (files, environment variables, etc.)
 - **[Context](context/README.md)** - Context utilities for request handling, cancellation, and value propagation
 - **[Dependency Injection](di/README.md)** - Container-based DI system for managing service dependencies
+- **[Environment Variables](env/README.md)** - Utilities for working with environment variables with fallback values
 - **[Error Handling](errors/README.md)** - Structured error types and handling with rich context information
 - **[Logging](logging/README.md)** - Structured logging with Zap for high-performance logging
 
@@ -71,7 +72,7 @@ ServiceLib provides a comprehensive set of components organized by functionality
 
 ServiceLib follows [Semantic Versioning](https://semver.org/). The current version is available in the [go.mod](go.mod) file.
 
-- **Go Version**: Requires Go 1.18 or later (for generics support)
+- **Go Version**: Requires Go 1.24 or later
 - **Dependencies**: All dependencies are managed through Go modules
 - **API Stability**: APIs marked as stable will not have breaking changes within the same major version
 - **Backward Compatibility**: We strive to maintain backward compatibility within the same major version
