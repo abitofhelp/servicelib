@@ -226,9 +226,47 @@ if err != nil {
 
 ### Error Handling
 
-The `errors` package provides structured error types and handling:
+The `errors` package provides structured error types and handling. It has been refactored into several sub-packages for better organization and maintainability:
 
-- **Error Types**: Domain errors, infrastructure errors, application errors
+- **Core**: Core error handling functionality
+  - Error codes and constants
+  - Error context structures and functions
+  - Basic error utility functions (Is, As, Unwrap, etc.)
+  - HTTP status code mapping
+
+- **Types**: Specific error types
+  - Validation errors
+  - Application errors
+  - Domain errors
+  - Repository errors
+  - Not found errors
+
+- **Interfaces**: Error interfaces for type checking and HTTP status mapping
+  - ErrorWithCode
+  - ErrorWithHTTPStatus
+  - ValidationErrorInterface
+  - ApplicationErrorInterface
+  - RepositoryErrorInterface
+  - NotFoundErrorInterface
+
+- **Recovery**: Error recovery mechanisms
+  - Circuit breakers
+  - Retries
+  - Fallbacks
+
+- **Utils**: Utility functions for error handling
+  - Error formatting
+  - Error comparison
+  - Error serialization
+
+- **Wrappers**: Error wrapping utilities
+  - Context enrichment
+  - Stack trace capture
+  - Error chaining
+
+The package provides features such as:
+
+- **Error Types**: Domain errors, application errors, repository errors, validation errors
 - **Error Wrapping**: Wrap errors with context information
 - **Error Codes**: Standardized error codes for consistent handling
 - **Localized Error Messages**: Error messages in multiple languages
@@ -249,6 +287,8 @@ if errors.Is(err, errors.ErrNotFound) {
     // Handle not found error
 }
 ```
+
+Note: The public API of the errors package remains backward compatible despite the internal refactoring.
 
 ### Health Checks
 
@@ -741,15 +781,22 @@ func main() {
 
 ### Error Handling
 
-- **Structured Errors**: Use the errors package to create structured errors with context
+- **Structured Errors**: Use the errors package to create structured errors with context. The package has been refactored into sub-packages, but the public API remains backward compatible.
 
 ```go
 if err != nil {
-    return errors.NewInfrastructureError("database_error", "Failed to query database", err)
+    // Using the domain error type from the types package
+    return errors.NewDomainError("database_error", "Failed to query database", err)
+
+    // Or using the application error type
+    return errors.NewApplicationError("app_error", "Application error occurred", err)
+
+    // Or using the repository error type
+    return errors.NewRepositoryError("repo_error", "Repository error occurred", err)
 }
 ```
 
-- **Error Categorization**: Categorize errors to handle them appropriately at the API boundary
+- **Error Categorization**: Categorize errors to handle them appropriately at the API boundary. The utility functions for checking error types are available in the core package but exposed through the main errors package.
 
 ```go
 switch {
@@ -759,9 +806,36 @@ case errors.IsValidation(err):
     return http.StatusBadRequest, errorResponse(err)
 case errors.IsUnauthorized(err):
     return http.StatusUnauthorized, errorResponse(err)
+case errors.IsRepository(err):
+    return http.StatusInternalServerError, errorResponse(err)
+case errors.IsDomain(err):
+    return http.StatusBadRequest, errorResponse(err)
 default:
     return http.StatusInternalServerError, errorResponse(err)
 }
+```
+
+- **Error Recovery**: Use the recovery mechanisms provided by the errors package for handling transient failures.
+
+```go
+// Retry an operation with exponential backoff
+result, err := errors.RetryWithBackoff(ctx, func() (interface{}, error) {
+    return repository.FindById(ctx, id)
+}, errors.RetryOptions{
+    MaxRetries: 3,
+    InitialDelay: 100 * time.Millisecond,
+    MaxDelay: 1 * time.Second,
+})
+
+// Use a circuit breaker to prevent cascading failures
+breaker := errors.NewCircuitBreaker(errors.CircuitBreakerOptions{
+    MaxFailures: 5,
+    Timeout: 10 * time.Second,
+})
+
+err := breaker.Execute(func() error {
+    return service.CallExternalAPI(ctx)
+})
 ```
 
 ### Performance Optimization

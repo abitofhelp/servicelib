@@ -9,6 +9,7 @@ The following diagrams can be generated from the source files in the `source` di
 ### Architecture Diagrams
 
 - **Package Dependencies** - Shows the dependencies between the main packages in ServiceLib
+- **Improved Package Dependencies** - Shows a proposed improved package structure with interface packages to reduce coupling
 - **Layered Architecture** - Illustrates the layered architecture of ServiceLib
 
 ### Component Diagrams
@@ -42,6 +43,7 @@ If you don't want to install PlantUML locally, you can view the diagrams using o
 For convenience, here are links to view each diagram directly in the PlantUML Online Server:
 
 - [Package Dependencies](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/docs/diagrams/source/package_dependencies.puml)
+- [Improved Package Dependencies](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/docs/diagrams/source/improved_package_dependencies.puml)
 - [Layered Architecture](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/docs/diagrams/source/layered_architecture.puml)
 - [Authentication Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/docs/diagrams/source/auth_component.puml)
 - [Dependency Injection Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/docs/diagrams/source/di_component.puml)
@@ -64,6 +66,7 @@ You can view the SVG files for each diagram directly:
 You can view the source files for each diagram directly:
 
 - [Package Dependencies](source/package_dependencies.puml)
+- [Improved Package Dependencies](source/improved_package_dependencies.puml)
 - [Layered Architecture](source/layered_architecture.puml)
 - [Authentication Component](source/auth_component.puml)
 - [Dependency Injection Component](source/di_component.puml)

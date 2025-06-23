@@ -28,10 +28,16 @@ The ServiceLib documentation is organized into several key sections to help you 
 
 - **[UML Diagrams](diagrams/README.md)** - Architectural and component diagrams, including package dependencies, component relationships, sequence diagrams, and class diagrams.
   - [Package Dependencies Diagram](diagrams/svg/package_dependencies.svg) ([source](diagrams/source/package_dependencies.puml))
+  - [Improved Package Dependencies Diagram](diagrams/source/improved_package_dependencies.puml) - Proposed improved package structure with interface packages
   - [Layered Architecture Diagram](diagrams/svg/layered_architecture.svg) ([source](diagrams/source/layered_architecture.puml))
   - [Authentication Component Diagram](diagrams/svg/auth_component.svg) ([source](diagrams/source/auth_component.puml))
   - [Dependency Injection Component Diagram](diagrams/svg/di_component.svg) ([source](diagrams/source/di_component.puml))
   - [Health Check Component Diagram](diagrams/svg/health_component.svg) ([source](diagrams/source/health_component.puml))
+
+- **Package Dependencies**
+  - [Package Dependencies Guide](Package_Dependencies_Guide.md) - Comprehensive guide to managing package dependencies in ServiceLib
+  - [Package Dependencies Implementation Plan](Package_Dependencies_Implementation_Plan.md) - Phased approach to implementing package dependency improvements
+  - [Package Dependencies Summary](Package_Dependencies_Summary.md) - Summary of analysis and recommendations for package dependencies
 
 ### Component Documentation
 
