@@ -3,63 +3,20 @@
 package db
 
 import (
-	"context"
-	"database/sql"
-	"time"
-
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"github.com/abitofhelp/servicelib/db/interfaces"
 )
 
-// SQLDBInterface defines the interface for sql.DB operations
-type SQLDBInterface interface {
-	PingContext(ctx context.Context) error
-	BeginTx(ctx context.Context, opts *sql.TxOptions) (*sql.Tx, error)
-	SetMaxOpenConns(n int)
-	SetMaxIdleConns(n int)
-	SetConnMaxLifetime(d time.Duration)
-}
+// SQLDBInterface is an alias for interfaces.SQLDBInterface for backward compatibility
+type SQLDBInterface = interfaces.SQLDBInterface
 
-// For type assertion to ensure sql.DB implements SQLDBInterface
-var _ SQLDBInterface = (*sql.DB)(nil)
+// SQLTxInterface is an alias for interfaces.SQLTxInterface for backward compatibility
+type SQLTxInterface = interfaces.SQLTxInterface
 
-// SQLTxInterface defines the interface for sql.Tx operations
-type SQLTxInterface interface {
-	Commit() error
-	Rollback() error
-}
+// MongoClientInterface is an alias for interfaces.MongoClientInterface for backward compatibility
+type MongoClientInterface = interfaces.MongoClientInterface
 
-// For type assertion to ensure sql.Tx implements SQLTxInterface
-var _ SQLTxInterface = (*sql.Tx)(nil)
+// PgxPoolInterface is an alias for interfaces.PgxPoolInterface for backward compatibility
+type PgxPoolInterface = interfaces.PgxPoolInterface
 
-// MongoClientInterface defines the interface for mongo.Client operations
-type MongoClientInterface interface {
-	Ping(ctx context.Context, rp *readpref.ReadPref) error
-	Connect(ctx context.Context) error
-	Database(name string, opts ...*options.DatabaseOptions) *mongo.Database
-}
-
-// For type assertion to ensure mongo.Client implements MongoClientInterface
-var _ MongoClientInterface = (*mongo.Client)(nil)
-
-// PgxPoolInterface defines the interface for pgxpool.Pool operations
-type PgxPoolInterface interface {
-	Ping(ctx context.Context) error
-	Begin(ctx context.Context) (pgx.Tx, error)
-	Close()
-}
-
-// For type assertion to ensure pgxpool.Pool implements PgxPoolInterface
-var _ PgxPoolInterface = (*pgxpool.Pool)(nil)
-
-// PgxTxInterface defines the interface for pgx.Tx operations
-type PgxTxInterface interface {
-	Commit(ctx context.Context) error
-	Rollback(ctx context.Context) error
-}
-
-// For type assertion to ensure pgx.Tx implements PgxTxInterface
-var _ PgxTxInterface = (pgx.Tx)(nil)
+// PgxTxInterface is an alias for interfaces.PgxTxInterface for backward compatibility
+type PgxTxInterface = interfaces.PgxTxInterface

@@ -24,11 +24,17 @@ type SQLDBInterface interface {
 	SetConnMaxLifetime(d time.Duration)
 }
 
+// For type assertion to ensure sql.DB implements SQLDBInterface
+var _ SQLDBInterface = (*sql.DB)(nil)
+
 // SQLTxInterface defines the interface for sql.Tx operations
 type SQLTxInterface interface {
 	Commit() error
 	Rollback() error
 }
+
+// For type assertion to ensure sql.Tx implements SQLTxInterface
+var _ SQLTxInterface = (*sql.Tx)(nil)
 
 // MongoClientInterface defines the interface for mongo.Client operations
 type MongoClientInterface interface {
@@ -37,6 +43,9 @@ type MongoClientInterface interface {
 	Database(name string, opts ...*options.DatabaseOptions) *mongo.Database
 }
 
+// For type assertion to ensure mongo.Client implements MongoClientInterface
+var _ MongoClientInterface = (*mongo.Client)(nil)
+
 // PgxPoolInterface defines the interface for pgxpool.Pool operations
 type PgxPoolInterface interface {
 	Ping(ctx context.Context) error
@@ -44,8 +53,14 @@ type PgxPoolInterface interface {
 	Close()
 }
 
+// For type assertion to ensure pgxpool.Pool implements PgxPoolInterface
+var _ PgxPoolInterface = (*pgxpool.Pool)(nil)
+
 // PgxTxInterface defines the interface for pgx.Tx operations
 type PgxTxInterface interface {
 	Commit(ctx context.Context) error
 	Rollback(ctx context.Context) error
 }
+
+// For type assertion to ensure pgx.Tx implements PgxTxInterface
+var _ PgxTxInterface = (pgx.Tx)(nil)
