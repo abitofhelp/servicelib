@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example usage of the Username value object
-package example_valueobject
+package identification
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 
 func main() {
 	// Create a new username
-	username, err := valueobject.NewUsername("john.doe")
+	username, err := identification.NewUsername("john.doe")
 	if err != nil {
 		// Handle error
 		fmt.Println("Error creating username:", err)
@@ -31,7 +31,7 @@ func main() {
 	fmt.Printf("Contains 'john'? %v\n", containsJohn) // true
 
 	// Compare usernames (case insensitive)
-	otherUsername, _ := valueobject.NewUsername("John.Doe")
+	otherUsername, _ := identification.NewUsername("John.Doe")
 	areEqual := username.Equals(otherUsername)
 	fmt.Printf("Are usernames equal? %v\n", areEqual) // true
 }

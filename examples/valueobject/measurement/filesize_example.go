@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example usage of the FileSize value object
-package example_valueobject
+package measurement
 
 import (
 	"fmt"

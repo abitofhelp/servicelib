@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example usage of the URL value object
-package example_valueobject
+package network
 
 import (
 	"fmt"

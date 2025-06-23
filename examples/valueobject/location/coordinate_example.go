@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example usage of the Coordinate value object
-package example_valueobject
+package location
 
 import (
 	"fmt"

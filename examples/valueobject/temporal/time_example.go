@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example usage of the Time value object
-package example_valueobject
+package temporal
 
 import (
 	"encoding/json"
