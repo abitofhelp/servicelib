@@ -4,6 +4,7 @@
 package infra
 
 import (
+	"context"
 	"github.com/abitofhelp/servicelib/errors/core"
 )
 
@@ -22,6 +23,55 @@ func NewInfrastructureError(code core.ErrorCode, message string, cause error) *I
 
 // IsInfrastructureError identifies this as an infrastructure error.
 func (e *InfrastructureError) IsInfrastructureError() bool {
+	return true
+}
+
+// RetryError represents an error that occurred during a retry operation.
+// It extends InfrastructureError with retry-specific information.
+type RetryError struct {
+	*InfrastructureError
+	Attempts    int `json:"attempts,omitempty"`
+	MaxAttempts int `json:"max_attempts,omitempty"`
+}
+
+// NewRetryError creates a new RetryError.
+func NewRetryError(message string, cause error, attempts int, maxAttempts int) *RetryError {
+	return &RetryError{
+		InfrastructureError: NewInfrastructureError(core.InternalErrorCode, message, cause),
+		Attempts:            attempts,
+		MaxAttempts:         maxAttempts,
+	}
+}
+
+// IsRetryError identifies this as a retry error.
+func (e *RetryError) IsRetryError() bool {
+	return true
+}
+
+// ContextError represents an error that occurred due to a context cancellation or timeout during a retry operation.
+// It extends InfrastructureError with context-specific information.
+type ContextError struct {
+	*InfrastructureError
+}
+
+// NewContextError creates a new ContextError.
+func NewContextError(message string, cause error) *ContextError {
+	var code core.ErrorCode
+	if cause == context.Canceled {
+		code = core.CanceledCode
+	} else if cause == context.DeadlineExceeded {
+		code = core.TimeoutCode
+	} else {
+		code = core.InternalErrorCode
+	}
+
+	return &ContextError{
+		InfrastructureError: NewInfrastructureError(code, message, cause),
+	}
+}
+
+// IsContextError identifies this as a context error.
+func (e *ContextError) IsContextError() bool {
 	return true
 }
 

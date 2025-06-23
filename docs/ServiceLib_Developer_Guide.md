@@ -13,6 +13,7 @@
    - [Health Checks](#health-checks)
    - [Logging](#logging)
    - [Middleware](#middleware)
+   - [Retry](#retry)
    - [Telemetry](#telemetry)
    - [Validation](#validation)
 4. [UML Diagrams](#uml-diagrams)
@@ -371,6 +372,47 @@ handler := middleware.Chain(
 server := &http.Server{
     Addr:    ":8080",
     Handler: handler,
+}
+```
+
+### Retry
+
+The `retry` package provides functionality for retrying operations with configurable backoff and jitter:
+
+- **Configurable Retry Parameters**: Customize maximum retries, initial backoff, maximum backoff, backoff factor, and jitter factor
+- **Exponential Backoff**: Automatically increases wait time between retry attempts
+- **Jitter**: Adds randomness to backoff times to prevent thundering herd problems
+- **Context Integration**: Respects context cancellation and timeouts
+- **Error Framework Integration**: Uses the servicelib error framework for consistent error handling
+- **Retryable Error Detection**: Provides helper functions to determine if an error is retryable
+
+```go
+// Define a function to retry
+fn := func(ctx context.Context) error {
+    // Your operation here
+    // Return nil if successful, or an error if it should be retried
+    return nil
+}
+
+// Use default retry configuration
+config := retry.DefaultConfig()
+
+// Customize the configuration if needed
+config = config.WithMaxRetries(5).
+    WithInitialBackoff(200 * time.Millisecond).
+    WithMaxBackoff(5 * time.Second).
+    WithBackoffFactor(2.5).
+    WithJitterFactor(0.3)
+
+// Define a custom function to determine if an error is retryable
+isRetryable := func(err error) bool {
+    return retry.IsNetworkError(err) || retry.IsTimeoutError(err) || retry.IsTransientError(err)
+}
+
+// Execute with retry
+err := retry.Do(ctx, fn, config, isRetryable)
+if err != nil {
+    // Handle error
 }
 ```
 

@@ -60,6 +60,8 @@ type (
 	DatabaseError        = infra.DatabaseError
 	NetworkError         = infra.NetworkError
 	ExternalServiceError = infra.ExternalServiceError
+	RetryError           = infra.RetryError
+	ContextError         = infra.ContextError
 	ApplicationError     = app.ApplicationError
 	ConfigurationError   = app.ConfigurationError
 	AuthenticationError  = app.AuthenticationError
@@ -131,6 +133,14 @@ func NewNetworkError(message string, host string, port string, cause error) *Net
 
 func NewExternalServiceError(message string, serviceName string, endpoint string, cause error) *ExternalServiceError {
 	return infra.NewExternalServiceError(message, serviceName, endpoint, cause)
+}
+
+func NewRetryError(message string, cause error, attempts int, maxAttempts int) *RetryError {
+	return infra.NewRetryError(message, cause, attempts, maxAttempts)
+}
+
+func NewContextError(message string, cause error) *ContextError {
+	return infra.NewContextError(message, cause)
 }
 
 // Application error creation functions
@@ -271,6 +281,16 @@ func IsNetworkError(err error) bool {
 
 func IsExternalServiceError(err error) bool {
 	var e *ExternalServiceError
+	return As(err, &e)
+}
+
+func IsRetryError(err error) bool {
+	var e *RetryError
+	return As(err, &e)
+}
+
+func IsContextError(err error) bool {
+	var e *ContextError
 	return As(err, &e)
 }
 

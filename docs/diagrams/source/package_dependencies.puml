@@ -37,6 +37,9 @@ package "db" as db {
 package "di" as di {
 }
 
+package "retry" as retry {
+}
+
 auth --> logging
 auth --> middleware
 auth --> errors
@@ -62,5 +65,7 @@ di --> config
 di --> logging
 
 config --> errors
+
+retry --> errors
 
 @enduml

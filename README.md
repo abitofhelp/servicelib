@@ -37,11 +37,13 @@ ServiceLib provides a comprehensive set of components organized by functionality
 ### Core Infrastructure
 
 - **[Configuration](config/README.md)** - Flexible configuration management with adapters for various sources (files, environment variables, etc.)
+- **[ConfigScan](configscan/README.md)** - Tool for scanning packages to determine whether any have configuration requirements and don't have default values set
 - **[Context](context/README.md)** - Context utilities for request handling, cancellation, and value propagation
 - **[Dependency Injection](di/README.md)** - Container-based DI system for managing service dependencies
 - **[Environment Variables](env/README.md)** - Utilities for working with environment variables with fallback values
 - **[Error Handling](errors/README.md)** - Structured error types and handling with rich context information
 - **[Logging](logging/README.md)** - Structured logging with Zap for high-performance logging
+- **[Retry](retry/README.md)** - Retry operations with configurable backoff and jitter
 
 ### Security
 
@@ -113,6 +115,7 @@ Each package in ServiceLib includes its own README.md with detailed documentatio
 
 - [Authentication](auth/README.md) - JWT, OAuth2, and OIDC examples
 - [Configuration](config/README.md) - Configuration management examples
+- [ConfigScan](configscan/README.md) - Package scanning for configuration requirements
 - [Database](db/README.md) - Database connection and transaction examples
 - [Dependency Injection](di/README.md) - DI container usage examples
 - [Health Checks](health/README.md) - Health check implementation examples
@@ -163,6 +166,23 @@ The `config` package provides a flexible configuration system that supports mult
   - Validation
 
 - **Adapters**: Easily create custom adapters for different configuration sources
+
+### ConfigScan
+
+The `configscan` package provides tools for scanning packages to determine whether any have configuration requirements and don't have default values set:
+
+- **Scanner**: Scans packages for configuration requirements
+  - Identifies structs with names containing "Config"
+  - Checks if there's a default function for each config struct
+  - Reports config structs that don't have default functions
+
+- **Command-Line Tool**: Easily scan your project from the command line
+  - Scan the current directory or a specific directory
+  - Get a report of packages with missing default values
+
+- **Best Practices**: Encourages providing default values for all configuration structs
+  - Ensures users don't have to specify every configuration parameter
+  - Promotes consistent configuration patterns across packages
 
 ### Context
 

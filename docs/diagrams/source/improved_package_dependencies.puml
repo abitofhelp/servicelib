@@ -10,13 +10,13 @@ skinparam component {
 package "auth" as auth {
   package "interfaces" as auth_interfaces {
   }
-  
+
   package "jwt" as auth_jwt {
   }
-  
+
   package "oidc" as auth_oidc {
   }
-  
+
   auth_jwt --> auth_interfaces
   auth_oidc --> auth_interfaces
 }
@@ -24,23 +24,23 @@ package "auth" as auth {
 package "logging" as logging {
   package "interfaces" as logging_interfaces {
   }
-  
+
   package "zap" as logging_zap {
   }
-  
+
   logging_zap --> logging_interfaces
 }
 
 package "telemetry" as telemetry {
   package "interfaces" as telemetry_interfaces {
   }
-  
+
   package "prometheus" as telemetry_prometheus {
   }
-  
+
   package "opentelemetry" as telemetry_opentelemetry {
   }
-  
+
   telemetry_prometheus --> telemetry_interfaces
   telemetry_opentelemetry --> telemetry_interfaces
 }
@@ -51,39 +51,39 @@ package "middleware" as middleware {
 package "context" as context {
   package "interfaces" as context_interfaces {
   }
-  
+
   package "impl" as context_impl {
   }
-  
+
   context_impl --> context_interfaces
 }
 
 package "health" as health {
   package "interfaces" as health_interfaces {
   }
-  
+
   package "impl" as health_impl {
   }
-  
+
   health_impl --> health_interfaces
 }
 
 package "errors" as errors {
   package "interfaces" as errors_interfaces {
   }
-  
+
   package "core" as errors_core {
   }
-  
+
   package "domain" as errors_domain {
   }
-  
+
   package "app" as errors_app {
   }
-  
+
   package "infra" as errors_infra {
   }
-  
+
   errors_core --> errors_interfaces
   errors_domain --> errors_interfaces
   errors_app --> errors_interfaces
@@ -93,23 +93,23 @@ package "errors" as errors {
 package "config" as config {
   package "interfaces" as config_interfaces {
   }
-  
+
   package "impl" as config_impl {
   }
-  
+
   config_impl --> config_interfaces
 }
 
 package "db" as db {
   package "interfaces" as db_interfaces {
   }
-  
+
   package "sql" as db_sql {
   }
-  
+
   package "mongo" as db_mongo {
   }
-  
+
   db_sql --> db_interfaces
   db_mongo --> db_interfaces
 }
@@ -117,11 +117,14 @@ package "db" as db {
 package "di" as di {
   package "interfaces" as di_interfaces {
   }
-  
+
   package "impl" as di_impl {
   }
-  
+
   di_impl --> di_interfaces
+}
+
+package "retry" as retry {
 }
 
 auth --> logging_interfaces
@@ -150,5 +153,7 @@ di --> config_interfaces
 di --> logging_interfaces
 
 config --> errors_interfaces
+
+retry --> errors_interfaces
 
 @enduml
