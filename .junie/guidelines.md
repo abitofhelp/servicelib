@@ -1,11 +1,11 @@
 This project follows the following coding guidelines:
+* You do not have to maintain backward compatibility at this time.
 * You will explain decisions and design choices before implementing them.
 * The architecture combines the best practices from Domain-Driven Design (DDD), Clean Architecture, and Hexagonal Architecture, creating a hybrid model that leverages the strengths of each.  All code must adhere to these designs.
 * The codebase is written in Go, following best practices and conventions.
 * Any function requiring a context parameter must have a context.Context parameter as the first argument and use ContextLogger to log messages.
 * You must use Testify for assertions in tests.
 * You must use GoMock for mocking in tests.
-* You must use the standard log package for logging.
 * You must not implement testing for the /examples folder.
 * Implement unit tests for each package and when a new Go file is added.  The target is a minimum of 80% coverage of statements.  
 * Unit tests should be fast, must exist in the same folder as the file being tested, and isolated from each other.

@@ -19,6 +19,8 @@ The library follows modern Go practices and design patterns, with a focus on:
 - **Reliability**: Built-in error handling and recovery mechanisms
 - **Observability**: Integrated logging, metrics, and tracing
 
+**Note: The Family-Service repository implements a GraphQL service using servicelib. This serves as an excellent illustration of servicelib's capabilities and potential.**
+
 ## Documentation
 
 For comprehensive documentation, please see the following resources:
