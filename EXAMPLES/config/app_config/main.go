@@ -1,10 +1,7 @@
-//go:build ignore
-// +build ignore
-
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of implementing and using the AppConfig interface
-package example_config
+package main
 
 import (
 	"fmt"

@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // This example demonstrates how to use the error handling system in servicelib.
-package example_quickstart_example
+package main
 
 import (
 	"context"

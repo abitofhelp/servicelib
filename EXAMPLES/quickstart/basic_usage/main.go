@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of a basic ServiceLib application
-package example_quickstart_example
+package main
 
 import (
 	"context"

@@ -1,10 +1,7 @@
-//go:build ignore
-// +build ignore
-
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of basic usage of the config package
-package example_config
+package main
 
 import (
 	"fmt"

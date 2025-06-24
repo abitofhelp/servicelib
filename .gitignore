@@ -240,6 +240,7 @@ cmd/server/*.html
 # Ignore coverage files in any directory
 **/*coverage.html
 **/*coverage.out
+**/*coverage.txt
 **/*.out
 
 secrets/

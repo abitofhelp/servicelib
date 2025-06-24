@@ -1,7 +1,7 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example demonstrating how to get user information from the context
-package example_auth
+package main
 
 import (
 	"context"
