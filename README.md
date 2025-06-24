@@ -4,9 +4,6 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/abitofhelp/servicelib)](https://goreportcard.com/report/github.com/abitofhelp/servicelib)
 [![GoDoc](https://godoc.org/github.com/abitofhelp/servicelib?status.svg)](https://godoc.org/github.com/abitofhelp/servicelib)
 
-## Coverage (click for details)
-[![codecov](https://codecov.io/gh/abitofhelp/servicelib/graphs/sunburst.svg)](https://codecov.io/gh/abitofhelp/servicelib)
-
 ## Overview
 ### Note: The Family-Service repository implements a GraphQL service using ServiceLib. It serves as an excellent illustration of ServiceLib's capabilities and potential.
 
