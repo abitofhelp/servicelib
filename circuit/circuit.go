@@ -8,7 +8,6 @@ package circuit
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"time"
 
