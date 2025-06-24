@@ -21,9 +21,9 @@ The library follows modern Go practices and design patterns, with a focus on:
 
 For comprehensive documentation, please see the following resources:
 
-- **[Developer Guide](docs/ServiceLib_Developer_Guide.md)** - Detailed component descriptions, architecture diagrams, usage examples, best practices, and troubleshooting guidance
-- **[Integration Tests](docs/Integration_Tests.md)** - Instructions for running integration tests, test environment setup, and troubleshooting test failures
-- **[UML Diagrams](docs/diagrams/README.md)** - Architectural and component diagrams showing package dependencies and component relationships
+- **[Developer Guide](DOCS/ServiceLib_Developer_Guide.md)** - Detailed component descriptions, architecture diagrams, usage examples, best practices, and troubleshooting guidance
+- **[Integration Tests](DOCS/Integration_Tests.md)** - Instructions for running integration tests, test environment setup, and troubleshooting test failures
+- **[UML Diagrams](DOCS/diagrams/README.md)** - Architectural and component diagrams showing package dependencies and component relationships
 - **[API Reference](https://pkg.go.dev/github.com/abitofhelp/servicelib)** - Generated API documentation from Go doc comments
 
 ## Features
@@ -103,7 +103,7 @@ To get started with ServiceLib, you can create a simple HTTP server with logging
 
 3. Create a main.go file with a basic HTTP server using ServiceLib components.
 
-For a complete example, see the [Quickstart Example](examples/quickstart_example.go).
+For a complete example, see the [Quickstart Example](EXAMPLES/quickstart_example.go).
 
 ## Examples
 
@@ -119,9 +119,9 @@ Each package in ServiceLib includes its own README.md with detailed documentatio
 - [Telemetry](telemetry/README.md) - Metrics and tracing examples
 - [Transaction](transaction/README.md) - Distributed transaction examples
 
-For complete example applications, see the [Examples Directory](examples/README.md).
+For complete example applications, see the [Examples Directory](EXAMPLES/README.md).
 
-For comprehensive documentation, please see the [Developer Guide](docs/ServiceLib_Developer_Guide.md).
+For comprehensive documentation, please see the [Developer Guide](DOCS/ServiceLib_Developer_Guide.md).
 
 ## Component Documentation
 
@@ -477,7 +477,7 @@ For detailed request tracing:
 
 - **Unit Tests**: Test each component in isolation using mocks
 
-- **[Integration Tests](docs/Integration_Tests.md)**: Test the integration between components
+- **[Integration Tests](DOCS/Integration_Tests.md)**: Test the integration between components
 
 - **End-to-End Tests**: Test the complete service flow
 

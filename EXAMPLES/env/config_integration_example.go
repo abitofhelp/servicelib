@@ -111,5 +111,5 @@ func main() {
 	fmt.Println("export API_KEY=\"your-api-key\"")
 	fmt.Println("export APP_ENV=\"production\"")
 	fmt.Println("export FEATURES=\"basic,premium,advanced\"")
-	fmt.Println("go run examples/env/config_integration_example.go")
+ fmt.Println("go run EXAMPLES/env/config_integration_example.go")
 }

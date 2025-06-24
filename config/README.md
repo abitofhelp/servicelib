@@ -27,7 +27,7 @@ go get github.com/abitofhelp/servicelib/config
 
 ## Quick Start
 
-See the [Basic Usage example](../examples/config/basic_usage_example.go) for a complete, runnable example of how to use the config package.
+See the [Basic Usage example](../EXAMPLES/config/basic_usage_example.go) for a complete, runnable example of how to use the config package.
 
 ## Configuration
 

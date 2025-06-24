@@ -72,7 +72,7 @@ make coverage
 go test ./path/to/package -run TestName
 ```
 
-For information on running integration tests, see the [Integration Tests Guide](docs/Integration_Tests.md).
+For information on running integration tests, see the [Integration Tests Guide](DOCS/Integration_Tests.md).
 
 ### Linting
 

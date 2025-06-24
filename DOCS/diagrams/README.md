@@ -43,14 +43,14 @@ If you don't want to install PlantUML locally, you can view the diagrams using o
 
 For convenience, here are links to view each diagram directly in the PlantUML Online Server:
 
-- [Package Dependencies](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/docs/diagrams/source/package_dependencies.puml)
-- [Improved Package Dependencies](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/docs/diagrams/source/improved_package_dependencies.puml)
-- [Layered Architecture](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/docs/diagrams/source/layered_architecture.puml)
-- [Authentication Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/docs/diagrams/source/auth_component.puml)
-- [Dependency Injection Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/docs/diagrams/source/di_component.puml)
-- [Health Check Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/docs/diagrams/source/health_component.puml)
-- [Error Handling Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/docs/diagrams/source/errors_component.puml)
-- [Retry Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/docs/diagrams/source/retry_component.puml)
+- [Package Dependencies](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/DOCS/diagrams/source/package_dependencies.puml)
+- [Improved Package Dependencies](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/DOCS/diagrams/source/improved_package_dependencies.puml)
+- [Layered Architecture](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/DOCS/diagrams/source/layered_architecture.puml)
+- [Authentication Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/DOCS/diagrams/source/auth_component.puml)
+- [Dependency Injection Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/DOCS/diagrams/source/di_component.puml)
+- [Health Check Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/DOCS/diagrams/source/health_component.puml)
+- [Error Handling Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/DOCS/diagrams/source/errors_component.puml)
+- [Retry Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/DOCS/diagrams/source/retry_component.puml)
 
 ### SVG Files
 
@@ -108,33 +108,33 @@ SVG versions of all diagrams are already available in the `svg` directory. Howev
 
 ```bash
 # Generate a specific diagram
-plantuml -tsvg docs/diagrams/source/package_dependencies.puml
+plantuml -tsvg DOCS/diagrams/source/package_dependencies.puml
 
 # Generate all diagrams
-plantuml -tsvg docs/diagrams/source/*.puml
+plantuml -tsvg DOCS/diagrams/source/*.puml
 ```
 
 ### Generating PNG Files
 
 ```bash
 # Generate a specific diagram
-plantuml -tpng docs/diagrams/source/package_dependencies.puml
+plantuml -tpng DOCS/diagrams/source/package_dependencies.puml
 
 # Generate all diagrams
-plantuml -tpng docs/diagrams/source/*.puml
+plantuml -tpng DOCS/diagrams/source/*.puml
 ```
 
 The generated files will be placed in the same directory as the source files. You may want to move them to a more appropriate location:
 
 ```bash
 # Create directories if they don't exist
-mkdir -p docs/diagrams/svg docs/diagrams/png
+mkdir -p DOCS/diagrams/svg DOCS/diagrams/png
 
 # Move SVG files
-mv docs/diagrams/source/*.svg docs/diagrams/svg/
+mv DOCS/diagrams/source/*.svg DOCS/diagrams/svg/
 
 # Move PNG files
-mv docs/diagrams/source/*.png docs/diagrams/png/
+mv DOCS/diagrams/source/*.png DOCS/diagrams/png/
 ```
 
 ## Contributing

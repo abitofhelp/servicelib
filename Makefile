@@ -38,7 +38,7 @@ LINUX_ARM64=GOOS=linux GOARCH=arm64
 
 # Test parameters
 TEST_FLAGS=-coverprofile=coverage.out
-TEST_PACKAGES=$(shell go list ./... | grep -v /examples)
+TEST_PACKAGES=$(shell go list ./... | grep -v /EXAMPLES)
 INTEGRATION_TEST_FLAGS=-coverprofile=integration_coverage.out -tags=integration
 PACKAGE_COVERAGE_FLAGS=-coverprofile=
 

@@ -46,5 +46,5 @@ func main() {
 	fmt.Println("export PORT=9090")
 	fmt.Println("export DATABASE_URL=\"postgres://user:password@localhost:5432/mydb\"")
 	fmt.Println("export API_KEY=\"your-api-key\"")
-	fmt.Println("go run examples/env/basic_usage_example.go")
+ fmt.Println("go run EXAMPLES/env/basic_usage_example.go")
 }
