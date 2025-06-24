@@ -13,6 +13,7 @@ package retry
 import (
 	"context"
 	"math/rand"
+	"sync"
 	"time"
 
 	"github.com/abitofhelp/servicelib/errors"
@@ -25,7 +26,11 @@ import (
 
 // Package-level random number generator for jitter calculations
 // This is more efficient than creating a new one for each call to DoWithOptions
-var rng = rand.New(rand.NewSource(time.Now().UnixNano()))
+// Protected by rngMutex for concurrent access
+var (
+	rngMutex sync.Mutex
+	rng      = rand.New(rand.NewSource(time.Now().UnixNano()))
+)
 
 // RetryableFunc is a function that can be retried
 type RetryableFunc func(ctx context.Context) error
@@ -264,7 +269,11 @@ func DoWithOptions(ctx context.Context, fn RetryableFunc, config Config, isRetry
 
 		// Calculate jitter factor between (1-jitterFactor) and (1+jitterFactor)
 		// This ensures backoff is always positive and properly distributed
-		jitterMultiplier := 1.0 + (rng.Float64()*2.0-1.0)*config.JitterFactor
+		// Use mutex to protect access to the random number generator
+		rngMutex.Lock()
+		jitterValue := rng.Float64()
+		rngMutex.Unlock()
+		jitterMultiplier := 1.0 + (jitterValue*2.0-1.0)*config.JitterFactor
 
 		// Apply jitter by multiplying the backoff by the jitter factor
 		backoff = time.Duration(float64(backoff) * jitterMultiplier)

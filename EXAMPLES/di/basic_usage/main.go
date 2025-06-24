@@ -39,7 +39,7 @@ func main() {
 	fmt.Println("Container created successfully")
 
 	// Get the context from the container
-	containerCtx := container.GetContext()
+	// containerCtx := container.GetContext()
 	fmt.Println("Context retrieved from container")
 
 	// Get the logger from the container

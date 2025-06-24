@@ -80,7 +80,7 @@ func handleCancellation() {
 		fmt.Printf("Error: %v\n", err)
 
 		// Check if it's a cancellation error
-		if errors.Is(err, errors.ErrCancelled) {
+		if errors.Is(err, errors.ErrCanceled) {
 			fmt.Println("Detected cancellation error")
 		}
 	}

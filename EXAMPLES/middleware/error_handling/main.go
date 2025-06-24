@@ -23,28 +23,28 @@ func main() {
 		case "validation":
 			// Simulate a validation error
 			// This will be mapped to HTTP 400 Bad Request
-			panic(errors.Validation("Invalid input: field 'name' is required"))
+			panic(errors.NewValidationError("Invalid input: field 'name' is required", "name", nil))
 		case "notfound":
 			// Simulate a not found error
 			// This will be mapped to HTTP 404 Not Found
-			panic(errors.NotFound("Resource with ID %s not found", "12345"))
+			panic(errors.NewNotFoundError("Resource", "12345", nil))
 		case "unauthorized":
 			// Simulate an unauthorized error
 			// This will be mapped to HTTP 401 Unauthorized
-			panic(errors.Unauthorized("Authentication required"))
+			panic(errors.NewAuthenticationError("Authentication required", "user", nil))
 		case "forbidden":
 			// Simulate a forbidden error
 			// This will be mapped to HTTP 403 Forbidden
-			panic(errors.Forbidden("Insufficient permissions"))
+			panic(errors.NewAuthorizationError("Insufficient permissions", "user", "resource", "action", nil))
 		case "internal":
 			// Simulate an internal error
 			// This will be mapped to HTTP 500 Internal Server Error
 			err := fmt.Errorf("database connection failed")
-			panic(errors.Internal(err, "An unexpected error occurred"))
+			panic(errors.Wrap(err, errors.InternalErrorCode, "An unexpected error occurred"))
 		case "timeout":
 			// Simulate a timeout error
 			// This will be mapped to HTTP 504 Gateway Timeout
-			panic(errors.Timeout("Operation timed out after %d seconds", 30))
+			panic(errors.NewContextError(fmt.Sprintf("Operation timed out after %d seconds", 30), nil))
 		default:
 			// No error, normal response
 			w.Header().Set("Content-Type", "text/plain")
