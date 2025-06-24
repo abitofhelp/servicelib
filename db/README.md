@@ -17,10 +17,11 @@ The `db` package provides utilities for database connection management and opera
   - MongoDB
 
 - **Features**:
-  - Transaction management
+  - Transaction management with automatic retries
   - Query execution with retries
   - Result mapping
   - Migrations
+  - Integration with the retry package
 
 ## Installation
 
@@ -65,6 +66,41 @@ See the [Connection Example](../examples/db/connection_example.go) for a complet
 The `Transaction` method executes a function within a transaction.
 
 See the [Transaction Example](../examples/db/transaction_example.go) for a complete, runnable example of how to use the Transaction method.
+
+#### ExecutePostgresTransaction and ExecuteSQLTransaction
+
+The `ExecutePostgresTransaction` and `ExecuteSQLTransaction` functions execute a function within a transaction with automatic retries for transient errors. These functions use the `retry` package internally to provide robust error handling and retry logic.
+
+```go
+// Execute a function within a PostgreSQL transaction with retries
+err := db.ExecutePostgresTransaction(ctx, pool, func(tx pgx.Tx) error {
+    // Your transaction logic here
+    return nil
+})
+
+// Execute a function within a SQL transaction with retries
+err := db.ExecuteSQLTransaction(ctx, sqlDB, func(tx *sql.Tx) error {
+    // Your transaction logic here
+    return nil
+})
+```
+
+You can customize the retry behavior by providing a `RetryConfig`:
+
+```go
+config := db.DefaultRetryConfig().
+    WithMaxRetries(5).
+    WithInitialBackoff(200 * time.Millisecond).
+    WithMaxBackoff(5 * time.Second).
+    WithBackoffFactor(2.0)
+
+err := db.ExecutePostgresTransaction(ctx, pool, func(tx pgx.Tx) error {
+    // Your transaction logic here
+    return nil
+}, config)
+```
+
+See the [Retry Example](../examples/db/retry_example.go) for a complete, runnable example of how to use these functions.
 
 #### QueryWithRetries
 
@@ -127,6 +163,7 @@ For complete, runnable examples, see the following files in the examples directo
 - [Logging](../logging/README.md) - The logging component can be used to log database operations.
 - [Telemetry](../telemetry/README.md) - The telemetry component can be used to monitor database performance.
 - [Transaction](../transaction/README.md) - The transaction component provides utilities for distributed transactions.
+- [Retry](../retry/README.md) - The retry package is used for automatic retries of database operations.
 
 ## Contributing
 

@@ -10,6 +10,9 @@ The retry package provides functionality for retrying operations with configurab
 - **Context Integration**: Respects context cancellation and timeouts.
 - **Error Framework Integration**: Uses the servicelib error framework for consistent error handling.
 - **Retryable Error Detection**: Provides helper functions to determine if an error is retryable.
+- **Structured Logging**: Logs retry attempts, backoff times, and errors using the ContextLogger.
+- **Distributed Tracing**: Integrates with OpenTelemetry for tracing retry operations.
+- **Metrics**: Records metrics for retry attempts, success/failure, and backoff times.
 
 ## Usage
 
@@ -70,25 +73,116 @@ isRetryable := func(err error) bool {
     if retry.IsNetworkError(err) {
         return true
     }
-    
+
     // Check if the error is a timeout error
     if retry.IsTimeoutError(err) {
         return true
     }
-    
+
     // Check if the error is a transient error
     if retry.IsTransientError(err) {
         return true
     }
-    
+
     // Add your custom logic here
-    
+
     return false
 }
 
 // Execute with retry and custom retryable error detection
 err := retry.Do(ctx, fn, config, isRetryable)
 ```
+
+### Logging and Tracing
+
+The retry package supports structured logging and distributed tracing. You can provide a logger and tracer using the `DoWithOptions` function:
+
+```go
+import (
+    "context"
+    "time"
+
+    "github.com/abitofhelp/servicelib/logging"
+    "github.com/abitofhelp/servicelib/retry"
+    "go.opentelemetry.io/otel"
+    "go.uber.org/zap"
+)
+
+func executeWithLogging(ctx context.Context, logger *zap.Logger) error {
+    // Create a context logger
+    contextLogger := logging.NewContextLogger(logger)
+
+    // Define a function to retry
+    fn := func(ctx context.Context) error {
+        // Your operation here
+        return nil
+    }
+
+    // Use default retry configuration
+    config := retry.DefaultConfig()
+
+    // Create options with logger
+    options := retry.DefaultOptions()
+    options.Logger = contextLogger
+
+    // Execute with retry and logging
+    return retry.DoWithOptions(ctx, fn, config, nil, options)
+}
+```
+
+#### Custom Tracer
+
+The retry package uses a `Tracer` interface for distributed tracing, which allows for easier testing and mocking. By default, it uses OpenTelemetry, but you can provide your own implementation or use the no-op implementation for testing or when tracing is not needed:
+
+```go
+import (
+    "context"
+    "time"
+
+    "github.com/abitofhelp/servicelib/logging"
+    "github.com/abitofhelp/servicelib/retry"
+    "go.opentelemetry.io/otel"
+    "go.uber.org/zap"
+)
+
+func executeWithCustomTracing(ctx context.Context, logger *zap.Logger) error {
+    // Create a context logger
+    contextLogger := logging.NewContextLogger(logger)
+
+    // Define a function to retry
+    fn := func(ctx context.Context) error {
+        // Your operation here
+        return nil
+    }
+
+    // Use default retry configuration
+    config := retry.DefaultConfig()
+
+    // Create options with logger and custom tracer
+    options := retry.Options{
+        Logger: contextLogger,
+        Tracer: retry.NewOtelTracer(otel.Tracer("my-custom-tracer")),
+    }
+
+    // Or use a no-op tracer when tracing is not needed
+    // options := retry.Options{
+    //     Logger: contextLogger,
+    //     Tracer: retry.NewNoopTracer(),
+    // }
+
+    // Execute with retry, logging, and tracing
+    return retry.DoWithOptions(ctx, fn, config, nil, options)
+}
+```
+
+This will log detailed information about each retry attempt, including:
+- When an attempt starts and finishes
+- The result of each attempt (success or failure)
+- Backoff durations between attempts
+- Error details when attempts fail
+- Final outcome of the retry operation
+
+The logs include trace IDs and span IDs when tracing is enabled, making it easy to correlate logs with traces.
 
 ## Error Handling
 
@@ -134,7 +228,7 @@ The retry package is designed to work with other servicelib packages. For exampl
 import (
     "context"
     "database/sql"
-    
+
     "github.com/abitofhelp/servicelib/db"
     "github.com/abitofhelp/servicelib/retry"
 )
@@ -145,10 +239,10 @@ func executeWithRetry(ctx context.Context, db *sql.DB) error {
         // Your database operation here
         return nil
     }
-    
+
     // Use default retry configuration
     config := retry.DefaultConfig()
-    
+
     // Execute with retry
     return retry.Do(ctx, fn, config, db.IsTransientError)
 }

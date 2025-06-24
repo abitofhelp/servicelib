@@ -7,12 +7,12 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
 	dberrors "github.com/abitofhelp/servicelib/errors"
 	"github.com/abitofhelp/servicelib/logging"
+	"github.com/abitofhelp/servicelib/retry"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -332,71 +332,49 @@ func ExecutePostgresTransaction(ctx context.Context, pool *pgxpool.Pool, fn func
 		config = retryConfig[0]
 	}
 
-	var lastErr error
-	for attempt := 0; attempt <= config.MaxRetries; attempt++ {
-		// If this is a retry, wait with exponential backoff
-		if attempt > 0 {
-			backoff := time.Duration(float64(config.InitialBackoff) * float64(attempt))
-			if backoff > config.MaxBackoff {
-				backoff = config.MaxBackoff
-			}
+	// Convert db RetryConfig to retry.Config
+	retryOpts := retry.DefaultConfig().
+		WithMaxRetries(config.MaxRetries).
+		WithInitialBackoff(config.InitialBackoff).
+		WithMaxBackoff(config.MaxBackoff).
+		WithBackoffFactor(config.BackoffFactor)
 
-			config.Logger.Debug(ctx, "Retrying database transaction",
-				zap.Int("attempt", attempt),
-				zap.Duration("backoff", backoff),
-				zap.Error(lastErr))
+	// Create retry options with the logger
+	options := retry.Options{
+		Logger: config.Logger,
+		Tracer: retry.NewNoopTracer(), // Use no-op tracer by default
+	}
 
-			select {
-			case <-ctx.Done():
-				return dberrors.NewDatabaseError("context canceled during transaction retry", "retry", "PostgreSQL", ctx.Err())
-			case <-time.After(backoff):
-				// Continue with retry
-			}
-		}
-
+	// Create a function that will be retried
+	retryFn := func(ctx context.Context) error {
 		// Create a context with timeout for the transaction
 		txCtx, cancel := context.WithTimeout(ctx, DefaultTimeout)
+		defer cancel()
 
 		// Begin transaction
 		tx, err := pool.Begin(txCtx)
 		if err != nil {
-			cancel()
-			lastErr = err
-			if IsTransientError(err) {
-				continue // Retry if this is a transient error
-			}
 			return dberrors.NewDatabaseError("failed to begin transaction", "begin", "PostgreSQL", err)
 		}
 
- 	// Execute function
- 	err = fn(tx)
- 	if err != nil {
- 		// Rollback transaction
- 		rollbackCtx, rollbackCancel := context.WithTimeout(ctx, 5*time.Second)
- 		rollbackErr := tx.Rollback(rollbackCtx)
- 		rollbackCancel()
- 		cancel()
+		// Execute function
+		err = fn(tx)
+		if err != nil {
+			// Rollback transaction
+			rollbackCtx, rollbackCancel := context.WithTimeout(ctx, 5*time.Second)
+			rollbackErr := tx.Rollback(rollbackCtx)
+			rollbackCancel()
 
- 		if rollbackErr != nil {
- 			config.Logger.Warn(ctx, "Failed to rollback transaction", zap.Error(rollbackErr))
- 		}
+			if rollbackErr != nil {
+				config.Logger.Warn(ctx, "Failed to rollback transaction", zap.Error(rollbackErr))
+			}
 
- 		lastErr = err
- 		if IsTransientError(err) {
- 			continue // Retry if this is a transient error
- 		}
- 		return dberrors.NewDatabaseError("transaction function failed", "execute", "PostgreSQL", err)
+			return dberrors.NewDatabaseError("transaction function failed", "execute", "PostgreSQL", err)
 		}
 
 		// Commit transaction
 		err = tx.Commit(txCtx)
-		cancel()
-
 		if err != nil {
-			lastErr = err
-			if IsTransientError(err) {
-				continue // Retry if this is a transient error
-			}
 			return dberrors.NewDatabaseError("failed to commit transaction", "commit", "PostgreSQL", err)
 		}
 
@@ -404,8 +382,18 @@ func ExecutePostgresTransaction(ctx context.Context, pool *pgxpool.Pool, fn func
 		return nil
 	}
 
-	// If we get here, we've exhausted our retries
-	return dberrors.NewDatabaseError(fmt.Sprintf("transaction failed after %d retries", config.MaxRetries), "retry", "PostgreSQL", lastErr)
+	// Use the retry package to execute the function with retries
+	err := retry.DoWithOptions(ctx, retryFn, retryOpts, IsTransientError, options)
+	if err != nil {
+		// Check if it's already a DatabaseError
+		if dberrors.IsDatabaseError(err) {
+			return err
+		}
+		// Wrap other errors
+		return dberrors.NewDatabaseError("transaction failed", "retry", "PostgreSQL", err)
+	}
+
+	return nil
 }
 
 // ExecuteSQLTransaction executes a function within a SQL transaction.
@@ -424,39 +412,28 @@ func ExecuteSQLTransaction(ctx context.Context, db *sql.DB, fn func(tx *sql.Tx) 
 		config = retryConfig[0]
 	}
 
-	var lastErr error
-	for attempt := 0; attempt <= config.MaxRetries; attempt++ {
-		// If this is a retry, wait with exponential backoff
-		if attempt > 0 {
-			backoff := time.Duration(float64(config.InitialBackoff) * float64(attempt))
-			if backoff > config.MaxBackoff {
-				backoff = config.MaxBackoff
-			}
+	// Convert db RetryConfig to retry.Config
+	retryOpts := retry.DefaultConfig().
+		WithMaxRetries(config.MaxRetries).
+		WithInitialBackoff(config.InitialBackoff).
+		WithMaxBackoff(config.MaxBackoff).
+		WithBackoffFactor(config.BackoffFactor)
 
-			config.Logger.Debug(ctx, "Retrying database transaction",
-				zap.Int("attempt", attempt),
-				zap.Duration("backoff", backoff),
-				zap.Error(lastErr))
+	// Create retry options with the logger
+	options := retry.Options{
+		Logger: config.Logger,
+		Tracer: retry.NewNoopTracer(), // Use no-op tracer by default
+	}
 
-			select {
-			case <-ctx.Done():
-				return dberrors.NewDatabaseError("context canceled during transaction retry", "retry", "SQL", ctx.Err())
-			case <-time.After(backoff):
-				// Continue with retry
-			}
-		}
-
+	// Create a function that will be retried
+	retryFn := func(ctx context.Context) error {
 		// Create a context with timeout for the transaction
 		txCtx, cancel := context.WithTimeout(ctx, DefaultTimeout)
+		defer cancel()
 
 		// Begin transaction
 		tx, err := db.BeginTx(txCtx, nil)
 		if err != nil {
-			cancel()
-			lastErr = err
-			if IsTransientError(err) {
-				continue // Retry if this is a transient error
-			}
 			return dberrors.NewDatabaseError("failed to begin transaction", "begin", "SQL", err)
 		}
 
@@ -465,28 +442,17 @@ func ExecuteSQLTransaction(ctx context.Context, db *sql.DB, fn func(tx *sql.Tx) 
 		if err != nil {
 			// Rollback transaction
 			rollbackErr := tx.Rollback()
-			cancel()
 
 			if rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
 				config.Logger.Warn(ctx, "Failed to rollback transaction", zap.Error(rollbackErr))
 			}
 
-			lastErr = err
-			if IsTransientError(err) {
-				continue // Retry if this is a transient error
-			}
 			return dberrors.NewDatabaseError("transaction function failed", "execute", "SQL", err)
 		}
 
 		// Commit transaction
 		err = tx.Commit()
-		cancel()
-
 		if err != nil {
-			lastErr = err
-			if IsTransientError(err) {
-				continue // Retry if this is a transient error
-			}
 			return dberrors.NewDatabaseError("failed to commit transaction", "commit", "SQL", err)
 		}
 
@@ -494,6 +460,16 @@ func ExecuteSQLTransaction(ctx context.Context, db *sql.DB, fn func(tx *sql.Tx) 
 		return nil
 	}
 
-	// If we get here, we've exhausted our retries
-	return dberrors.NewDatabaseError(fmt.Sprintf("transaction failed after %d retries", config.MaxRetries), "retry", "SQL", lastErr)
+	// Use the retry package to execute the function with retries
+	err := retry.DoWithOptions(ctx, retryFn, retryOpts, IsTransientError, options)
+	if err != nil {
+		// Check if it's already a DatabaseError
+		if dberrors.IsDatabaseError(err) {
+			return err
+		}
+		// Wrap other errors
+		return dberrors.NewDatabaseError("transaction failed", "retry", "SQL", err)
+	}
+
+	return nil
 }
