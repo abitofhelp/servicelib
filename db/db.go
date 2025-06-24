@@ -13,6 +13,7 @@ import (
 	dberrors "github.com/abitofhelp/servicelib/errors"
 	"github.com/abitofhelp/servicelib/logging"
 	"github.com/abitofhelp/servicelib/retry"
+	"github.com/abitofhelp/servicelib/telemetry"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -342,7 +343,7 @@ func ExecutePostgresTransaction(ctx context.Context, pool *pgxpool.Pool, fn func
 	// Create retry options with the logger
 	options := retry.Options{
 		Logger: config.Logger,
-		Tracer: retry.NewNoopTracer(), // Use no-op tracer by default
+		Tracer: telemetry.NewNoopTracer(), // Use no-op tracer by default
 	}
 
 	// Create a function that will be retried
@@ -422,7 +423,7 @@ func ExecuteSQLTransaction(ctx context.Context, db *sql.DB, fn func(tx *sql.Tx) 
 	// Create retry options with the logger
 	options := retry.Options{
 		Logger: config.Logger,
-		Tracer: retry.NewNoopTracer(), // Use no-op tracer by default
+		Tracer: telemetry.NewNoopTracer(), // Use no-op tracer by default
 	}
 
 	// Create a function that will be retried

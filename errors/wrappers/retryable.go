@@ -6,7 +6,10 @@ import (
 	"fmt"
 )
 
-// RetryableError wraps an error with retryable context
+// RetryableError wraps an error with retryable context.
+// This error type is used to indicate that an error should be retried by external systems.
+// It is different from RetryError in the infra package, which is used internally by the retry package
+// to indicate that all retry attempts have been exhausted.
 type RetryableError struct {
 	Original error
 	Attempts int

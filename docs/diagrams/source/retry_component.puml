@@ -1,0 +1,103 @@
+@startuml retry_component
+
+skinparam componentStyle uml2
+skinparam component {
+  BackgroundColor White
+  BorderColor Black
+  ArrowColor Black
+}
+
+package "retry" as retry {
+  class "RetryableFunc" as RetryableFunc {
+    +func(ctx context.Context) error
+  }
+
+  class "IsRetryableError" as IsRetryableError {
+    +func(err error) bool
+  }
+
+  class "Config" as Config {
+    +MaxRetries: int
+    +InitialBackoff: time.Duration
+    +MaxBackoff: time.Duration
+    +BackoffFactor: float64
+    +JitterFactor: float64
+    +RetryableErrors: []error
+    +WithMaxRetries(maxRetries int): Config
+    +WithInitialBackoff(initialBackoff time.Duration): Config
+    +WithMaxBackoff(maxBackoff time.Duration): Config
+    +WithBackoffFactor(backoffFactor float64): Config
+    +WithJitterFactor(jitterFactor float64): Config
+    +WithRetryableErrors(retryableErrors []error): Config
+  }
+
+  class "Options" as Options {
+    +Logger: *logging.ContextLogger
+    +Tracer: telemetry.Tracer
+    +WithOtelTracer(tracer trace.Tracer): Options
+  }
+
+  note right of Options
+    Provides additional options for retry operations
+    including logging and tracing capabilities
+  end note
+
+  note right of Config
+    Configures retry behavior with
+    backoff and jitter parameters
+  end note
+
+  class "Functions" as Functions {
+    +DefaultConfig(): Config
+    +DefaultOptions(): Options
+    +Do(ctx context.Context, fn RetryableFunc, config Config, isRetryable IsRetryableError): error
+    +DoWithOptions(ctx context.Context, fn RetryableFunc, config Config, isRetryable IsRetryableError, options Options): error
+    +IsNetworkError(err error): bool [Deprecated]
+    +IsTimeoutError(err error): bool [Deprecated]
+    +IsTransientError(err error): bool [Deprecated]
+  }
+
+  note right of Functions
+    Core functions for executing operations with retry logic
+    and helper functions for error detection
+  end note
+}
+
+package "errors" as errors {
+  class "RetryError" as RetryError {
+    +Attempts: int
+    +MaxAttempts: int
+    +IsRetryError(): bool
+  }
+}
+
+package "logging" as logging {
+  class "ContextLogger" as ContextLogger {
+  }
+}
+
+package "telemetry" as telemetry {
+  interface "Tracer" as Tracer {
+    +Start(ctx context.Context, spanName string): (context.Context, Span)
+  }
+
+  interface "Span" as Span {
+    +End()
+    +SetAttributes(attributes ...attribute.KeyValue)
+    +RecordError(err error)
+  }
+}
+
+' Relationships
+retry --> errors : uses
+retry --> logging : uses
+retry --> telemetry : uses
+Functions ..> RetryableFunc : uses
+Functions ..> IsRetryableError : uses
+Functions ..> Config : uses
+Functions ..> Options : uses
+Functions ..> RetryError : creates
+Options ..> ContextLogger : references
+Options ..> Tracer : references
+
+@enduml

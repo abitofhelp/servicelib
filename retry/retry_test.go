@@ -10,6 +10,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	serviceErrors "github.com/abitofhelp/servicelib/errors"
+	"github.com/abitofhelp/servicelib/logging"
+	"github.com/abitofhelp/servicelib/telemetry"
 )
 
 func TestDefaultConfig(t *testing.T) {
@@ -208,7 +210,7 @@ func TestDoBackoffAndJitter(t *testing.T) {
 
 		// For the last attempt, check that backoff doesn't exceed max
 		if i == len(startTimes)-1 {
-			maxWithJitter := config.MaxBackoff + time.Duration(float64(config.MaxBackoff)*config.JitterFactor)
+			maxWithJitter := time.Duration(float64(config.MaxBackoff) * (1 + config.JitterFactor))
 			assert.True(t, elapsed <= maxWithJitter,
 				"Last backoff should not exceed max backoff plus jitter")
 		}
@@ -216,37 +218,35 @@ func TestDoBackoffAndJitter(t *testing.T) {
 }
 
 func TestIsNetworkError(t *testing.T) {
+	// Test that the deprecated IsNetworkError function correctly delegates to errors.IsNetworkError
 	testCases := []struct {
-		name     string
-		err      error
-		expected bool
+		name string
+		err  error
 	}{
 		{
-			name:     "nil error",
-			err:      nil,
-			expected: false,
+			name: "nil error",
+			err:  nil,
 		},
 		{
-			name:     "connection refused error",
-			err:      errors.New("connection refused"),
-			expected: true,
+			name: "connection refused error",
+			err:  errors.New("connection refused"),
 		},
 		{
-			name:     "connection reset error",
-			err:      errors.New("connection reset by peer"),
-			expected: true,
+			name: "connection reset error",
+			err:  errors.New("connection reset by peer"),
 		},
 		{
-			name:     "non-network error",
-			err:      errors.New("some other error"),
-			expected: false,
+			name: "non-network error",
+			err:  errors.New("some other error"),
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			// Verify that the deprecated function returns the same result as the errors package function
+			expected := serviceErrors.IsNetworkError(tc.err)
 			result := IsNetworkError(tc.err)
-			assert.Equal(t, tc.expected, result)
+			assert.Equal(t, expected, result, "IsNetworkError should delegate to errors.IsNetworkError")
 		})
 	}
 }
@@ -326,4 +326,108 @@ func TestIsTransientError(t *testing.T) {
 			assert.Equal(t, tc.expected, result)
 		})
 	}
+}
+
+func TestDeprecatedErrorFunctions(t *testing.T) {
+	// Test that the deprecated error detection functions correctly delegate to the errors package functions
+	testCases := []struct {
+		name string
+		err  error
+	}{
+		{
+			name: "nil error",
+			err:  nil,
+		},
+		{
+			name: "network error",
+			err:  errors.New("connection refused"),
+		},
+		{
+			name: "timeout error",
+			err:  errors.New("operation timed out"),
+		},
+		{
+			name: "context deadline exceeded",
+			err:  context.DeadlineExceeded,
+		},
+		{
+			name: "transient error",
+			err:  errors.New("rate limit exceeded"),
+		},
+		{
+			name: "non-special error",
+			err:  errors.New("some other error"),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// Test IsNetworkError
+			expected := serviceErrors.IsNetworkError(tc.err)
+			result := IsNetworkError(tc.err)
+			assert.Equal(t, expected, result, "IsNetworkError should delegate to serviceErrors.IsNetworkError")
+
+			// Test IsTimeoutError
+			expected = serviceErrors.IsTimeout(tc.err)
+			result = IsTimeoutError(tc.err)
+			assert.Equal(t, expected, result, "IsTimeoutError should delegate to serviceErrors.IsTimeout")
+
+			// Test IsTransientError
+			expected = serviceErrors.IsTransientError(tc.err)
+			result = IsTransientError(tc.err)
+			assert.Equal(t, expected, result, "IsTransientError should delegate to serviceErrors.IsTransientError")
+		})
+	}
+}
+
+func TestDoWithOptionsCustomLoggerAndTracer(t *testing.T) {
+	ctx := context.Background()
+	config := DefaultConfig()
+
+	// Create a custom logger
+	logger := logging.NewContextLogger(nil) // Using nil will create a no-op logger
+
+	// Create a custom tracer (using no-op tracer for testing)
+	tracer := telemetry.NewNoopTracer()
+
+	// Create options with custom logger and tracer
+	options := Options{
+		Logger: logger,
+		Tracer: tracer,
+	}
+
+	// Function that succeeds on first attempt
+	fn := func(ctx context.Context) error {
+		return nil
+	}
+
+	// Execute with custom options
+	err := DoWithOptions(ctx, fn, config, nil, options)
+	assert.NoError(t, err)
+
+	// Test with a function that fails
+	attempts := 0
+	maxAttempts := 2
+
+	// Function that succeeds after maxAttempts attempts
+	fnWithRetries := func(ctx context.Context) error {
+		attempts++
+		if attempts <= maxAttempts {
+			return errors.New("temporary error")
+		}
+		return nil
+	}
+
+	// Always retry
+	isRetryable := func(err error) bool {
+		return true
+	}
+
+	// Reset attempts counter
+	attempts = 0
+
+	// Execute with custom options
+	err = DoWithOptions(ctx, fnWithRetries, config, isRetryable, options)
+	assert.NoError(t, err)
+	assert.Equal(t, maxAttempts+1, attempts)
 }

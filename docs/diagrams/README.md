@@ -18,6 +18,7 @@ The following diagrams can be generated from the source files in the `source` di
 - **Dependency Injection Component** - Shows the structure of the dependency injection component
 - **Health Check Component** - Shows the structure of the health check component
 - **Error Handling Component** - Shows the structure of the error handling system, including the relationships between different error types
+- **Retry Component** - Shows the structure of the retry package, including its configuration options and relationships with other components
 
 ## Diagram Formats
 
@@ -49,6 +50,7 @@ For convenience, here are links to view each diagram directly in the PlantUML On
 - [Dependency Injection Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/docs/diagrams/source/di_component.puml)
 - [Health Check Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/docs/diagrams/source/health_component.puml)
 - [Error Handling Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/docs/diagrams/source/errors_component.puml)
+- [Retry Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/docs/diagrams/source/retry_component.puml)
 
 ### SVG Files
 
@@ -60,6 +62,7 @@ You can view the SVG files for each diagram directly:
 - [Dependency Injection Component](svg/di_component.svg)
 - [Health Check Component](svg/health_component.svg)
 - [Error Handling Component](svg/errors_component.svg)
+- [Retry Component](svg/retry_component.svg)
 
 ### Source Files
 
@@ -72,6 +75,7 @@ You can view the source files for each diagram directly:
 - [Dependency Injection Component](source/di_component.puml)
 - [Health Check Component](source/health_component.puml)
 - [Error Handling Component](source/errors_component.puml)
+- [Retry Component](source/retry_component.puml)
 
 ## Relationship to Code
 
@@ -88,6 +92,8 @@ The UML diagrams provide visual representations of the ServiceLib architecture a
 - **Health Check Component**: Shows the internal structure of the `health` package, including how health checks are registered, managed, and exposed via HTTP endpoints.
 
 - **Error Handling Component**: Shows the internal structure of the `errors` package, including the hierarchy of error types (BaseError, DomainError, ApplicationError, InfrastructureError) and their relationships. This helps developers understand how to use the error handling system and how different error types relate to each other.
+
+- **Retry Component**: Shows the internal structure of the `retry` package, including the configuration options, function types, and relationships with other packages like errors, logging, and telemetry. This helps developers understand how to use the retry functionality and how it integrates with other components in the system.
 
 ## Generating Diagrams
 

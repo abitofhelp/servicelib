@@ -28,6 +28,9 @@ func (e *InfrastructureError) IsInfrastructureError() bool {
 
 // RetryError represents an error that occurred during a retry operation.
 // It extends InfrastructureError with retry-specific information.
+// This error type is used internally by the retry package to indicate that all retry attempts
+// have been exhausted. It is different from RetryableError in the wrappers package, which is
+// used to indicate that an error should be retried by external systems.
 type RetryError struct {
 	*InfrastructureError
 	Attempts    int `json:"attempts,omitempty"`

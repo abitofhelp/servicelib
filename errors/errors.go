@@ -6,6 +6,9 @@
 package errors
 
 import (
+	"context"
+	"strings"
+
 	"github.com/abitofhelp/servicelib/errors/app"
 	"github.com/abitofhelp/servicelib/errors/core"
 	"github.com/abitofhelp/servicelib/errors/domain"
@@ -275,8 +278,48 @@ func IsDatabaseError(err error) bool {
 }
 
 func IsNetworkError(err error) bool {
-	var e *NetworkError
-	return As(err, &e)
+	if err == nil {
+		return false
+	}
+
+	// Check if the error is a known network error type from our errors package
+	var networkErr *NetworkError
+	if As(err, &networkErr) {
+		return true
+	}
+
+	// Check if the error implements net.Error interface with Timeout() or Temporary() methods
+	if netErr, ok := err.(interface {
+		Timeout() bool
+		Temporary() bool
+	}); ok {
+		return netErr.Temporary() || netErr.Timeout()
+	}
+
+	// Check if the error is a timeout error
+	if IsTimeout(err) {
+		return true
+	}
+
+	// Fall back to string matching for errors that don't implement specific interfaces
+	// This is less reliable but provides backward compatibility
+	errMsg := err.Error()
+	networkErrorStrings := []string{
+		"connection refused",
+		"connection reset",
+		"connection closed",
+		"no route to host",
+		"network is unreachable",
+		"broken pipe",
+	}
+
+	for _, s := range networkErrorStrings {
+		if strings.Contains(strings.ToLower(errMsg), s) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func IsExternalServiceError(err error) bool {
@@ -370,6 +413,78 @@ func IsTimeout(err error) bool {
 	// Check if the error has a GetCode method and the code is TimeoutCode
 	if e, ok := err.(interface{ GetCode() ErrorCode }); ok {
 		return e.GetCode() == TimeoutCode
+	}
+
+	// Check if the error is a context deadline exceeded error
+	if err == context.DeadlineExceeded {
+		return true
+	}
+
+	// Check if the error implements net.Error interface with Timeout() method
+	if netErr, ok := err.(interface {
+		Timeout() bool
+	}); ok {
+		return netErr.Timeout()
+	}
+
+	// Fall back to string matching for errors that don't implement specific interfaces
+	// This is less reliable but provides backward compatibility
+	errMsg := err.Error()
+	timeoutErrorStrings := []string{
+		"timeout",
+		"timed out",
+		"deadline exceeded",
+	}
+
+	for _, s := range timeoutErrorStrings {
+		if strings.Contains(strings.ToLower(errMsg), s) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// IsTransientError checks if an error is a transient error that may be resolved by retrying.
+func IsTransientError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	// Check if the error is a known transient error type from our errors package
+	// such as RetryError, NetworkError, or ExternalServiceError
+	if IsRetryError(err) || IsNetworkError(err) || IsExternalServiceError(err) {
+		return true
+	}
+
+	// Check if the error is a network error or timeout error
+	if IsNetworkError(err) || IsTimeout(err) {
+		return true
+	}
+
+	// Check if the error implements a Temporary() method (common in Go standard library)
+	if tempErr, ok := err.(interface {
+		Temporary() bool
+	}); ok {
+		return tempErr.Temporary()
+	}
+
+	// Fall back to string matching for errors that don't implement specific interfaces
+	// This is less reliable but provides backward compatibility
+	errMsg := err.Error()
+	transientErrorStrings := []string{
+		"server is busy",
+		"too many requests",
+		"rate limit exceeded",
+		"try again",
+		"temporary",
+		"transient",
+	}
+
+	for _, s := range transientErrorStrings {
+		if strings.Contains(strings.ToLower(errMsg), s) {
+			return true
+		}
 	}
 
 	return false

@@ -8,6 +8,7 @@
 [![codecov](https://codecov.io/gh/abitofhelp/servicelib/graphs/sunburst.svg)](https://codecov.io/gh/abitofhelp/servicelib)
 
 ## Overview
+### Note: The Family-Service repository implements a GraphQL service using ServiceLib. It serves as an excellent illustration of ServiceLib's capabilities and potential.
 
 ServiceLib is a comprehensive Go library designed to accelerate the development of robust, production-ready microservices. It provides a collection of reusable components and utilities that address common challenges in service development, allowing developers to focus on business logic rather than infrastructure concerns.
 
@@ -18,8 +19,6 @@ The library follows modern Go practices and design patterns, with a focus on:
 - **Performance**: Optimized for high-throughput microservices
 - **Reliability**: Built-in error handling and recovery mechanisms
 - **Observability**: Integrated logging, metrics, and tracing
-
-**Note: The Family-Service repository implements a GraphQL service using servicelib. This serves as an excellent illustration of servicelib's capabilities and potential.**
 
 ## Documentation
 
