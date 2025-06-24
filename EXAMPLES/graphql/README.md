@@ -64,6 +64,18 @@ Key concepts:
 - Handling unauthorized access
 - Implementing role-based access control
 
+### 6. Authorization Check Example
+
+[authorization/main.go](authorization/main.go)
+
+Shows how to properly check authorization for GraphQL operations using the servicelib authorization middleware.
+
+Key concepts:
+- Using the CheckAuthorization function
+- Handling authorization errors
+- Logging authorization failures
+- Implementing role and scope-based access control
+
 ## Running the Examples
 
 To run any of the examples, use the `go run` command:

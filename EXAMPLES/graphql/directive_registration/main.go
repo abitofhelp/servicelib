@@ -32,25 +32,4 @@ schema := generated.NewExecutableSchema(generated.Config{
 	// Demonstrate how to use the IsAuthorizedDirective function
 	fmt.Println("\nThe IsAuthorizedDirective function checks if the user has the required roles, scopes, and access to the resource.")
 	fmt.Println("It extracts user information from the context and performs the authorization check.")
-
-	// Example of what happens inside IsAuthorizedDirective (shown as code)
-	// Note: The following string contains example code that references variables and packages
-	// that aren't defined or imported in this file. This is intentional as this is just an example.
-	fmt.Println(`
-	// Example of checking authorization manually
-	ctx := context.Background()
-	allowedRoles := []string{"ADMIN", "EDITOR"}
-	requiredScopes := []string{"READ"}
-	resource := "ITEM"
-
-	err := graphql.CheckAuthorization(ctx, allowedRoles, requiredScopes, resource, "ExampleOperation", logger)
-	if err != nil {
-		// Handle authorization failure
-		fmt.Printf("Authorization failed: %v\n", err)
-		return nil, err
-	}
-
-	// Proceed with the operation if authorized
-	return next(ctx)
-	`)
 }
