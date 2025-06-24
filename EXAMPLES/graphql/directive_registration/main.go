@@ -17,6 +17,8 @@ func main() {
 	fmt.Println("Example: Registering @isAuthorized directive in GraphQL server")
 
 	// This is a simplified representation of what the generated code would look like
+	// Note: The following string contains example code that references variables and packages
+	// that aren't defined or imported in this file. This is intentional as this is just an example.
 	fmt.Println(`
 schema := generated.NewExecutableSchema(generated.Config{
     Resolvers: resolverInstance,
@@ -32,6 +34,8 @@ schema := generated.NewExecutableSchema(generated.Config{
 	fmt.Println("It extracts user information from the context and performs the authorization check.")
 
 	// Example of what happens inside IsAuthorizedDirective (shown as code)
+	// Note: The following string contains example code that references variables and packages
+	// that aren't defined or imported in this file. This is intentional as this is just an example.
 	fmt.Println(`
 	// Example of checking authorization manually
 	ctx := context.Background()
