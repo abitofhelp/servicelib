@@ -42,7 +42,7 @@ schema := generated.NewExecutableSchema(generated.Config{
 	err := graphql.CheckAuthorization(ctx, allowedRoles, requiredScopes, resource, "ExampleOperation", logger)
 	if err != nil {
 		// Handle authorization failure
-		fmt.Printf("Authorization failed: %%v\n", err)
+		fmt.Printf("Authorization failed: %v\n", err)
 		return nil, err
 	}
 
