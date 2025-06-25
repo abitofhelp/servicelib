@@ -55,7 +55,7 @@ TOOLS_BIN_DIR=$(TOOLS_DIR)/bin
 GOIMPORTS=$(TOOLS_BIN_DIR)/goimports
 GOFUMPT=$(TOOLS_BIN_DIR)/gofumpt
 
-.PHONY: all build build-darwin-amd64 build-darwin-arm64 build-windows-amd64 build-linux-amd64 build-linux-arm64 build-all clean test test-integration test-all test-package coverage coverage-integration coverage-package lint fmt vet tidy vendor generate generate-package security bench bench-package help check-go-version tools docs serve-docs ci pre-commit update-deps release
+.PHONY: all build build-darwin-amd64 build-darwin-arm64 build-windows-amd64 build-linux-amd64 build-linux-arm64 build-all clean test test-integration test-all test-package coverage coverage-integration coverage-package lint fmt vet tidy vendor generate generate-package security bench bench-package help check-go-version tools docs serve-docs ci pre-commit update-deps release validate-readme
 
 # ==================================================================================
 # Main targets
@@ -233,8 +233,16 @@ vet:
 	$(GOVET) ./...
 
 # Run all code quality checks
-quality: fmt vet lint security
+quality: fmt vet lint security validate-readme
 	@echo "All code quality checks passed!"
+
+# Validate README.md files against the template structure
+validate-readme:
+	@echo "Validating README.md files against template structure..."
+	@mkdir -p $(TOOLS_DIR)/readme_validator
+	@echo "Building README validator..."
+	@$(GOBUILD) -o $(TOOLS_DIR)/readme_validator/main ./tools/readme_validator
+	@$(TOOLS_DIR)/readme_validator/main
 
 # ==================================================================================
 # Dependency management targets
@@ -333,7 +341,7 @@ serve-docs:
 # ==================================================================================
 
 # CI target for continuous integration
-ci: check-go-version tidy lint test-all
+ci: check-go-version tidy lint validate-readme test-all
 
 # Pre-commit hook
 pre-commit: fmt vet lint security test
@@ -390,6 +398,7 @@ help:
 	@echo "  generate           - Generate mocks using go:generate"
 	@echo "  generate-package   - Generate mocks for a specific package (PACKAGE=./path/to/package)"
 	@echo "  security           - Check for security vulnerabilities"
+	@echo "  validate-readme    - Validate README.md files against the template structure"
 	@echo "  bench              - Run benchmarks"
 	@echo "  bench-package      - Run benchmarks for a specific package (PACKAGE=./path/to/package)"
 	@echo "  docs               - Generate documentation"

@@ -4,6 +4,7 @@
 
 The `validation` package provides utilities for validating data in Go applications. It offers a structured way to perform validations, collect validation errors, and report them in a consistent format. This package is useful for validating user input, request data, or any other data that needs to conform to certain rules or constraints.
 
+
 ## Features
 
 - **Structured Validation**: Collect and report validation errors in a structured way
@@ -13,21 +14,26 @@ The `validation` package provides utilities for validating data in Go applicatio
 - **Field-Level Validation**: Validate individual fields with specific error messages
 - **Collection Validation**: Validate all items in a collection
 
+
 ## Installation
 
 ```bash
 go get github.com/abitofhelp/servicelib/validation
 ```
 
+
 ## Quick Start
 
-See the [Basic Validation Example](../examples/validation/basic_validation_example.go) for a complete, runnable example of how to use the validation package.
+See the [Basic Validation Example](../EXAMPLES/validation/basic_validation_example.go) for a complete, runnable example of how to use the validation package.
+
 
 ## Configuration
 
 The validation package does not require any specific configuration. It can be used directly without any setup.
 
+
 ## API Documentation
+
 
 ### Core Types
 
@@ -35,11 +41,12 @@ The validation package does not require any specific configuration. It can be us
 
 The `ValidationResult` struct is the main entry point for the validation package. It provides methods for collecting and reporting validation errors.
 
-See the [Basic Validation Example](../examples/validation/basic_validation_example.go) for a complete, runnable example of how to use the ValidationResult struct.
+See the [Basic Validation Example](../EXAMPLES/validation/basic_validation_example.go) for a complete, runnable example of how to use the ValidationResult struct.
 
 #### ValidationError
 
 The `ValidationError` struct represents a validation error with a message and a field name.
+
 
 ### Key Methods
 
@@ -73,16 +80,18 @@ The validation package provides several common validators:
 - `AllTrue`: Validates that all items in a collection satisfy a condition
 - `ValidateAll`: Validates all items in a collection
 
-See the [Date Validation Example](../examples/validation/date_validation_example.go) for a complete, runnable example of how to use date validators.
+See the [Date Validation Example](../EXAMPLES/validation/date_validation_example.go) for a complete, runnable example of how to use date validators.
+
 
 ## Examples
 
 For complete, runnable examples, see the following files in the examples directory:
 
-- [Basic Validation Example](../examples/validation/basic_validation_example.go) - Shows how to use basic validators
-- [Collection Validation Example](../examples/validation/collection_validation_example.go) - Shows how to validate collections
-- [Custom Validation Example](../examples/validation/custom_validation_example.go) - Shows how to create custom validators
-- [Date Validation Example](../examples/validation/date_validation_example.go) - Shows how to validate dates
+- [Basic Validation Example](../EXAMPLES/validation/basic_validation_example.go) - Shows how to use basic validators
+- [Collection Validation Example](../EXAMPLES/validation/collection_validation_example.go) - Shows how to validate collections
+- [Custom Validation Example](../EXAMPLES/validation/custom_validation_example.go) - Shows how to create custom validators
+- [Date Validation Example](../EXAMPLES/validation/date_validation_example.go) - Shows how to validate dates
+
 
 ## Best Practices
 
@@ -96,7 +105,8 @@ For complete, runnable examples, see the following files in the examples directo
 
 5. **Return Early for Critical Validations**: For performance reasons, return early if critical validations fail.
 
-See the [Custom Validation Example](../examples/validation/custom_validation_example.go) for a complete, runnable example of how to implement these best practices.
+See the [Custom Validation Example](../EXAMPLES/validation/custom_validation_example.go) for a complete, runnable example of how to implement these best practices.
+
 
 ## Troubleshooting
 
@@ -120,15 +130,18 @@ See the [Custom Validation Example](../examples/validation/custom_validation_exa
 
 **Solution**: Consider validating only a subset of the collection or implementing pagination. For critical validations, return early if they fail.
 
+
 ## Related Components
 
 - [Errors](../errors/README.md) - The errors component is used by the validation package for error handling.
 - [Context](../context/README.md) - The context component can be used with the validation package for context-aware validation.
 - [Logging](../logging/README.md) - The logging component can be used with the validation package for logging validation errors.
 
+
 ## Contributing
 
 Contributions to this component are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
+
 
 ## License
 

@@ -1,0 +1,57 @@
+@startuml GraphQL Component
+
+skinparam componentStyle uml2
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+  ArrowColor Black
+}
+
+package "GraphQL" {
+  class "ServerConfig" as ServerConfig {
+    + MaxQueryDepth: int
+    + MaxQueryComplexity: int
+    + RequestTimeout: time.Duration
+  }
+
+  class "Server" as Server {
+    + NewServer(schema, logger, cfg): *handler.Server
+    + createAroundOperationsFunc(logger, requestTimeout): graphql.AroundOperations
+  }
+
+  class "Directives" as Directives {
+    + IsAuthorizedDirective(ctx, obj, next, allowedRoles, requiredScopes, resourceType, resourceID): interface{}
+    + CheckAuthorization(ctx, allowedRoles, requiredScopes, resourceType, resourceID): error
+    + ConvertRolesToStrings[T](roles): []string
+  }
+
+  class "ErrorHandling" as ErrorHandling {
+    + HandleError(ctx, err, operation, logger): error
+  }
+
+  class "Metrics" as Metrics {
+    + AuthorizationCheckDuration: prometheus.Histogram
+    + AuthorizationFailures: prometheus.Counter
+  }
+
+  class "GraphQL Functions" as GraphQLFunctions {
+    + NewDefaultServerConfig(): ServerConfig
+    + DefaultServerConfig(): ServerConfig
+  }
+}
+
+Server --> ServerConfig: uses
+Server --> ErrorHandling: uses
+Directives --> Metrics: uses
+GraphQLFunctions --> ServerConfig: creates
+
+note right of Server
+  The graphql package provides utilities for working with GraphQL 
+  in Go services, including server configuration, error handling, 
+  authorization directives, and performance monitoring.
+  
+  It integrates with the 99designs/gqlgen library to provide 
+  a robust foundation for building GraphQL APIs.
+end note
+
+@enduml

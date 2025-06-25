@@ -1,6 +1,10 @@
 # Signal Module
-
 The Signal Module provides utilities for handling OS signals and implementing graceful shutdown in Go applications. It helps applications respond to termination signals and execute cleanup operations before exiting.
+
+
+## Overview
+
+Brief description of the signal and its purpose in the ServiceLib library.
 
 ## Features
 
@@ -12,15 +16,22 @@ The Signal Module provides utilities for handling OS signals and implementing gr
 - **Multiple Signal Handling**: Handle multiple signals with forced exit on second signal
 - **Logging Integration**: Comprehensive logging of shutdown events
 
+
 ## Installation
 
 ```bash
 go get github.com/abitofhelp/servicelib/signal
 ```
 
+
 ## Quick Start
 
-See the [Basic Signal Handling example](../examples/signal/basic_signal_handling_example.go) for a complete, runnable example of how to use the Signal module.
+See the [Basic Signal Handling example](../EXAMPLES/signal/basic_signal_handling_example.go) for a complete, runnable example of how to use the Signal module.
+
+
+## Configuration
+
+See the [Configuration example](../EXAMPLES/signal/configuration_example.go) for a complete, runnable example of how to configure the signal.
 
 ## API Documentation
 
@@ -30,7 +41,7 @@ The `WaitForShutdown` function blocks until a shutdown signal is received and re
 
 #### Basic Usage
 
-See the [Basic Signal Handling example](../examples/signal/basic_signal_handling_example.go) for a complete, runnable example of how to implement basic signal handling.
+See the [Basic Signal Handling example](../EXAMPLES/signal/basic_signal_handling_example.go) for a complete, runnable example of how to implement basic signal handling.
 
 ### Shutdown Callbacks
 
@@ -38,7 +49,7 @@ The `SetupSignalHandler` function sets up a signal handler for graceful shutdown
 
 #### Using Shutdown Callbacks
 
-See the [Shutdown Callbacks example](../examples/signal/shutdown_callbacks_example.go) for a complete, runnable example of how to use shutdown callbacks.
+See the [Shutdown Callbacks example](../EXAMPLES/signal/shutdown_callbacks_example.go) for a complete, runnable example of how to use shutdown callbacks.
 
 ### Manual Cancellation
 
@@ -46,7 +57,36 @@ The `HandleShutdown` method of the `GracefulShutdown` struct handles graceful sh
 
 #### Manual Cancellation Example
 
-See the [Manual Cancellation example](../examples/signal/manual_cancellation_example.go) for a complete, runnable example of how to implement manual cancellation.
+See the [Manual Cancellation example](../EXAMPLES/signal/manual_cancellation_example.go) for a complete, runnable example of how to implement manual cancellation.
+
+
+### Core Types
+
+Description of the main types provided by the signal.
+
+#### Type 1
+
+Description of Type 1 and its purpose.
+
+See the [Type 1 example](../EXAMPLES/signal/type1_example.go) for a complete, runnable example of how to use Type 1.
+
+### Key Methods
+
+Description of the key methods provided by the signal.
+
+#### Method 1
+
+Description of Method 1 and its purpose.
+
+See the [Method 1 example](../EXAMPLES/signal/method1_example.go) for a complete, runnable example of how to use Method 1.
+
+## Examples
+
+For complete, runnable examples, see the following files in the EXAMPLES directory:
+
+- [Basic Usage](../EXAMPLES/signal/basic_usage_example.go) - Shows basic usage of the signal
+- [Advanced Configuration](../EXAMPLES/signal/advanced_configuration_example.go) - Shows advanced configuration options
+- [Error Handling](../EXAMPLES/signal/error_handling_example.go) - Shows how to handle errors
 
 ## Best Practices
 
@@ -78,6 +118,28 @@ The `signal` package is similar to the `shutdown` package but offers a different
 - **More Flexible**: Allows for more customization of shutdown behavior
 
 Choose the `signal` package when you need more control over the shutdown process or when you have multiple independent resources to shut down concurrently.
+
+
+## Troubleshooting
+
+### Common Issues
+
+#### Issue 1
+
+Description of issue 1 and how to resolve it.
+
+#### Issue 2
+
+Description of issue 2 and how to resolve it.
+
+## Related Components
+
+- [Component 1](../signal1/README.md) - Description of how this signal relates to Component 1
+- [Component 2](../signal2/README.md) - Description of how this signal relates to Component 2
+
+## Contributing
+
+Contributions to this signal are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
 
 ## License
 

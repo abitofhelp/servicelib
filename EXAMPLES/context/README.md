@@ -6,7 +6,7 @@ This directory contains examples demonstrating how to use the `context` package,
 
 ### 1. Basic Usage Example
 
-[basic_usage_example.go](basic_usage_example.go)
+[basic_usage/main.go](basic_usage/main.go)
 
 Demonstrates basic usage of the context package.
 
@@ -18,7 +18,7 @@ Key concepts:
 
 ### 2. Timeout Example
 
-[timeout_example.go](timeout_example.go)
+[timeout/main.go](timeout/main.go)
 
 Shows how to use different timeout functions provided by the context package.
 
@@ -30,7 +30,7 @@ Key concepts:
 
 ### 3. Value Propagation Example
 
-[value_propagation_example.go](value_propagation_example.go)
+[value_propagation/main.go](value_propagation/main.go)
 
 Demonstrates how to add and retrieve values from contexts.
 
@@ -59,7 +59,7 @@ Key concepts:
 To run any of the examples, use the `go run` command:
 
 ```bash
-go run examples/context/basic_usage_example.go
+go run basic_usage/main.go
 ```
 
 ## Key Features of the Context Package

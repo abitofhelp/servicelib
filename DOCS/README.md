@@ -16,7 +16,7 @@ The ServiceLib documentation is organized into several key sections to help you 
 
 - **[API Reference](https://pkg.go.dev/github.com/abitofhelp/servicelib)** - Generated API documentation from Go doc comments, providing function signatures, type definitions, package documentation, and usage examples.
 
-- **[Examples](../examples/README.md)** - Example applications using ServiceLib, organized by component, including a quickstart example for new users, component-specific examples, advanced usage patterns, and integration examples.
+- **[Examples](../EXAMPLES/README.md)** - Example applications using ServiceLib, organized by component, including a quickstart example for new users, component-specific examples, advanced usage patterns, and integration examples.
 
 ### Development & Testing
 
@@ -73,11 +73,11 @@ To get started with ServiceLib, follow these steps:
    go get github.com/abitofhelp/servicelib
    ```
 
-2. Check out the [Quickstart Example](../examples/quickstart_example.go) to see a basic application using ServiceLib.
+2. Check out the [Quickstart Example](../EXAMPLES/quickstart/main.go) to see a basic application using ServiceLib.
 
 3. Review the [Developer Guide](ServiceLib_Developer_Guide.md) for detailed usage instructions and examples.
 
-4. Explore the [Examples](../examples/) directory for component-specific examples.
+4. Explore the [Examples](../EXAMPLES/) directory for component-specific examples.
 
 5. For testing your implementation, refer to the [Integration Tests](Integration_Tests.md) documentation.
 

@@ -21,11 +21,11 @@ go get github.com/abitofhelp/servicelib/transaction
 
 ## Quick Start
 
-See the [Basic Saga Example](../examples/transaction/basic_saga_example.go) for a complete, runnable example of how to use the transaction package.
+See the [Basic Saga Example](../EXAMPLES/transaction/basic_saga_example/main.go) for a complete, runnable example of how to use the transaction package.
 
 ## Configuration
 
-See the [Custom Transaction Example](../examples/transaction/custom_transaction_example.go) for a complete, runnable example of how to configure the transaction package.
+See the [Custom Transaction Example](../EXAMPLES/transaction/custom_transaction_example/main.go) for a complete, runnable example of how to configure the transaction package.
 
 ## API Documentation
 
@@ -35,7 +35,7 @@ See the [Custom Transaction Example](../examples/transaction/custom_transaction_
 
 The `Transaction` struct is the main entry point for the transaction package. It provides methods for adding operations and executing transactions.
 
-See the [Basic Usage Example](../examples/transaction/basic_usage_example.go) for a complete, runnable example of how to use the Transaction struct.
+See the [Basic Usage Example](../EXAMPLES/transaction/basic_usage_example/main.go) for a complete, runnable example of how to use the Transaction struct.
 
 #### Operation
 
@@ -51,7 +51,7 @@ The `Rollback` type represents a function that undoes the effects of an operatio
 
 The `WithTransaction` function provides a convenient way to execute operations within a transaction.
 
-See the [Basic Saga Example](../examples/transaction/basic_saga_example.go) for a complete, runnable example of how to use the WithTransaction function.
+See the [Basic Saga Example](../EXAMPLES/transaction/basic_saga_example/main.go) for a complete, runnable example of how to use the WithTransaction function.
 
 #### AddOperation
 
@@ -65,18 +65,18 @@ The `Execute` method executes all operations in a transaction and rolls back com
 
 The `CheckedRollback` function creates a rollback operation with error checking and logging.
 
-See the [Error Handling Example](../examples/transaction/error_handling_example.go) for a complete, runnable example of how to use the CheckedRollback function.
+See the [Error Handling Example](../EXAMPLES/transaction/error_handling_example/main.go) for a complete, runnable example of how to use the CheckedRollback function.
 
 ## Examples
 
-For complete, runnable examples, see the following files in the examples directory:
+For complete, runnable examples, see the following files in the EXAMPLES directory:
 
-- [Basic Saga Example](../examples/transaction/basic_saga_example.go) - Shows how to use the WithTransaction function
-- [Basic Usage Example](../examples/transaction/basic_usage_example.go) - Shows how to create and use a Transaction
-- [Context Timeout Example](../examples/transaction/context_timeout_example.go) - Shows how to use context timeouts with transactions
-- [Custom Transaction Example](../examples/transaction/custom_transaction_example.go) - Shows how to create a custom transaction
-- [Error Handling Example](../examples/transaction/error_handling_example.go) - Shows how to handle errors in transactions
-- [Idempotent Operations Example](../examples/transaction/idempotent_operations_example.go) - Shows how to create idempotent operations
+- [Basic Saga Example](../EXAMPLES/transaction/basic_saga_example/main.go) - Shows how to use the WithTransaction function
+- [Basic Usage Example](../EXAMPLES/transaction/basic_usage_example/main.go) - Shows how to create and use a Transaction
+- [Context Timeout Example](../EXAMPLES/transaction/context_timeout_example/main.go) - Shows how to use context timeouts with transactions
+- [Custom Transaction Example](../EXAMPLES/transaction/custom_transaction_example/main.go) - Shows how to create a custom transaction
+- [Error Handling Example](../EXAMPLES/transaction/error_handling_example/main.go) - Shows how to handle errors in transactions
+- [Idempotent Operations Example](../EXAMPLES/transaction/idempotent_operations_example/main.go) - Shows how to create idempotent operations
 
 ## Best Practices
 
@@ -90,7 +90,7 @@ For complete, runnable examples, see the following files in the examples directo
 
 5. **Idempotent Operations**: Design operations and rollbacks to be idempotent when possible.
 
-See the [Idempotent Operations Example](../examples/transaction/idempotent_operations_example.go) for a complete, runnable example of how to create idempotent operations.
+See the [Idempotent Operations Example](../EXAMPLES/transaction/idempotent_operations_example/main.go) for a complete, runnable example of how to create idempotent operations.
 
 ## Troubleshooting
 
@@ -106,7 +106,7 @@ See the [Idempotent Operations Example](../examples/transaction/idempotent_opera
 
 **Issue**: Transactions are not respecting context cancellation or timeouts.
 
-**Solution**: Ensure that all operations check the context for cancellation. See the [Context Timeout Example](../examples/transaction/context_timeout_example.go) for a complete, runnable example.
+**Solution**: Ensure that all operations check the context for cancellation. See the [Context Timeout Example](../EXAMPLES/transaction/context_timeout_example/main.go) for a complete, runnable example.
 
 #### Transaction Coordination
 

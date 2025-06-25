@@ -4,6 +4,7 @@
 
 The `di` package provides a container-based dependency injection system for Go applications. It helps manage dependencies between components, making your code more modular, testable, and maintainable.
 
+
 ## Features
 
 - **Container Types**:
@@ -19,21 +20,26 @@ The `di` package provides a container-based dependency injection system for Go a
   - Structured configuration support
   - Domain-driven design support
 
+
 ## Installation
 
 ```bash
 go get github.com/abitofhelp/servicelib/di
 ```
 
+
 ## Quick Start
 
-See the [Basic Usage Example](../examples/di/basic_usage_example.go) for a complete, runnable example of how to use the di package.
+See the [Basic Usage Example](../EXAMPLES/di/basic_usage_example.go) for a complete, runnable example of how to use the di package.
+
 
 ## Configuration
 
-See the [Service Container Example](../examples/di/service_container_example.go) for a complete, runnable example of how to configure the di package.
+See the [Service Container Example](../EXAMPLES/di/service_container_example.go) for a complete, runnable example of how to configure the di package.
+
 
 ## API Documentation
+
 
 ### Core Types
 
@@ -41,19 +47,20 @@ See the [Service Container Example](../examples/di/service_container_example.go)
 
 The `BaseContainer` is the foundation for all container types. It provides access to common dependencies like context, logger, and configuration.
 
-See the [Basic Usage Example](../examples/di/basic_usage_example.go) for a complete, runnable example of how to use the BaseContainer.
+See the [Basic Usage Example](../EXAMPLES/di/basic_usage_example.go) for a complete, runnable example of how to use the BaseContainer.
 
 #### ServiceContainer
 
 The `ServiceContainer` is designed for domain-driven design applications. It manages repositories, domain services, and application services.
 
-See the [Service Container Example](../examples/di/service_container_example.go) for a complete, runnable example of how to use the ServiceContainer.
+See the [Service Container Example](../EXAMPLES/di/service_container_example.go) for a complete, runnable example of how to use the ServiceContainer.
 
 #### GenericAppContainer
 
 The `GenericAppContainer` provides a flexible container for any application structure. It allows custom initialization of repositories, domain services, and application services.
 
-See the [Generic Container Example](../examples/di/generic_container_example.go) for a complete, runnable example of how to use the GenericAppContainer.
+See the [Generic Container Example](../EXAMPLES/di/generic_container_example.go) for a complete, runnable example of how to use the GenericAppContainer.
+
 
 ### Key Methods
 
@@ -89,13 +96,15 @@ The `NewGenericAppContainer` function creates a new generic application containe
 container, err := di.NewGenericAppContainer(ctx, logger, cfg, connectionString, initRepo, initDomainService, initAppService)
 ```
 
+
 ## Examples
 
 For complete, runnable examples, see the following files in the examples directory:
 
-- [Basic Usage Example](../examples/di/basic_usage_example.go) - Shows basic usage of the Container type
-- [Service Container Example](../examples/di/service_container_example.go) - Shows how to use the ServiceContainer type
-- [Generic Container Example](../examples/di/generic_container_example.go) - Shows how to use the GenericAppContainer type
+- [Basic Usage Example](../EXAMPLES/di/basic_usage_example.go) - Shows basic usage of the Container type
+- [Service Container Example](../EXAMPLES/di/service_container_example.go) - Shows how to use the ServiceContainer type
+- [Generic Container Example](../EXAMPLES/di/generic_container_example.go) - Shows how to use the GenericAppContainer type
+
 
 ## Best Practices
 
@@ -112,6 +121,7 @@ For complete, runnable examples, see the following files in the examples directo
 6. **Error Handling**: Always check for errors when creating containers and initializing dependencies.
 
 7. **Testing**: Use dependency injection to make your code more testable by allowing mock implementations.
+
 
 ## Troubleshooting
 
@@ -135,15 +145,18 @@ For complete, runnable examples, see the following files in the examples directo
 
 **Solution**: Use the correct generic type parameters when creating containers. Ensure that your types implement the required interfaces.
 
+
 ## Related Components
 
 - [Config](../config/README.md) - The config component is used to configure the di package.
 - [Logging](../logging/README.md) - The logging component is used for logging in the di package.
 - [Context](../context/README.md) - The context component is used for context management in the di package.
 
+
 ## Contributing
 
 Contributions to this component are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
+
 
 ## License
 

@@ -1,6 +1,10 @@
 # Health Module
-
 The Health Module provides functionality for implementing health check endpoints in Go applications. It helps you create health check handlers for monitoring the health of your services and their dependencies.
+
+
+## Overview
+
+Brief description of the health and its purpose in the ServiceLib library.
 
 ## Features
 
@@ -12,15 +16,22 @@ The Health Module provides functionality for implementing health check endpoints
 - **Tracing Integration**: OpenTelemetry tracing for all operations
 - **Logging Integration**: Structured logging with zap
 
+
 ## Installation
 
 ```bash
 go get github.com/abitofhelp/servicelib/health
 ```
 
+
 ## Quick Start
 
-See the [Basic Usage example](../examples/health/basic_usage_example.go) for a complete, runnable example of how to use the Health module.
+See the [Basic Usage example](../EXAMPLES/health/basic_usage_example.go) for a complete, runnable example of how to use the Health module.
+
+
+## Configuration
+
+See the [Configuration example](../EXAMPLES/health/configuration_example.go) for a complete, runnable example of how to configure the health.
 
 ## API Documentation
 
@@ -30,11 +41,11 @@ The `NewHandler` function creates a new health check HTTP handler that can be re
 
 #### Creating a Health Handler
 
-See the [Basic Usage example](../examples/health/basic_usage_example.go) for a complete, runnable example of how to create a health handler.
+See the [Basic Usage example](../EXAMPLES/health/basic_usage_example.go) for a complete, runnable example of how to create a health handler.
 
 #### Custom Health Status
 
-See the [Custom Health Status example](../examples/health/custom_health_status_example.go) for a complete, runnable example of how to create a custom health status response.
+See the [Custom Health Status example](../EXAMPLES/health/custom_health_status_example.go) for a complete, runnable example of how to create a custom health status response.
 
 ### Health Status
 
@@ -90,6 +101,62 @@ const (
 4. **Detailed Status**: Provide detailed status information for each dependency to aid in troubleshooting.
 
 5. **Monitoring Integration**: Integrate health checks with your monitoring system.
+
+
+### Core Types
+
+Description of the main types provided by the health.
+
+#### Type 1
+
+Description of Type 1 and its purpose.
+
+See the [Type 1 example](../EXAMPLES/health/type1_example.go) for a complete, runnable example of how to use Type 1.
+
+### Key Methods
+
+Description of the key methods provided by the health.
+
+#### Method 1
+
+Description of Method 1 and its purpose.
+
+See the [Method 1 example](../EXAMPLES/health/method1_example.go) for a complete, runnable example of how to use Method 1.
+
+## Examples
+
+For complete, runnable examples, see the following files in the EXAMPLES directory:
+
+- [Basic Usage](../EXAMPLES/health/basic_usage_example.go) - Shows basic usage of the health
+- [Advanced Configuration](../EXAMPLES/health/advanced_configuration_example.go) - Shows advanced configuration options
+- [Error Handling](../EXAMPLES/health/error_handling_example.go) - Shows how to handle errors
+
+## Best Practices
+
+1. **Best Practice 1**: Description of best practice 1
+2. **Best Practice 2**: Description of best practice 2
+3. **Best Practice 3**: Description of best practice 3
+
+## Troubleshooting
+
+### Common Issues
+
+#### Issue 1
+
+Description of issue 1 and how to resolve it.
+
+#### Issue 2
+
+Description of issue 2 and how to resolve it.
+
+## Related Components
+
+- [Component 1](../health1/README.md) - Description of how this health relates to Component 1
+- [Component 2](../health2/README.md) - Description of how this health relates to Component 2
+
+## Contributing
+
+Contributions to this health are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
 
 ## License
 

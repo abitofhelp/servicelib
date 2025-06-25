@@ -4,6 +4,7 @@
 
 The `context` package extends Go's standard context package with additional utilities for request handling, cancellation, and value propagation. It provides a set of helper functions and types to make working with contexts easier and more type-safe.
 
+
 ## Features
 
 - **Value Management**: Strongly typed context values
@@ -11,21 +12,26 @@ The `context` package extends Go's standard context package with additional util
 - **Cancellation**: Simplified cancellation patterns
 - **Propagation**: Utilities for propagating context values across service boundaries
 
+
 ## Installation
 
 ```bash
 go get github.com/abitofhelp/servicelib/context
 ```
 
+
 ## Quick Start
 
-See the [Basic Usage Example](../examples/context/basic_usage_example.go) for a complete, runnable example of how to use the context package.
+See the [Basic Usage Example](../EXAMPLES/context/basic_usage_example.go) for a complete, runnable example of how to use the context package.
+
 
 ## Configuration
 
 The context package does not require any specific configuration. It can be used directly without any setup.
 
+
 ## API Documentation
+
 
 ### Core Types
 
@@ -33,7 +39,8 @@ The context package does not require any specific configuration. It can be used 
 
 The package provides strongly typed keys for context values to ensure type safety.
 
-See the [Basic Usage Example](../examples/context/basic_usage_example.go) for a complete, runnable example of how to use context keys.
+See the [Basic Usage Example](../EXAMPLES/context/basic_usage_example.go) for a complete, runnable example of how to use context keys.
+
 
 ### Key Methods
 
@@ -41,28 +48,30 @@ See the [Basic Usage Example](../examples/context/basic_usage_example.go) for a 
 
 The package provides methods for setting and getting values from a context.
 
-See the [Value Propagation Example](../examples/context/value_propagation_example.go) for a complete, runnable example of how to use value management methods.
+See the [Value Propagation Example](../EXAMPLES/context/value_propagation_example.go) for a complete, runnable example of how to use value management methods.
 
 #### Timeout Management
 
 The package provides methods for working with context deadlines and timeouts.
 
-See the [Timeout Example](../examples/context/timeout_example.go) for a complete, runnable example of how to use timeout management methods.
+See the [Timeout Example](../EXAMPLES/context/timeout_example.go) for a complete, runnable example of how to use timeout management methods.
 
 #### Error Handling
 
 The package provides methods for handling errors in context operations.
 
-See the [Error Handling Example](../examples/context/error_handling_example.go) for a complete, runnable example of how to handle errors.
+See the [Error Handling Example](../EXAMPLES/context/error_handling_example.go) for a complete, runnable example of how to handle errors.
+
 
 ## Examples
 
 For complete, runnable examples, see the following files in the examples directory:
 
-- [Basic Usage Example](../examples/context/basic_usage_example.go) - Shows basic usage of the context package
-- [Value Propagation Example](../examples/context/value_propagation_example.go) - Shows how to propagate values through a context
-- [Timeout Example](../examples/context/timeout_example.go) - Shows how to use timeouts with context
-- [Error Handling Example](../examples/context/error_handling_example.go) - Shows how to handle errors in context operations
+- [Basic Usage Example](../EXAMPLES/context/basic_usage_example.go) - Shows basic usage of the context package
+- [Value Propagation Example](../EXAMPLES/context/value_propagation_example.go) - Shows how to propagate values through a context
+- [Timeout Example](../EXAMPLES/context/timeout_example.go) - Shows how to use timeouts with context
+- [Error Handling Example](../EXAMPLES/context/error_handling_example.go) - Shows how to handle errors in context operations
+
 
 ## Best Practices
 
@@ -75,6 +84,7 @@ For complete, runnable examples, see the following files in the examples directo
 4. **Timeout Management**: Set appropriate timeouts for operations to prevent hanging requests.
 
 5. **Value Scope**: Context values should be request-scoped and not used for passing optional parameters to functions.
+
 
 ## Troubleshooting
 
@@ -98,6 +108,7 @@ For complete, runnable examples, see the following files in the examples directo
 
 **Solution**: Ensure that you're checking `ctx.Err()` regularly in long-running operations. Use `select` statements with `ctx.Done()` to abort operations when the context is cancelled or times out.
 
+
 ## Related Components
 
 - [Logging](../logging/README.md) - The logging component uses context for request-scoped logging.
@@ -105,9 +116,11 @@ For complete, runnable examples, see the following files in the examples directo
 - [Middleware](../middleware/README.md) - The middleware component uses context for request processing.
 - [Auth](../auth/README.md) - The auth component uses context for storing authentication information.
 
+
 ## Contributing
 
 Contributions to this component are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
+
 
 ## License
 

@@ -1,6 +1,10 @@
 # Middleware Module
-
 The Middleware Module provides HTTP middleware components for common cross-cutting concerns in Go applications. It includes middleware for request context, timeout handling, panic recovery, logging, error handling, and CORS support.
+
+
+## Overview
+
+Brief description of the middleware and its purpose in the ServiceLib library.
 
 ## Features
 
@@ -11,57 +15,64 @@ The Middleware Module provides HTTP middleware components for common cross-cutti
 - **Error Handling**: Centralized error handling for HTTP responses
 - **CORS**: Cross-Origin Resource Sharing support
 
+
 ## Installation
 
 ```bash
 go get github.com/abitofhelp/servicelib/middleware
 ```
 
+
 ## Quick Start
 
-See the [Basic Usage example](../examples/middleware/basic_usage_example.go) for a complete, runnable example of how to use the Middleware module.
+See the [Basic Usage example](../EXAMPLES/middleware/basic_usage/main.go) for a complete, runnable example of how to use the Middleware module.
+
+
+## Configuration
+
+See the [Configuration example](../EXAMPLES/middleware/basic_usage/main.go) for a complete, runnable example of how to configure the middleware.
 
 ## API Documentation
 
 ### Basic Usage
 
-See the [Basic Usage example](../examples/middleware/basic_usage_example.go) for a complete, runnable example of how to use the middleware components together.
+See the [Basic Usage example](../EXAMPLES/middleware/basic_usage/main.go) for a complete, runnable example of how to use the middleware components together.
 
 ### Request Context Middleware
 
 The `WithRequestContext` middleware adds request context information, including request ID and start time.
 
-See the [Basic Usage example](../examples/middleware/basic_usage_example.go) for a complete, runnable example of how to use the request context middleware.
+See the [Basic Usage example](../EXAMPLES/middleware/basic_usage/main.go) for a complete, runnable example of how to use the request context middleware.
 
 ### Timeout Middleware
 
 The `WithTimeout` middleware sets a timeout for request processing.
 
-See the [Timeout example](../examples/middleware/timeout_example.go) for a complete, runnable example of how to use the timeout middleware.
+See the [Timeout example](../EXAMPLES/middleware/timeout/main.go) for a complete, runnable example of how to use the timeout middleware.
 
 ### Recovery Middleware
 
 The `WithRecovery` middleware catches panics in HTTP handlers and converts them to error responses.
 
-See the [Recovery example](../examples/middleware/recovery_example.go) for a complete, runnable example of how to use the recovery middleware.
+See the [Recovery example](../EXAMPLES/middleware/recovery/main.go) for a complete, runnable example of how to use the recovery middleware.
 
 ### Logging Middleware
 
 The `WithLogging` middleware logs request and response details.
 
-See the [Logging example](../examples/middleware/logging_example.go) for a complete, runnable example of how to use the logging middleware.
+See the [Logging example](../EXAMPLES/middleware/logging/main.go) for a complete, runnable example of how to use the logging middleware.
 
 ### Error Handling Middleware
 
 The `WithErrorHandling` middleware provides centralized error handling for HTTP responses.
 
-See the [Error Handling example](../examples/middleware/error_handling_example.go) for a complete, runnable example of how to use the error handling middleware.
+See the [Error Handling example](../EXAMPLES/middleware/error_handling/main.go) for a complete, runnable example of how to use the error handling middleware.
 
 ### CORS Middleware
 
 The `WithCORS` middleware adds Cross-Origin Resource Sharing support.
 
-See the [CORS example](../examples/middleware/cors_example.go) for a complete, runnable example of how to use the CORS middleware.
+See the [CORS example](../EXAMPLES/middleware/cors/main.go) for a complete, runnable example of how to use the CORS middleware.
 
 ### Middleware Composition
 
@@ -179,6 +190,62 @@ func useTimingMiddleware() {
 6. **Testing**: Test middleware in isolation and as part of the chain.
 
 7. **Logging**: Include relevant information in logs, but be careful not to log sensitive data.
+
+
+### Core Types
+
+Description of the main types provided by the middleware.
+
+#### Type 1
+
+Description of Type 1 and its purpose.
+
+See the [Type 1 example](../EXAMPLES/middleware/basic_usage/main.go) for a complete, runnable example of how to use Type 1.
+
+### Key Methods
+
+Description of the key methods provided by the middleware.
+
+#### Method 1
+
+Description of Method 1 and its purpose.
+
+See the [Method 1 example](../EXAMPLES/middleware/basic_usage/main.go) for a complete, runnable example of how to use Method 1.
+
+## Examples
+
+For complete, runnable examples, see the following files in the EXAMPLES directory:
+
+- [Basic Usage](../EXAMPLES/middleware/basic_usage/main.go) - Shows basic usage of the middleware
+- [Advanced Configuration](../EXAMPLES/middleware/basic_usage/main.go) - Shows advanced configuration options
+- [Error Handling](../EXAMPLES/middleware/error_handling/main.go) - Shows how to handle errors
+
+## Best Practices
+
+1. **Best Practice 1**: Description of best practice 1
+2. **Best Practice 2**: Description of best practice 2
+3. **Best Practice 3**: Description of best practice 3
+
+## Troubleshooting
+
+### Common Issues
+
+#### Issue 1
+
+Description of issue 1 and how to resolve it.
+
+#### Issue 2
+
+Description of issue 2 and how to resolve it.
+
+## Related Components
+
+- [Component 1](../middleware1/README.md) - Description of how this middleware relates to Component 1
+- [Component 2](../middleware2/README.md) - Description of how this middleware relates to Component 2
+
+## Contributing
+
+Contributions to this middleware are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
 
 ## License
 

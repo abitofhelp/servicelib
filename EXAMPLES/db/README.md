@@ -6,7 +6,7 @@ This directory contains examples demonstrating how to use the `db` package, whic
 
 ### 1. Connection Example
 
-[connection_example.go](connection_example.go)
+[connection/main.go](connection/main.go)
 
 Demonstrates how to connect to different types of databases.
 
@@ -18,7 +18,7 @@ Key concepts:
 
 ### 2. Health Check Example
 
-[health_check_example.go](health_check_example.go)
+[health_check/main.go](health_check/main.go)
 
 Shows how to perform health checks on database connections.
 
@@ -31,7 +31,7 @@ Key concepts:
 
 ### 3. Query Example
 
-[query_example.go](query_example.go)
+[query/main.go](query/main.go)
 
 Demonstrates how to execute queries with different database types.
 
@@ -44,7 +44,7 @@ Key concepts:
 
 ### 4. Repository Example
 
-[repository_example.go](repository_example.go)
+[repository/main.go](repository/main.go)
 
 Shows how to implement the repository pattern with the db package.
 
@@ -57,7 +57,7 @@ Key concepts:
 
 ### 5. Retry Example
 
-[retry_example.go](retry_example.go)
+[retry/main.go](retry/main.go)
 
 Demonstrates how to execute database queries with retries.
 
@@ -70,7 +70,7 @@ Key concepts:
 
 ### 6. Transaction Example
 
-[transaction_example.go](transaction_example.go)
+[transaction/main.go](transaction/main.go)
 
 Shows how to use transactions with different database types.
 
@@ -86,7 +86,7 @@ Key concepts:
 To run any of the examples, use the `go run` command:
 
 ```bash
-go run examples/db/connection_example.go
+go run connection/main.go
 ```
 
 ## Additional Resources

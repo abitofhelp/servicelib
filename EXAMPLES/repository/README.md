@@ -6,7 +6,7 @@ This directory contains examples demonstrating how to use the `repository` packa
 
 ### 1. Basic Repository Example
 
-[basic_repository_example.go](basic_repository_example.go)
+[basic_repository_example/main.go](basic_repository_example/main.go)
 
 Demonstrates the basic implementation and usage of a repository.
 
@@ -19,7 +19,7 @@ Key concepts:
 
 ### 2. Dependency Injection Example
 
-[dependency_injection_example.go](dependency_injection_example.go)
+[dependency_injection_example/main.go](dependency_injection_example/main.go)
 
 Shows how to use dependency injection with repositories.
 
@@ -32,7 +32,7 @@ Key concepts:
 
 ### 3. Repository Factory Example
 
-[repository_factory_example.go](repository_factory_example.go)
+[repository_factory_example/main.go](repository_factory_example/main.go)
 
 Demonstrates how to use a repository factory to create repositories.
 
@@ -48,7 +48,7 @@ Key concepts:
 To run any of the examples, use the `go run` command:
 
 ```bash
-go run examples/repository/basic_repository_example.go
+go run basic_repository_example/main.go
 ```
 
 ## Additional Resources

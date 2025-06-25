@@ -6,7 +6,7 @@ This directory contains examples demonstrating how to use the `transaction` pack
 
 ### 1. Basic Saga Example
 
-[basic_saga_example.go](basic_saga_example.go)
+[basic_saga_example/main.go](basic_saga_example/main.go)
 
 Demonstrates a basic saga transaction where one of the operations fails, triggering rollbacks for the previously completed operations.
 
@@ -17,7 +17,7 @@ Key concepts:
 
 ### 2. Basic Usage Example
 
-[basic_usage_example.go](basic_usage_example.go)
+[basic_usage_example/main.go](basic_usage_example/main.go)
 
 Shows a successful transaction using the `WithTransaction` function.
 
@@ -28,7 +28,7 @@ Key concepts:
 
 ### 3. Context Timeout Example
 
-[context_timeout_example.go](context_timeout_example.go)
+[context_timeout_example/main.go](context_timeout_example/main.go)
 
 Demonstrates using context with timeout in transactions.
 
@@ -40,7 +40,7 @@ Key concepts:
 
 ### 4. Custom Transaction Example
 
-[custom_transaction_example.go](custom_transaction_example.go)
+[custom_transaction_example/main.go](custom_transaction_example/main.go)
 
 Shows how to create a transaction explicitly using `NewTransaction` and then execute it.
 
@@ -52,7 +52,7 @@ Key concepts:
 
 ### 5. Error Handling Example
 
-[error_handling_example.go](error_handling_example.go)
+[error_handling_example/main.go](error_handling_example/main.go)
 
 Demonstrates error handling with checked rollbacks.
 
@@ -63,7 +63,7 @@ Key concepts:
 
 ### 6. Idempotent Operations Example
 
-[idempotent_operations_example.go](idempotent_operations_example.go)
+[idempotent_operations_example/main.go](idempotent_operations_example/main.go)
 
 Shows how to implement idempotent operations in transactions.
 
@@ -78,7 +78,7 @@ Key concepts:
 To run any of the examples, use the `go run` command:
 
 ```bash
-go run examples/transaction/basic_saga_example.go
+go run basic_saga_example/main.go
 ```
 
 ## Additional Resources

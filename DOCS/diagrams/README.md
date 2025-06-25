@@ -15,10 +15,15 @@ The following diagrams can be generated from the source files in the `source` di
 ### Component Diagrams
 
 - **Authentication Component** - Shows the structure of the authentication component
+- **Database Component** - Shows the structure of the database package, including its interfaces and functions
 - **Dependency Injection Component** - Shows the structure of the dependency injection component
-- **Health Check Component** - Shows the structure of the health check component
 - **Error Handling Component** - Shows the structure of the error handling system, including the relationships between different error types
+- **GraphQL Component** - Shows the structure of the GraphQL package, including server configuration and directives
+- **Health Check Component** - Shows the structure of the health check component
+- **Logging Component** - Shows the structure of the logging package, including the logger interface and context logger
+- **Middleware Component** - Shows the structure of the middleware package, including middleware functions and utilities
 - **Retry Component** - Shows the structure of the retry package, including its configuration options and relationships with other components
+- **Telemetry Component** - Shows the structure of the telemetry package, including metrics and tracing components
 
 ## Diagram Formats
 
@@ -47,22 +52,33 @@ For convenience, here are links to view each diagram directly in the PlantUML On
 - [Improved Package Dependencies](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/DOCS/diagrams/source/improved_package_dependencies.puml)
 - [Layered Architecture](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/DOCS/diagrams/source/layered_architecture.puml)
 - [Authentication Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/DOCS/diagrams/source/auth_component.puml)
+- [Database Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/DOCS/diagrams/source/db_component.puml)
 - [Dependency Injection Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/DOCS/diagrams/source/di_component.puml)
-- [Health Check Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/DOCS/diagrams/source/health_component.puml)
 - [Error Handling Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/DOCS/diagrams/source/errors_component.puml)
+- [GraphQL Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/DOCS/diagrams/source/graphql_component.puml)
+- [Health Check Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/DOCS/diagrams/source/health_component.puml)
+- [Logging Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/DOCS/diagrams/source/logging_component.puml)
+- [Middleware Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/DOCS/diagrams/source/middleware_component.puml)
 - [Retry Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/DOCS/diagrams/source/retry_component.puml)
+- [Telemetry Component](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/abitofhelp/servicelib/main/DOCS/diagrams/source/telemetry_component.puml)
 
 ### SVG Files
 
 You can view the SVG files for each diagram directly:
 
 - [Package Dependencies](svg/package_dependencies.svg)
+- [Improved Package Dependencies](svg/improved_package_dependencies.svg)
 - [Layered Architecture](svg/layered_architecture.svg)
 - [Authentication Component](svg/auth_component.svg)
+- [Database Component](svg/db_component.svg)
 - [Dependency Injection Component](svg/di_component.svg)
-- [Health Check Component](svg/health_component.svg)
 - [Error Handling Component](svg/errors_component.svg)
+- [GraphQL Component](svg/graphql_component.svg)
+- [Health Check Component](svg/health_component.svg)
+- [Logging Component](svg/logging_component.svg)
+- [Middleware Component](svg/middleware_component.svg)
 - [Retry Component](svg/retry_component.svg)
+- [Telemetry Component](svg/telemetry_component.svg)
 
 ### Source Files
 
@@ -72,10 +88,15 @@ You can view the source files for each diagram directly:
 - [Improved Package Dependencies](source/improved_package_dependencies.puml)
 - [Layered Architecture](source/layered_architecture.puml)
 - [Authentication Component](source/auth_component.puml)
+- [Database Component](source/db_component.puml)
 - [Dependency Injection Component](source/di_component.puml)
-- [Health Check Component](source/health_component.puml)
 - [Error Handling Component](source/errors_component.puml)
+- [GraphQL Component](source/graphql_component.puml)
+- [Health Check Component](source/health_component.puml)
+- [Logging Component](source/logging_component.puml)
+- [Middleware Component](source/middleware_component.puml)
 - [Retry Component](source/retry_component.puml)
+- [Telemetry Component](source/telemetry_component.puml)
 
 ## Relationship to Code
 
@@ -87,13 +108,23 @@ The UML diagrams provide visual representations of the ServiceLib architecture a
 
 - **Authentication Component**: Shows the internal structure of the `auth` package, including the relationships between different authentication mechanisms (JWT, OIDC) and how they interact with middleware and other components.
 
-- **Dependency Injection Component**: Shows the internal structure of the `di` package, illustrating how the dependency injection container works and how it manages service dependencies.
+- **Database Component**: Shows the internal structure of the `db` package, including the interfaces and functions for working with different types of databases (PostgreSQL, MongoDB, SQLite). This helps developers understand how to use the database functionality and how it integrates with other components.
 
-- **Health Check Component**: Shows the internal structure of the `health` package, including how health checks are registered, managed, and exposed via HTTP endpoints.
+- **Dependency Injection Component**: Shows the internal structure of the `di` package, illustrating how the dependency injection container works and how it manages service dependencies.
 
 - **Error Handling Component**: Shows the internal structure of the `errors` package, including the hierarchy of error types (BaseError, DomainError, ApplicationError, InfrastructureError) and their relationships. This helps developers understand how to use the error handling system and how different error types relate to each other.
 
+- **GraphQL Component**: Shows the internal structure of the `graphql` package, including server configuration, directives, and error handling. This helps developers understand how to use the GraphQL functionality and how it integrates with other components.
+
+- **Health Check Component**: Shows the internal structure of the `health` package, including how health checks are registered, managed, and exposed via HTTP endpoints.
+
+- **Logging Component**: Shows the internal structure of the `logging` package, including the logger interface, context logger, and their relationships with other components. This helps developers understand how to use the logging functionality and how it integrates with other components.
+
+- **Middleware Component**: Shows the internal structure of the `middleware` package, including middleware functions, context utilities, and response writers. This helps developers understand how to use the middleware functionality and how it integrates with other components.
+
 - **Retry Component**: Shows the internal structure of the `retry` package, including the configuration options, function types, and relationships with other packages like errors, logging, and telemetry. This helps developers understand how to use the retry functionality and how it integrates with other components in the system.
+
+- **Telemetry Component**: Shows the internal structure of the `telemetry` package, including metrics, tracing, and their relationships with other components. This helps developers understand how to use the telemetry functionality and how it integrates with other components.
 
 ## Generating Diagrams
 

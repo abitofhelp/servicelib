@@ -1,0 +1,50 @@
+@startuml Logging Component
+
+skinparam componentStyle uml2
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+  ArrowColor Black
+}
+
+package "Logging" {
+  interface "Logger" as Logger {
+    + Debug(ctx, msg, fields...)
+    + Info(ctx, msg, fields...)
+    + Warn(ctx, msg, fields...)
+    + Error(ctx, msg, fields...)
+    + Fatal(ctx, msg, fields...)
+    + With(fields...): Logger
+    + Sync(): error
+  }
+
+  class "ContextLogger" as ContextLogger {
+    - base: *zap.Logger
+    + Debug(ctx, msg, fields...)
+    + Info(ctx, msg, fields...)
+    + Warn(ctx, msg, fields...)
+    + Error(ctx, msg, fields...)
+    + Fatal(ctx, msg, fields...)
+    + With(fields...): *ContextLogger
+    + Sync(): error
+  }
+
+  class "Logging Functions" as LoggingFunctions {
+    + NewLogger(level, development): (*zap.Logger, error)
+    + WithTraceID(ctx, logger): *zap.Logger
+    + NewContextLogger(base): *ContextLogger
+  }
+}
+
+ContextLogger ..|> Logger: implements
+LoggingFunctions --> ContextLogger: creates
+LoggingFunctions --> "zap.Logger": uses
+
+note right of LoggingFunctions
+  The logging package provides structured logging 
+  with Zap for high-performance logging in Go applications.
+  It includes context-aware logging that automatically 
+  extracts trace IDs from the context.
+end note
+
+@enduml

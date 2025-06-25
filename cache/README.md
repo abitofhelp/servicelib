@@ -1,103 +1,215 @@
 # Cache Package
 
-The `cache` package provides a generic in-memory cache implementation with expiration for frequently accessed data.
-
 ## Overview
 
-This package implements a simple in-memory cache with the following features:
+The `cache` package provides a generic in-memory cache implementation with expiration for frequently accessed data. This package implements a simple in-memory cache that can be used to cache any type of data with configurable time-to-live (TTL) and automatic cleanup of expired items.
 
-- Generic support for caching any type of data
-- Configurable time-to-live (TTL) for cache items
-- Automatic cleanup of expired items
-- Maximum size limit with configurable eviction strategies
-- Support for OpenTelemetry tracing
-- Fluent interface for configuration
-- Thread-safe implementation
-- Middleware functions for easy integration
 
-## Usage
+## Features
 
-### Basic Usage
+- **Generic Support**: Cache any type of data using Go generics
+- **Configurable TTL**: Set default and per-item time-to-live
+- **Automatic Cleanup**: Expired items are automatically removed
+- **Size Limits**: Configure maximum cache size with eviction strategies
+- **Thread Safety**: Safe for concurrent use from multiple goroutines
+- **OpenTelemetry Integration**: Built-in support for distributed tracing
+- **Fluent Configuration**: Easy-to-use fluent interface for configuration
+- **Middleware Functions**: Simplify caching of function results
 
-```go
-import (
-    "context"
-    "github.com/abitofhelp/servicelib/cache"
-    "github.com/abitofhelp/servicelib/logging"
-    "go.uber.org/zap"
-    "time"
-)
 
-// Create a cache
-cfg := cache.DefaultConfig().
-    WithEnabled(true).
-    WithTTL(5 * time.Minute).
-    WithMaxSize(1000)
+## Installation
 
-logger := logging.NewContextLogger(zap.NewNop())
-options := cache.DefaultOptions().
-    WithName("user-cache").
-    WithLogger(logger)
-
-// Create a cache for User objects
-userCache := cache.NewCache[User](cfg, options)
-
-// Set a value in the cache
-ctx := context.Background()
-userCache.Set(ctx, "user:123", user)
-
-// Get a value from the cache
-user, found := userCache.Get(ctx, "user:123")
-if found {
-    // Use the cached user
-} else {
-    // User not found in cache
-}
-
-// Set a value with a custom TTL
-userCache.SetWithTTL(ctx, "user:456", user, 10 * time.Minute)
-
-// Delete a value from the cache
-userCache.Delete(ctx, "user:123")
-
-// Clear the entire cache
-userCache.Clear(ctx)
-
-// Get the number of items in the cache
-count := userCache.Size()
-
-// Shutdown the cache (stops the cleanup goroutine)
-userCache.Shutdown()
+```bash
+go get github.com/abitofhelp/servicelib/cache
 ```
 
-### Using Cache Middleware
 
-The package provides middleware functions to simplify caching function results:
+## Quick Start
 
-```go
-// Cache the result of a function
-user, err := cache.WithCache(ctx, userCache, "user:123", func(ctx context.Context) (User, error) {
-    // This function will only be called if the key is not in the cache
-    return userService.GetUser(ctx, "123")
-})
+See the [Basic Usage Example](../EXAMPLES/cache/basic_usage/main.go) for a complete, runnable example of how to use the cache package.
 
-// Cache the result with a custom TTL
-user, err := cache.WithCacheTTL(ctx, userCache, "user:123", 10 * time.Minute, func(ctx context.Context) (User, error) {
-    return userService.GetUser(ctx, "123")
-})
-```
 
 ## Configuration
 
-The cache can be configured using the `Config` struct and the fluent interface:
+The cache can be configured using the `Config` struct and the fluent interface.
 
-```go
-cfg := cache.DefaultConfig().
-    WithEnabled(true).                  // Enable/disable the cache
-    WithTTL(5 * time.Minute).           // Default time-to-live for cache items
-    WithMaxSize(1000).                  // Maximum number of items in the cache
-    WithPurgeInterval(1 * time.Minute)  // Interval at which expired items are purged
+See the [Custom Configuration Example](../EXAMPLES/cache/custom_configuration/main.go) for a complete, runnable example of how to configure the cache.
+
+
+## API Documentation
+
+
+### Core Types
+
+#### Cache
+
+The `Cache` struct is the main type in the cache package. It provides methods for storing and retrieving values from the cache.
+
 ```
+// Cache is a generic in-memory cache with expiration
+type Cache[T any] struct {
+    // contains filtered or unexported fields
+}
+```
+
+See the [Basic Usage Example](../EXAMPLES/cache/basic_usage/main.go) for a complete, runnable example of how to use the Cache type.
+
+#### Config
+
+The `Config` struct holds the configuration for the cache.
+
+```
+// Config holds the configuration for the cache
+type Config struct {
+    // contains filtered or unexported fields
+}
+```
+
+See the [Custom Configuration Example](../EXAMPLES/cache/custom_configuration/main.go) for a complete, runnable example of how to use the Config type.
+
+#### Options
+
+The `Options` struct holds additional options for the cache.
+
+```
+// Options holds additional options for the cache
+type Options struct {
+    // contains filtered or unexported fields
+}
+```
+
+
+### Key Methods
+
+#### NewCache
+
+`NewCache` creates a new cache with the specified configuration and options.
+
+```
+// NewCache creates a new cache with the specified configuration and options
+func NewCache[T any](cfg Config, options Options) *Cache[T]
+```
+
+#### Get
+
+`Get` retrieves a value from the cache.
+
+```
+// Get retrieves a value from the cache
+func (c *Cache[T]) Get(ctx context.Context, key string) (T, bool)
+```
+
+#### Set
+
+`Set` stores a value in the cache with the default TTL.
+
+```
+// Set stores a value in the cache with the default TTL
+func (c *Cache[T]) Set(ctx context.Context, key string, value T)
+```
+
+#### SetWithTTL
+
+`SetWithTTL` stores a value in the cache with a custom TTL.
+
+```
+// SetWithTTL stores a value in the cache with a custom TTL
+func (c *Cache[T]) SetWithTTL(ctx context.Context, key string, value T, ttl time.Duration)
+```
+
+#### Delete
+
+`Delete` removes a value from the cache.
+
+```
+// Delete removes a value from the cache
+func (c *Cache[T]) Delete(ctx context.Context, key string)
+```
+
+#### Clear
+
+`Clear` removes all values from the cache.
+
+```
+// Clear removes all values from the cache
+func (c *Cache[T]) Clear(ctx context.Context)
+```
+
+#### Size
+
+`Size` returns the number of items in the cache.
+
+```
+// Size returns the number of items in the cache
+func (c *Cache[T]) Size() int
+```
+
+#### Shutdown
+
+`Shutdown` stops the cleanup goroutine.
+
+```
+// Shutdown stops the cleanup goroutine
+func (c *Cache[T]) Shutdown()
+```
+
+#### WithCache
+
+`WithCache` is a middleware function that caches the result of a function.
+
+```
+// WithCache caches the result of a function
+func WithCache[T any, E error](ctx context.Context, cache *Cache[T], key string, fn func(ctx context.Context) (T, E)) (T, E)
+```
+
+#### WithCacheTTL
+
+`WithCacheTTL` is a middleware function that caches the result of a function with a custom TTL.
+
+```
+// WithCacheTTL caches the result of a function with a custom TTL
+func WithCacheTTL[T any, E error](ctx context.Context, cache *Cache[T], key string, ttl time.Duration, fn func(ctx context.Context) (T, E)) (T, E)
+```
+
+
+## Examples
+
+For complete, runnable examples, see the following files in the examples directory:
+
+- [Basic Usage](../EXAMPLES/cache/basic_usage/main.go) - Shows basic usage of the cache package
+- [Custom Configuration](../EXAMPLES/cache/custom_configuration/main.go) - Shows advanced configuration options
+
+
+## Best Practices
+
+1. **Choose Appropriate TTL**: Set TTL values based on how frequently your data changes. Shorter TTLs for frequently changing data, longer TTLs for more static data.
+
+2. **Use Meaningful Keys**: Choose cache keys that are meaningful and unique to avoid collisions.
+
+3. **Handle Cache Misses Gracefully**: Always handle the case where a value is not found in the cache.
+
+4. **Monitor Cache Performance**: Keep track of cache hit rates and adjust TTL values accordingly.
+
+5. **Set Size Limits**: Configure a maximum size for your cache to prevent memory issues.
+
+6. **Use Middleware Functions**: Use the provided middleware functions to simplify caching of function results.
+
+
+## Troubleshooting
+
+### Common Issues
+
+#### Cache Misses
+
+**Issue**: Values are not being found in the cache when expected.
+
+**Solution**: Check that the keys being used are consistent and that the TTL is not too short. Also, ensure that the cache is enabled.
+
+#### Memory Usage
+
+**Issue**: The cache is using too much memory.
+
+**Solution**: Configure a maximum size for the cache and choose an appropriate eviction strategy. Also, consider using shorter TTL values for large items.
 
 ## Eviction Strategies
 
@@ -108,34 +220,18 @@ The cache supports different eviction strategies when the maximum size is reache
 - **FIFO (First In, First Out)**: Evicts the first item added to the cache
 - **Random**: Evicts a random item
 
-## OpenTelemetry Integration
 
-The cache supports OpenTelemetry tracing:
+## Related Components
 
-```go
-import (
-    "go.opentelemetry.io/otel/trace"
-)
+- [Logging](../logging/README.md) - The logging component is used by the cache for logging operations.
+- [Telemetry](../telemetry/README.md) - The telemetry component provides tracing, which is used by the cache for tracing operations.
 
-// Create a tracer
-tracer := otelTracer // Your OpenTelemetry tracer
 
-// Configure the cache with the tracer
-options := cache.DefaultOptions().
-    WithName("user-cache").
-    WithLogger(logger).
-    WithOtelTracer(tracer)
+## Contributing
 
-userCache := cache.NewCache[User](cfg, options)
-```
+Contributions to this component are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
 
-## Thread Safety
 
-The cache is thread-safe and can be used concurrently from multiple goroutines.
+## License
 
-## Performance Considerations
-
-- The cache uses a map internally, so lookups are O(1)
-- The cache uses a read-write mutex to ensure thread safety, so concurrent reads are allowed but writes are exclusive
-- The cleanup goroutine runs at the configured interval to remove expired items
-- When the maximum size is reached, an item will be evicted according to the configured eviction strategy
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.

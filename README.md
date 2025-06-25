@@ -33,7 +33,6 @@ ServiceLib provides a comprehensive set of components organized by functionality
 ### Core Infrastructure
 
 - **[Configuration](config/README.md)** - Flexible configuration management with adapters for various sources (files, environment variables, etc.)
-- **[ConfigScan](configscan/README.md)** - Tool for scanning packages to determine whether any have configuration requirements and don't have default values set
 - **[Context](context/README.md)** - Context utilities for request handling, cancellation, and value propagation
 - **[Dependency Injection](di/README.md)** - Container-based DI system for managing service dependencies
 - **[Environment Variables](env/README.md)** - Utilities for working with environment variables with fallback values
@@ -111,7 +110,6 @@ Each package in ServiceLib includes its own README.md with detailed documentatio
 
 - [Authentication](auth/README.md) - JWT, OAuth2, and OIDC examples
 - [Configuration](config/README.md) - Configuration management examples
-- [ConfigScan](configscan/README.md) - Package scanning for configuration requirements
 - [Database](db/README.md) - Database connection and transaction examples
 - [Dependency Injection](di/README.md) - DI container usage examples
 - [Health Checks](health/README.md) - Health check implementation examples

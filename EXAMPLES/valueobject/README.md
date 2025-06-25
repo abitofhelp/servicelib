@@ -6,7 +6,7 @@ This directory contains examples demonstrating how to use the `valueobject` pack
 
 ### 1. Coordinate Example
 
-[coordinate_example.go](coordinate_example.go)
+[location/coordinate_example/main.go](location/coordinate_example/main.go)
 
 Demonstrates how to use the Coordinate value object for geographic coordinates.
 
@@ -19,7 +19,7 @@ Key concepts:
 
 ### 2. Email Example
 
-[email_example.go](email_example.go)
+[contact/email_example/main.go](contact/email_example/main.go)
 
 Shows how to use the Email value object for email addresses.
 
@@ -32,7 +32,7 @@ Key concepts:
 
 ### 3. FileSize Example
 
-[filesize_example.go](filesize_example.go)
+[measurement/filesize_example/main.go](measurement/filesize_example/main.go)
 
 Demonstrates how to use the FileSize value object for representing file sizes.
 
@@ -45,7 +45,7 @@ Key concepts:
 
 ### 4. ID Example
 
-[id_example.go](id_example.go)
+[identification/id_example/main.go](identification/id_example/main.go)
 
 Shows how to use the ID value object for entity identifiers.
 
@@ -58,7 +58,7 @@ Key concepts:
 
 ### 5. IPAddress Example
 
-[ipaddress_example.go](ipaddress_example.go)
+[network/ipaddress_example/main.go](network/ipaddress_example/main.go)
 
 Demonstrates how to use the IPAddress value object.
 
@@ -71,7 +71,7 @@ Key concepts:
 
 ### 6. Money Example
 
-[money_example.go](money_example.go)
+[measurement/money_example/main.go](measurement/money_example/main.go)
 
 Shows how to use the Money value object for monetary values.
 
@@ -84,7 +84,7 @@ Key concepts:
 
 ### 7. URL Example
 
-[url_example.go](url_example.go)
+[network/url_example/main.go](network/url_example/main.go)
 
 Demonstrates how to use the URL value object.
 
@@ -97,7 +97,7 @@ Key concepts:
 
 ### 8. Username Example
 
-[username_example.go](username_example.go)
+[identification/username_example/main.go](identification/username_example/main.go)
 
 Shows how to use the Username value object.
 
@@ -113,7 +113,7 @@ Key concepts:
 To run any of the examples, use the `go run` command:
 
 ```bash
-go run examples/valueobject/money_example.go
+go run measurement/money_example/main.go
 ```
 
 ## Additional Resources

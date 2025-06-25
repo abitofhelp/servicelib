@@ -1,6 +1,9 @@
 # Environment Variables Package
 
+## Overview
+
 The `env` package provides utilities for working with environment variables in Go applications. It simplifies the process of retrieving environment variables with fallback values.
+
 
 ## Features
 
@@ -8,19 +11,61 @@ The `env` package provides utilities for working with environment variables in G
 - **Default Values**: Support for fallback values when environment variables are not set
 - **Simple API**: Clean and straightforward API for environment variable handling
 
+
 ## Installation
 
 ```bash
 go get github.com/abitofhelp/servicelib/env
 ```
 
+
 ## Quick Start
 
-See the [Basic Usage Example](../examples/env/basic_usage_example.go) for a complete, runnable example of how to use the env package.
+See the [Basic Usage Example](../EXAMPLES/env/basic_usage/main.go) for a complete, runnable example of how to use the env package.
+
 
 ## Configuration
 
-See the [Configuration Integration Example](../examples/env/config_integration_example.go) for a complete, runnable example of how to integrate environment variables with a configuration structure.
+See the [Configuration Integration Example](../EXAMPLES/env/config_integration/main.go) for a complete, runnable example of how to integrate environment variables with a configuration structure.
+
+
+## API Documentation
+
+
+### Core Types
+
+The env package does not define any custom types. It provides utility functions for working with environment variables.
+
+
+### Key Methods
+
+#### GetEnv
+
+`GetEnv` retrieves the value of the environment variable named by the key. If the variable is not present, the fallback value is returned.
+
+```go
+package env
+
+func GetEnv(key, fallback string) string
+```
+
+Parameters:
+- `key`: The name of the environment variable
+- `fallback`: The value to return if the environment variable is not set
+
+Returns:
+- `string`: The value of the environment variable or the fallback value
+
+See the [Basic Usage Example](../EXAMPLES/env/basic_usage/main.go) for a complete, runnable example of how to use the GetEnv method.
+
+
+## Examples
+
+For complete, runnable examples, see the following files in the examples directory:
+
+- [Basic Usage](../EXAMPLES/env/basic_usage/main.go) - Shows basic usage of the env package
+- [Configuration Integration](../EXAMPLES/env/config_integration/main.go) - Shows how to integrate environment variables with a configuration structure
+
 
 ## Best Practices
 
@@ -36,6 +81,35 @@ See the [Configuration Integration Example](../examples/env/config_integration_e
 
 6. **Error Handling**: Implement proper error handling for missing critical environment variables.
 
+
+## Troubleshooting
+
+### Common Issues
+
+#### Missing Environment Variables
+
+**Issue**: Critical environment variables are missing, causing the application to fail.
+
+**Solution**: Implement proper validation of environment variables at application startup and provide clear error messages when required variables are missing.
+
+#### Incorrect Environment Variable Names
+
+**Issue**: Environment variables are not being found due to incorrect names.
+
+**Solution**: Double-check the names of environment variables and ensure they match between the application code and the environment where the application is running.
+
+
+## Related Components
+
+- [Configuration](../config/README.md) - The configuration component can use environment variables as a source for configuration values.
+- [Logging](../logging/README.md) - The logging component can use environment variables to configure log levels and output destinations.
+
+
+## Contributing
+
+Contributions to this component are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
+
+
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.

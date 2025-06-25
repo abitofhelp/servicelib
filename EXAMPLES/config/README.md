@@ -6,7 +6,7 @@ This directory contains examples demonstrating how to use the `config` package, 
 
 ### 1. Basic Usage Example
 
-[basic_usage_example.go](basic_usage_example.go)
+[basic_usage/main.go](basic_usage/main.go)
 
 Demonstrates basic usage of the GenericConfigAdapter with a custom configuration struct.
 
@@ -18,7 +18,7 @@ Key concepts:
 
 ### 2. App Config Example
 
-[app_config_example.go](app_config_example.go)
+[app_config/main.go](app_config/main.go)
 
 Shows how to implement and use the AppConfig interface.
 
@@ -30,7 +30,7 @@ Key concepts:
 
 ### 3. Database Config Example
 
-[database_config_example.go](database_config_example.go)
+[database_config/main.go](database_config/main.go)
 
 Demonstrates how to implement and use the DatabaseConfig interface.
 
@@ -43,7 +43,7 @@ Key concepts:
 
 ### 4. Custom Adapter Example
 
-[custom_adapter_example.go](custom_adapter_example.go)
+[custom_adapter/main.go](custom_adapter/main.go)
 
 Shows how to create a custom adapter that reads configuration from environment variables.
 
@@ -59,7 +59,7 @@ Key concepts:
 To run any of the examples, use the `go run` command:
 
 ```bash
-go run examples/config/basic_usage_example.go
+go run basic_usage/main.go
 ```
 
 ## Additional Resources

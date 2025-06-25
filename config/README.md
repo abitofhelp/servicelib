@@ -4,6 +4,7 @@
 
 The `config` package provides a flexible configuration system that supports multiple sources and formats for Go applications. It allows you to manage application configuration in a hierarchical manner with support for various data sources.
 
+
 ## Features
 
 - **Multiple Sources**:
@@ -19,21 +20,26 @@ The `config` package provides a flexible configuration system that supports mult
 - **Validation**: Validate configuration against schemas
 - **Adapters**: Easily create custom adapters for different configuration sources
 
+
 ## Installation
 
 ```bash
 go get github.com/abitofhelp/servicelib/config
 ```
 
+
 ## Quick Start
 
 See the [Basic Usage example](../EXAMPLES/config/basic_usage_example.go) for a complete, runnable example of how to use the config package.
 
+
 ## Configuration
 
-See the [Configuration example](../examples/config/app_config_example.go) for a complete, runnable example of how to configure the config package.
+See the [Configuration example](../EXAMPLES/config/app_config_example.go) for a complete, runnable example of how to configure the config package.
+
 
 ## API Documentation
+
 
 ### Core Types
 
@@ -41,13 +47,14 @@ See the [Configuration example](../examples/config/app_config_example.go) for a 
 
 The `Config` interface provides methods for accessing configuration values.
 
-See the [Basic Usage example](../examples/config/basic_usage_example.go) for a complete, runnable example of how to use the Config interface.
+See the [Basic Usage example](../EXAMPLES/config/basic_usage_example.go) for a complete, runnable example of how to use the Config interface.
 
 #### Options
 
 The `Options` struct provides configuration options for creating a new config instance.
 
-See the [Custom Adapter example](../examples/config/custom_adapter_example.go) for a complete, runnable example of how to use the Options struct.
+See the [Custom Adapter example](../EXAMPLES/config/custom_adapter_example.go) for a complete, runnable example of how to use the Options struct.
+
 
 ### Key Methods
 
@@ -59,7 +66,7 @@ The `New` function creates a new configuration instance from the specified files
 cfg, err := config.New("config.yaml", "env.yaml")
 ```
 
-See the [Basic Usage example](../examples/config/basic_usage_example.go) for a complete, runnable example.
+See the [Basic Usage example](../EXAMPLES/config/basic_usage_example.go) for a complete, runnable example.
 
 #### NewWithOptions
 
@@ -73,7 +80,7 @@ cfg, err := config.NewWithOptions(config.Options{
 })
 ```
 
-See the [Custom Adapter example](../examples/config/custom_adapter_example.go) for a complete, runnable example.
+See the [Custom Adapter example](../EXAMPLES/config/custom_adapter_example.go) for a complete, runnable example.
 
 #### Get Methods
 
@@ -93,7 +100,7 @@ debug := cfg.GetBool("logging.debug", false)
 timeout := cfg.GetDuration("server.timeout", "30s")
 ```
 
-See the [Basic Usage example](../examples/config/basic_usage_example.go) for a complete, runnable example.
+See the [Basic Usage example](../EXAMPLES/config/basic_usage_example.go) for a complete, runnable example.
 
 #### Unmarshal
 
@@ -106,7 +113,7 @@ if err := cfg.Unmarshal(&appConfig); err != nil {
 }
 ```
 
-See the [App Config example](../examples/config/app_config_example.go) for a complete, runnable example.
+See the [App Config example](../EXAMPLES/config/app_config_example.go) for a complete, runnable example.
 
 #### Watch
 
@@ -118,16 +125,18 @@ cfg.Watch(func() {
 })
 ```
 
-See the [Basic Usage example](../examples/config/basic_usage_example.go) for a complete, runnable example.
+See the [Basic Usage example](../EXAMPLES/config/basic_usage_example.go) for a complete, runnable example.
+
 
 ## Examples
 
 For complete, runnable examples, see the following files in the examples directory:
 
-- [Basic Usage](../examples/config/basic_usage_example.go) - Shows basic usage of the config package
-- [App Config](../examples/config/app_config_example.go) - Shows how to bind configuration to a struct
-- [Database Config](../examples/config/database_config_example.go) - Shows how to configure database connections
-- [Custom Adapter](../examples/config/custom_adapter_example.go) - Shows how to create a custom configuration adapter
+- [Basic Usage](../EXAMPLES/config/basic_usage_example.go) - Shows basic usage of the config package
+- [App Config](../EXAMPLES/config/app_config_example.go) - Shows how to bind configuration to a struct
+- [Database Config](../EXAMPLES/config/database_config_example.go) - Shows how to configure database connections
+- [Custom Adapter](../EXAMPLES/config/custom_adapter_example.go) - Shows how to create a custom configuration adapter
+
 
 ## Best Practices
 
@@ -140,6 +149,7 @@ For complete, runnable examples, see the following files in the examples directo
 4. **Configuration Hierarchy**: Use a hierarchical approach to organize your configuration.
 
 5. **Documentation**: Document all configuration options, including their purpose, type, and default values.
+
 
 ## Troubleshooting
 
@@ -163,15 +173,18 @@ For complete, runnable examples, see the following files in the examples directo
 
 **Solution**: Ensure that the environment variables are properly formatted with the correct prefix and separator. Check that the EnvPrefix and EnvReplacer options are set correctly.
 
+
 ## Related Components
 
 - [Logging](../logging/README.md) - The logging component uses the config package for configuration.
 - [Database](../db/README.md) - The database component uses the config package for database configuration.
 - [Telemetry](../telemetry/README.md) - The telemetry component uses the config package for telemetry configuration.
 
+
 ## Contributing
 
 Contributions to this component are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
+
 
 ## License
 

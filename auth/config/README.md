@@ -1,6 +1,6 @@
 # Auth Configuration Adapter
-
 This package provides adapters for integrating the auth configuration with the config package in the servicelib library.
+
 
 ## Overview
 
@@ -82,9 +82,86 @@ The package provides the following helper functions:
 - `CreateMiddlewareConfig`: Creates a middleware configuration from the auth configuration
 - `CreateServiceConfig`: Creates a service configuration from the auth configuration
 
+
+## Features
+
+- **Feature 1**: Description of feature 1
+- **Feature 2**: Description of feature 2
+- **Feature 3**: Description of feature 3
+
+## Installation
+
+```bash
+go get github.com/abitofhelp/servicelib/config
+```
+
+## Quick Start
+
+See the [Quick Start example](../EXAMPLES/config/quickstart_example.go) for a complete, runnable example of how to use the config.
+
+## Configuration
+
+See the [Configuration example](../EXAMPLES/config/configuration_example.go) for a complete, runnable example of how to configure the config.
+
+## API Documentation
+
+
+### Core Types
+
+Description of the main types provided by the config.
+
+#### Type 1
+
+Description of Type 1 and its purpose.
+
+See the [Type 1 example](../EXAMPLES/config/type1_example.go) for a complete, runnable example of how to use Type 1.
+
+### Key Methods
+
+Description of the key methods provided by the config.
+
+#### Method 1
+
+Description of Method 1 and its purpose.
+
+See the [Method 1 example](../EXAMPLES/config/method1_example.go) for a complete, runnable example of how to use Method 1.
+
+## Examples
+
+For complete, runnable examples, see the following files in the EXAMPLES directory:
+
+- [Basic Usage](../EXAMPLES/config/basic_usage_example.go) - Shows basic usage of the config
+- [Advanced Configuration](../EXAMPLES/config/advanced_configuration_example.go) - Shows advanced configuration options
+- [Error Handling](../EXAMPLES/config/error_handling_example.go) - Shows how to handle errors
+
 ## Best Practices
 
 1. Use the auth configuration adapter to access auth configuration through a unified interface
 2. Use the helper functions to create specific configurations for JWT, OIDC, Middleware, and Service components
 3. Use the `AsGenericConfig` method to convert auth configuration to generic configuration when needed
 4. Follow the examples in the `example_test.go` file for guidance on how to use the package
+
+## Troubleshooting
+
+### Common Issues
+
+#### Issue 1
+
+Description of issue 1 and how to resolve it.
+
+#### Issue 2
+
+Description of issue 2 and how to resolve it.
+
+## Related Components
+
+- [Component 1](../config1/README.md) - Description of how this config relates to Component 1
+- [Component 2](../config2/README.md) - Description of how this config relates to Component 2
+
+## Contributing
+
+Contributions to this config are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.

@@ -6,7 +6,7 @@ This directory contains examples demonstrating how to use the `middleware` packa
 
 ### 1. Basic Usage Example
 
-[basic_usage_example.go](basic_usage_example.go)
+[basic_usage/main.go](basic_usage/main.go)
 
 Demonstrates the basic setup and usage of the middleware package.
 
@@ -19,7 +19,7 @@ Key concepts:
 
 ### 2. CORS Example
 
-[cors_example.go](cors_example.go)
+[cors/main.go](cors/main.go)
 
 Shows how to use Cross-Origin Resource Sharing (CORS) middleware.
 
@@ -32,7 +32,7 @@ Key concepts:
 
 ### 3. Error Handling Example
 
-[error_handling_example.go](error_handling_example.go)
+[error_handling/main.go](error_handling/main.go)
 
 Demonstrates how to use error handling middleware.
 
@@ -45,7 +45,7 @@ Key concepts:
 
 ### 4. Logging Example
 
-[logging_example.go](logging_example.go)
+[logging/main.go](logging/main.go)
 
 Shows how to use logging middleware for HTTP requests.
 
@@ -58,7 +58,7 @@ Key concepts:
 
 ### 5. Recovery Example
 
-[recovery_example.go](recovery_example.go)
+[recovery/main.go](recovery/main.go)
 
 Demonstrates how to use recovery middleware to handle panics.
 
@@ -71,7 +71,7 @@ Key concepts:
 
 ### 6. Timeout Example
 
-[timeout_example.go](timeout_example.go)
+[timeout/main.go](timeout/main.go)
 
 Shows how to use timeout middleware to limit request processing time.
 
@@ -87,7 +87,7 @@ Key concepts:
 To run any of the examples, use the `go run` command:
 
 ```bash
-go run examples/middleware/basic_usage_example.go
+go run basic_usage/main.go
 ```
 
 ## Additional Resources

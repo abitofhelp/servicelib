@@ -4,6 +4,7 @@
 
 The `graphql` package provides utilities for working with GraphQL in Go services, including server configuration, error handling, and role-based access control (RBAC).
 
+
 ## Features
 
 - **GraphQL Server Configuration**: Sensible defaults for GraphQL server setup
@@ -12,21 +13,26 @@ The `graphql` package provides utilities for working with GraphQL in Go services
 - **Metrics and Tracing**: Performance monitoring for GraphQL operations
 - **Timeout and Cancellation**: Proper handling of timeouts and cancellations
 
+
 ## Installation
 
 ```bash
 go get github.com/abitofhelp/servicelib/graphql
 ```
 
+
 ## Quick Start
 
-See the [Directive Registration example](../examples/graphql/directive_registration_example.go) for a complete, runnable example of how to set up a GraphQL server with the `@isAuthorized` directive.
+See the [Directive Registration example](../EXAMPLES/graphql/directive_registration_example.go) for a complete, runnable example of how to set up a GraphQL server with the `@isAuthorized` directive.
+
 
 ## Configuration
 
-See the [Auth Configuration example](../examples/graphql/auth_configuration_example.go) for a complete, runnable example of how to configure the auth service for GraphQL.
+See the [Auth Configuration example](../EXAMPLES/graphql/auth_configuration_example.go) for a complete, runnable example of how to configure the auth service for GraphQL.
+
 
 ## API Documentation
+
 
 ### Core Types
 
@@ -34,13 +40,14 @@ See the [Auth Configuration example](../examples/graphql/auth_configuration_exam
 
 The `IsAuthorizedDirective` function implements the `@isAuthorized` directive for GraphQL, which can be used to restrict access to GraphQL operations based on user roles.
 
-See the [Directive Registration example](../examples/graphql/directive_registration_example.go) for a complete, runnable example of how to use the IsAuthorizedDirective.
+See the [Directive Registration example](../EXAMPLES/graphql/directive_registration_example.go) for a complete, runnable example of how to use the IsAuthorizedDirective.
 
 #### CheckAuthorization
 
 The `CheckAuthorization` function is a helper for checking authorization in resolvers with roles, scopes, and resources.
 
-See the [Resolver Authorization example](../examples/graphql/resolver_authorization_example.go) for a complete, runnable example of how to use the CheckAuthorization function.
+See the [Resolver Authorization example](../EXAMPLES/graphql/resolver_authorization_example.go) for a complete, runnable example of how to use the CheckAuthorization function.
+
 
 ### Key Methods
 
@@ -48,7 +55,7 @@ See the [Resolver Authorization example](../examples/graphql/resolver_authorizat
 
 The `IsAuthorizedWithScopes` function checks if a user has the required roles, scopes, and access to a resource.
 
-See the [Resolver Authorization example](../examples/graphql/resolver_authorization_example.go) for a complete, runnable example of how to use the IsAuthorizedWithScopes function.
+See the [Resolver Authorization example](../EXAMPLES/graphql/resolver_authorization_example.go) for a complete, runnable example of how to use the IsAuthorizedWithScopes function.
 
 #### HasScope
 
@@ -58,15 +65,17 @@ The `HasScope` function checks if a user has a specific scope.
 
 The `HasResource` function checks if a user has access to a specific resource.
 
+
 ## Examples
 
 For complete, runnable examples, see the following files in the examples directory:
 
-- [Directive Registration](../examples/graphql/directive_registration_example.go) - Shows how to register the @isAuthorized directive
-- [Auth Configuration](../examples/graphql/auth_configuration_example.go) - Shows how to configure the auth service
-- [Auth Middleware](../examples/graphql/auth_middleware_example.go) - Shows how to apply the auth middleware
-- [Resolver Authorization](../examples/graphql/resolver_authorization_example.go) - Shows how to check authorization in resolvers
-- [JWT Token Generation](../examples/graphql/jwt_token_generation_example.go) - Shows how to generate JWT tokens for testing
+- [Directive Registration](../EXAMPLES/graphql/directive_registration_example.go) - Shows how to register the @isAuthorized directive
+- [Auth Configuration](../EXAMPLES/graphql/auth_configuration_example.go) - Shows how to configure the auth service
+- [Auth Middleware](../EXAMPLES/graphql/auth_middleware_example.go) - Shows how to apply the auth middleware
+- [Resolver Authorization](../EXAMPLES/graphql/resolver_authorization_example.go) - Shows how to check authorization in resolvers
+- [JWT Token Generation](../EXAMPLES/graphql/jwt_token_generation_example.go) - Shows how to generate JWT tokens for testing
+
 
 ## Best Practices
 
@@ -79,6 +88,7 @@ For complete, runnable examples, see the following files in the examples directo
 4. **Error Handling**: Implement proper error handling for authorization failures.
 
 5. **Testing**: Generate test tokens with different roles, scopes, and resources to verify your authorization logic.
+
 
 ## Troubleshooting
 
@@ -102,15 +112,18 @@ For complete, runnable examples, see the following files in the examples directo
 
 **Solution**: Use the provided metrics to identify bottlenecks. Consider caching authorization results for frequently accessed operations.
 
+
 ## Related Components
 
 - [Auth](../auth/README.md) - The auth component provides JWT authentication middleware used by the graphql package.
 - [Middleware](../middleware/README.md) - The middleware component includes HTTP middleware for authentication and authorization.
 - [Telemetry](../telemetry/README.md) - The telemetry component provides metrics and tracing used by the graphql package.
 
+
 ## Contributing
 
 Contributions to this component are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
+
 
 ## License
 

@@ -1,5 +1,4 @@
 # ServiceLib Error Handling
-
 This package provides a comprehensive error handling system for the application. It includes error codes, HTTP status mapping, contextual information, and utilities for creating, wrapping, and serializing errors.
 
 For detailed information about the error handling design, including design principles, error type hierarchy, relationships between packages, and best practices, see [Error Handling Design](error_handling_design.md).
@@ -16,6 +15,11 @@ The error handling package is organized into several sub-packages:
   - `metrics`: Metrics integration
   - `trace`: Tracing integration
   - `utils`: Utility functions for error handling
+
+
+## Overview
+
+Brief description of the errors and its purpose in the ServiceLib library.
 
 ## Features
 
@@ -52,6 +56,7 @@ The error handling package is organized into several sub-packages:
   - Log errors with all contextual information
   - Record error metrics with error type and code
   - Add error information to traces
+
 
 ## Installation
 
@@ -310,6 +315,46 @@ func logError(ctx context.Context, err error) {
 }
 ```
 
+
+## Quick Start
+
+See the [Quick Start example](../EXAMPLES/errors/quickstart_example.go) for a complete, runnable example of how to use the errors.
+
+## Configuration
+
+See the [Configuration example](../EXAMPLES/errors/configuration_example.go) for a complete, runnable example of how to configure the errors.
+
+## API Documentation
+
+
+### Core Types
+
+Description of the main types provided by the errors.
+
+#### Type 1
+
+Description of Type 1 and its purpose.
+
+See the [Type 1 example](../EXAMPLES/errors/type1_example.go) for a complete, runnable example of how to use Type 1.
+
+### Key Methods
+
+Description of the key methods provided by the errors.
+
+#### Method 1
+
+Description of Method 1 and its purpose.
+
+See the [Method 1 example](../EXAMPLES/errors/method1_example.go) for a complete, runnable example of how to use Method 1.
+
+## Examples
+
+For complete, runnable examples, see the following files in the EXAMPLES directory:
+
+- [Basic Usage](../EXAMPLES/errors/basic_usage_example.go) - Shows basic usage of the errors
+- [Advanced Configuration](../EXAMPLES/errors/advanced_configuration_example.go) - Shows advanced configuration options
+- [Error Handling](../EXAMPLES/errors/error_handling_example.go) - Shows how to handle errors
+
 ## Best Practices
 
 ### 1. Use the Appropriate Error Type
@@ -417,6 +462,28 @@ The error handling system automatically includes source file and line informatio
 // The error will include the source file and line number
 err := errors.New(errors.InternalErrorCode, "Something went wrong")
 ```
+
+
+## Troubleshooting
+
+### Common Issues
+
+#### Issue 1
+
+Description of issue 1 and how to resolve it.
+
+#### Issue 2
+
+Description of issue 2 and how to resolve it.
+
+## Related Components
+
+- [Component 1](../errors1/README.md) - Description of how this errors relates to Component 1
+- [Component 2](../errors2/README.md) - Description of how this errors relates to Component 2
+
+## Contributing
+
+Contributions to this errors are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
 
 ## License
 

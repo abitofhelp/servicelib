@@ -6,7 +6,7 @@ This directory contains examples demonstrating how to use the `date` package, wh
 
 ### 1. Basic Usage Example
 
-[basic_usage_example.go](basic_usage_example.go)
+[basic_usage/main.go](basic_usage/main.go)
 
 Demonstrates basic date parsing and formatting.
 
@@ -18,7 +18,7 @@ Key concepts:
 
 ### 2. Optional Date Example
 
-[optional_date_example.go](optional_date_example.go)
+[optional_date/main.go](optional_date/main.go)
 
 Shows how to work with optional (nullable) dates.
 
@@ -30,7 +30,7 @@ Key concepts:
 
 ### 3. Error Handling Example
 
-[error_handling_example.go](error_handling_example.go)
+[error_handling/main.go](error_handling/main.go)
 
 Demonstrates error handling for invalid dates.
 
@@ -42,7 +42,7 @@ Key concepts:
 
 ### 4. Time Zone Example
 
-[time_zone_example.go](time_zone_example.go)
+[time_zone/main.go](time_zone/main.go)
 
 Shows how to work with dates in different time zones.
 
@@ -58,7 +58,7 @@ Key concepts:
 To run any of the examples, use the `go run` command:
 
 ```bash
-go run examples/date/basic_usage_example.go
+go run basic_usage/main.go
 ```
 
 ## Key Features of the Date Package

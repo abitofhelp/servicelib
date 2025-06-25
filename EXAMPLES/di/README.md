@@ -6,7 +6,7 @@ This directory contains examples demonstrating how to use the `di` package, whic
 
 ### 1. Basic Usage Example
 
-[basic_usage_example.go](basic_usage_example.go)
+[basic_usage/main.go](basic_usage/main.go)
 
 Demonstrates basic usage of the Container type, including:
 - Creating a container with context, logger, and configuration
@@ -14,7 +14,7 @@ Demonstrates basic usage of the Container type, including:
 
 ### 2. Service Container Example
 
-[service_container_example.go](service_container_example.go)
+[service_container/main.go](service_container/main.go)
 
 Demonstrates how to use the ServiceContainer type, including:
 - Implementing the Repository, DomainService, and ApplicationService interfaces
@@ -24,7 +24,7 @@ Demonstrates how to use the ServiceContainer type, including:
 
 ### 3. Generic Container Example
 
-[generic_container_example.go](generic_container_example.go)
+[generic_container/main.go](generic_container/main.go)
 
 Demonstrates how to use the GenericAppContainer type, including:
 - Implementing repository, domain service, and application service initializers
@@ -36,9 +36,9 @@ Demonstrates how to use the GenericAppContainer type, including:
 To run any of the examples, use the `go run` command:
 
 ```bash
-go run basic_usage_example.go
-go run service_container_example.go
-go run generic_container_example.go
+go run basic_usage/main.go
+go run service_container/main.go
+go run generic_container/main.go
 ```
 
 ## Additional Resources
