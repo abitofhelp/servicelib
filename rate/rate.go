@@ -20,17 +20,31 @@ import (
 	"go.uber.org/zap"
 )
 
-// Config contains rate limiter configuration parameters
+// Config contains rate limiter configuration parameters.
+// It defines the behavior of the rate limiter, including whether it's enabled,
+// how many requests are allowed per second, and the maximum burst size.
 type Config struct {
-	// Enabled determines if the rate limiter is enabled
+	// Enabled determines if the rate limiter is enabled.
+	// If set to false, all requests will be allowed without rate limiting.
 	Enabled bool
-	// RequestsPerSecond is the number of requests allowed per second
+
+	// RequestsPerSecond is the number of requests allowed per second.
+	// This determines the rate at which tokens are added to the bucket.
 	RequestsPerSecond int
-	// BurstSize is the maximum number of requests allowed in a burst
+
+	// BurstSize is the maximum number of requests allowed in a burst.
+	// This determines the maximum capacity of the token bucket.
 	BurstSize int
 }
 
-// DefaultConfig returns a default rate limiter configuration
+// DefaultConfig returns a default rate limiter configuration.
+// The default configuration includes:
+//   - Enabled: true (rate limiting is enabled)
+//   - RequestsPerSecond: 100 (100 requests allowed per second)
+//   - BurstSize: 50 (maximum of 50 requests allowed in a burst)
+//
+// Returns:
+//   - A Config instance with default values.
 func DefaultConfig() Config {
 	return Config{
 		Enabled:           true,
@@ -39,13 +53,28 @@ func DefaultConfig() Config {
 	}
 }
 
-// WithEnabled sets whether the rate limiter is enabled
+// WithEnabled sets whether the rate limiter is enabled.
+// If enabled is set to false, all requests will be allowed without rate limiting.
+//
+// Parameters:
+//   - enabled: A boolean indicating whether the rate limiter should be enabled.
+//
+// Returns:
+//   - A new Config instance with the updated Enabled value.
 func (c Config) WithEnabled(enabled bool) Config {
 	c.Enabled = enabled
 	return c
 }
 
-// WithRequestsPerSecond sets the number of requests allowed per second
+// WithRequestsPerSecond sets the number of requests allowed per second.
+// This determines the rate at which tokens are added to the bucket.
+// If a non-positive value is provided, it will be set to 1.
+//
+// Parameters:
+//   - requestsPerSecond: The number of requests allowed per second.
+//
+// Returns:
+//   - A new Config instance with the updated RequestsPerSecond value.
 func (c Config) WithRequestsPerSecond(requestsPerSecond int) Config {
 	if requestsPerSecond <= 0 {
 		requestsPerSecond = 1
@@ -54,7 +83,15 @@ func (c Config) WithRequestsPerSecond(requestsPerSecond int) Config {
 	return c
 }
 
-// WithBurstSize sets the maximum number of requests allowed in a burst
+// WithBurstSize sets the maximum number of requests allowed in a burst.
+// This determines the maximum capacity of the token bucket.
+// If a non-positive value is provided, it will be set to 1.
+//
+// Parameters:
+//   - burstSize: The maximum number of requests allowed in a burst.
+//
+// Returns:
+//   - A new Config instance with the updated BurstSize value.
 func (c Config) WithBurstSize(burstSize int) Config {
 	if burstSize <= 0 {
 		burstSize = 1
@@ -63,17 +100,31 @@ func (c Config) WithBurstSize(burstSize int) Config {
 	return c
 }
 
-// Options contains additional options for the rate limiter
+// Options contains additional options for the rate limiter.
+// These options are not directly related to the rate limiting behavior itself,
+// but provide additional functionality like logging, tracing, and identification.
 type Options struct {
-	// Logger is used for logging rate limiter operations
+	// Logger is used for logging rate limiter operations.
+	// If nil, a no-op logger will be used.
 	Logger *logging.ContextLogger
-	// Tracer is used for tracing rate limiter operations
+
+	// Tracer is used for tracing rate limiter operations.
+	// It provides integration with OpenTelemetry for distributed tracing.
 	Tracer telemetry.Tracer
-	// Name is the name of the rate limiter
+
+	// Name is the name of the rate limiter.
+	// This is useful for identifying the rate limiter in logs and traces.
 	Name string
 }
 
-// DefaultOptions returns default options for rate limiter operations
+// DefaultOptions returns default options for rate limiter operations.
+// The default options include:
+//   - No logger (a no-op logger will be used)
+//   - A no-op tracer (no OpenTelemetry integration)
+//   - Name: "default"
+//
+// Returns:
+//   - An Options instance with default values.
 func DefaultOptions() Options {
 	return Options{
 		Logger: nil,
@@ -82,19 +133,44 @@ func DefaultOptions() Options {
 	}
 }
 
-// WithLogger sets the logger for the rate limiter
+// WithLogger sets the logger for the rate limiter.
+// The logger is used to log rate limiter operations, such as when requests are
+// allowed or rejected due to rate limiting.
+//
+// Parameters:
+//   - logger: A ContextLogger instance for logging rate limiter operations.
+//
+// Returns:
+//   - A new Options instance with the updated Logger value.
 func (o Options) WithLogger(logger *logging.ContextLogger) Options {
 	o.Logger = logger
 	return o
 }
 
-// WithOtelTracer returns Options with an OpenTelemetry tracer
+// WithOtelTracer returns Options with an OpenTelemetry tracer.
+// This allows users to opt-in to OpenTelemetry tracing if they need it.
+// The tracer is used to create spans for rate limiter operations, which can be
+// viewed in a distributed tracing system.
+//
+// Parameters:
+//   - tracer: An OpenTelemetry trace.Tracer instance.
+//
+// Returns:
+//   - A new Options instance with the provided OpenTelemetry tracer.
 func (o Options) WithOtelTracer(tracer trace.Tracer) Options {
 	o.Tracer = telemetry.NewOtelTracer(tracer)
 	return o
 }
 
-// WithName sets the name of the rate limiter
+// WithName sets the name of the rate limiter.
+// The name is used to identify the rate limiter in logs and traces,
+// which is especially useful when multiple rate limiters are used in the same application.
+//
+// Parameters:
+//   - name: A string identifier for the rate limiter.
+//
+// Returns:
+//   - A new Options instance with the updated Name value.
 func (o Options) WithName(name string) Options {
 	o.Name = name
 	return o
@@ -102,6 +178,14 @@ func (o Options) WithName(name string) Options {
 
 // RateLimiter implements a token bucket rate limiter to protect resources
 // from being overwhelmed by too many requests.
+//
+// The token bucket algorithm works by maintaining a bucket of tokens that are
+// added at a fixed rate (RequestsPerSecond). Each request consumes one token.
+// If tokens are available, the request is allowed; otherwise, it is rejected
+// or delayed until tokens become available.
+//
+// This implementation is thread-safe and can be used concurrently from multiple
+// goroutines.
 type RateLimiter struct {
 	name           string
 	config         Config
@@ -112,7 +196,16 @@ type RateLimiter struct {
 	mutex          sync.Mutex
 }
 
-// NewRateLimiter creates a new rate limiter
+// NewRateLimiter creates a new rate limiter with the specified configuration and options.
+// If the rate limiter is disabled (config.Enabled is false), a special no-op rate limiter
+// is returned that allows all requests without rate limiting.
+//
+// Parameters:
+//   - config: The configuration parameters for the rate limiter.
+//   - options: Additional options for the rate limiter, such as logging and tracing.
+//
+// Returns:
+//   - A new RateLimiter instance configured according to the provided parameters.
 func NewRateLimiter(config Config, options Options) *RateLimiter {
 	if !config.Enabled {
 		if options.Logger != nil {
@@ -149,8 +242,15 @@ func NewRateLimiter(config Config, options Options) *RateLimiter {
 	}
 }
 
-// Allow checks if a request should be allowed based on the rate limit
-// It returns true if the request is allowed, false otherwise
+// Allow checks if a request should be allowed based on the rate limit.
+// This is a non-blocking method that immediately returns whether the request
+// is allowed or not. If the rate limiter is disabled or nil, all requests are allowed.
+//
+// The method is thread-safe and can be called concurrently from multiple goroutines.
+//
+// Returns:
+//   - true if the request is allowed (a token was available or rate limiting is disabled).
+//   - false if the request is not allowed (no tokens were available).
 func (rl *RateLimiter) Allow() bool {
 	if rl == nil {
 		// If rate limiter is disabled, allow all requests
@@ -172,9 +272,25 @@ func (rl *RateLimiter) Allow() bool {
 	return false
 }
 
-// Execute executes the given function with rate limiting
-// If the rate limit is exceeded, it will return an error immediately
-// Otherwise, it will execute the function
+// Execute executes a function with rate limiting.
+// This is a generic function that works with any return type. If the rate limit
+// is exceeded, it returns an error without executing the function. If the rate
+// limit is not exceeded, it executes the function and returns its result.
+//
+// This is a non-blocking operation - it will not wait for tokens to become available.
+//
+// Type Parameters:
+//   - T: The return type of the function to execute.
+//
+// Parameters:
+//   - ctx: The context for the operation. Can be used to cancel the operation.
+//   - rl: The rate limiter to use. If nil, the function is executed without rate limiting.
+//   - operation: A name for the operation being performed, used in logs and traces.
+//   - fn: The function to execute if the rate limit is not exceeded.
+//
+// Returns:
+//   - The result of the function execution, or the zero value of T if the rate limit is exceeded.
+//   - An error if the rate limit is exceeded or if the function returns an error.
 func Execute[T any](ctx context.Context, rl *RateLimiter, operation string, fn func(ctx context.Context) (T, error)) (T, error) {
 	var zero T
 
@@ -227,9 +343,25 @@ func Execute[T any](ctx context.Context, rl *RateLimiter, operation string, fn f
 	return result, err
 }
 
-// ExecuteWithWait executes the given function with rate limiting
-// If the rate limit is exceeded, it will wait until a token is available
-// and then execute the function
+// ExecuteWithWait executes a function with rate limiting, waiting if necessary.
+// This is a generic function that works with any return type. If the rate limit
+// is exceeded, it will wait until a token becomes available before executing the function.
+// If the context is canceled while waiting, it returns an error without executing the function.
+//
+// This is a blocking operation - it will wait for tokens to become available.
+//
+// Type Parameters:
+//   - T: The return type of the function to execute.
+//
+// Parameters:
+//   - ctx: The context for the operation. Can be used to cancel the operation.
+//   - rl: The rate limiter to use. If nil, the function is executed without rate limiting.
+//   - operation: A name for the operation being performed, used in logs and traces.
+//   - fn: The function to execute when a token becomes available.
+//
+// Returns:
+//   - The result of the function execution, or the zero value of T if the context is canceled.
+//   - An error if the context is canceled or if the function returns an error.
 func ExecuteWithWait[T any](ctx context.Context, rl *RateLimiter, operation string, fn func(ctx context.Context) (T, error)) (T, error) {
 	var zero T
 
@@ -312,7 +444,13 @@ func min(a, b int) int {
 	return b
 }
 
-// Reset resets the rate limiter to its initial state
+// Reset resets the rate limiter to its initial state.
+// This method refills the token bucket to its maximum capacity (BurstSize)
+// and resets the last refill time to the current time. This is useful for
+// testing or when you want to clear any rate limiting history.
+//
+// The method is thread-safe and can be called concurrently from multiple goroutines.
+// If the rate limiter is nil, this method does nothing.
 func (rl *RateLimiter) Reset() {
 	if rl == nil {
 		return

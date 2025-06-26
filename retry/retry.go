@@ -32,23 +32,57 @@ var (
 	rng      = rand.New(rand.NewSource(time.Now().UnixNano()))
 )
 
-// RetryableFunc is a function that can be retried
+// RetryableFunc is a function that can be retried.
+// It takes a context.Context parameter and returns an error.
+// If the function returns nil, it is considered successful.
+// If it returns an error, the retry mechanism will determine whether to retry based on the IsRetryableError function.
 type RetryableFunc func(ctx context.Context) error
 
-// IsRetryableError is a function that determines if an error is retryable
+// IsRetryableError is a function that determines if an error is retryable.
+// It takes an error parameter and returns a boolean indicating whether the error should be retried.
+// Return true to retry the operation, false to stop retrying and return the error.
 type IsRetryableError func(err error) bool
 
-// Config contains retry configuration parameters
+// Config contains retry configuration parameters.
+// It defines how retry operations should behave, including the number of retries,
+// backoff durations, and jitter factors.
 type Config struct {
-	MaxRetries      int           // Maximum number of retry attempts
-	InitialBackoff  time.Duration // Initial backoff duration
-	MaxBackoff      time.Duration // Maximum backoff duration
-	BackoffFactor   float64       // Factor by which the backoff increases
-	JitterFactor    float64       // Factor for random jitter (0-1)
-	RetryableErrors []error       // Errors that are considered retryable
+	// MaxRetries is the maximum number of retry attempts that will be made.
+	// The total number of attempts will be MaxRetries + 1 (including the initial attempt).
+	MaxRetries int
+
+	// InitialBackoff is the duration to wait before the first retry attempt.
+	// This value will be multiplied by BackoffFactor for subsequent retries.
+	InitialBackoff time.Duration
+
+	// MaxBackoff is the maximum duration to wait between retry attempts.
+	// The backoff duration will not exceed this value, regardless of the BackoffFactor.
+	MaxBackoff time.Duration
+
+	// BackoffFactor is the factor by which the backoff duration increases after each retry.
+	// For example, a BackoffFactor of 2.0 will double the backoff duration after each retry.
+	BackoffFactor float64
+
+	// JitterFactor is a factor for adding random jitter to the backoff duration.
+	// It should be a value between 0 and 1, where 0 means no jitter and 1 means maximum jitter.
+	// Jitter helps prevent multiple retries from occurring simultaneously (thundering herd).
+	JitterFactor float64
+
+	// RetryableErrors is a list of specific errors that should be considered retryable.
+	// If an error matches one of these errors (using errors.Is), it will be retried.
+	RetryableErrors []error
 }
 
-// DefaultConfig returns a default retry configuration
+// DefaultConfig returns a default retry configuration with reasonable values.
+// The default configuration includes:
+//   - 3 maximum retry attempts (4 total attempts including the initial one)
+//   - 100ms initial backoff
+//   - 2s maximum backoff
+//   - 2.0 backoff factor (doubles the backoff after each retry)
+//   - 0.2 jitter factor (adds up to 20% random jitter to the backoff)
+//
+// Returns:
+//   - A Config instance with default values.
 func DefaultConfig() Config {
 	return Config{
 		MaxRetries:     3,
@@ -59,7 +93,14 @@ func DefaultConfig() Config {
 	}
 }
 
-// WithMaxRetries sets the maximum number of retry attempts
+// WithMaxRetries sets the maximum number of retry attempts.
+// If a negative value is provided, it will be set to 0 (no retries).
+//
+// Parameters:
+//   - maxRetries: The maximum number of retry attempts.
+//
+// Returns:
+//   - A new Config instance with the updated MaxRetries value.
 func (c Config) WithMaxRetries(maxRetries int) Config {
 	// Ensure maxRetries is non-negative
 	if maxRetries < 0 {
@@ -69,7 +110,14 @@ func (c Config) WithMaxRetries(maxRetries int) Config {
 	return c
 }
 
-// WithInitialBackoff sets the initial backoff duration
+// WithInitialBackoff sets the initial backoff duration.
+// If a non-positive value is provided, it will be set to 1ms.
+//
+// Parameters:
+//   - initialBackoff: The duration to wait before the first retry attempt.
+//
+// Returns:
+//   - A new Config instance with the updated InitialBackoff value.
 func (c Config) WithInitialBackoff(initialBackoff time.Duration) Config {
 	// Ensure initialBackoff is positive
 	if initialBackoff <= 0 {
@@ -79,7 +127,14 @@ func (c Config) WithInitialBackoff(initialBackoff time.Duration) Config {
 	return c
 }
 
-// WithMaxBackoff sets the maximum backoff duration
+// WithMaxBackoff sets the maximum backoff duration.
+// If a non-positive value is provided, it will be set to the initial backoff duration.
+//
+// Parameters:
+//   - maxBackoff: The maximum duration to wait between retry attempts.
+//
+// Returns:
+//   - A new Config instance with the updated MaxBackoff value.
 func (c Config) WithMaxBackoff(maxBackoff time.Duration) Config {
 	// Ensure maxBackoff is positive
 	if maxBackoff <= 0 {
@@ -89,7 +144,14 @@ func (c Config) WithMaxBackoff(maxBackoff time.Duration) Config {
 	return c
 }
 
-// WithBackoffFactor sets the factor by which the backoff increases
+// WithBackoffFactor sets the factor by which the backoff duration increases after each retry.
+// If a non-positive value is provided, it will be set to 1.0 (no increase).
+//
+// Parameters:
+//   - backoffFactor: The factor by which the backoff increases.
+//
+// Returns:
+//   - A new Config instance with the updated BackoffFactor value.
 func (c Config) WithBackoffFactor(backoffFactor float64) Config {
 	// Ensure backoffFactor is positive
 	if backoffFactor <= 0 {
@@ -99,7 +161,15 @@ func (c Config) WithBackoffFactor(backoffFactor float64) Config {
 	return c
 }
 
-// WithJitterFactor sets the factor for random jitter
+// WithJitterFactor sets the factor for adding random jitter to the backoff duration.
+// The value should be between 0 and 1, where 0 means no jitter and 1 means maximum jitter.
+// If a value outside this range is provided, it will be clamped to the valid range.
+//
+// Parameters:
+//   - jitterFactor: The factor for random jitter (0-1).
+//
+// Returns:
+//   - A new Config instance with the updated JitterFactor value.
 func (c Config) WithJitterFactor(jitterFactor float64) Config {
 	// Ensure jitterFactor is between 0 and 1
 	if jitterFactor < 0 {
@@ -111,21 +181,39 @@ func (c Config) WithJitterFactor(jitterFactor float64) Config {
 	return c
 }
 
-// WithRetryableErrors sets the errors that are considered retryable
+// WithRetryableErrors sets the list of specific errors that should be considered retryable.
+// If an error matches one of these errors (using errors.Is), it will be retried.
+//
+// Parameters:
+//   - retryableErrors: A slice of errors that should be considered retryable.
+//
+// Returns:
+//   - A new Config instance with the updated RetryableErrors value.
 func (c Config) WithRetryableErrors(retryableErrors []error) Config {
 	c.RetryableErrors = retryableErrors
 	return c
 }
 
-// Options contains additional options for the retry operation
+// Options contains additional options for the retry operation.
+// These options are not directly related to the retry behavior itself,
+// but provide additional functionality like logging and tracing.
 type Options struct {
-	// Logger is used for logging retry operations
+	// Logger is used for logging retry operations.
+	// If nil, a no-op logger will be used.
 	Logger *logging.ContextLogger
-	// Tracer is used for tracing retry operations
+
+	// Tracer is used for tracing retry operations.
+	// It provides integration with OpenTelemetry for distributed tracing.
 	Tracer telemetry.Tracer
 }
 
-// DefaultOptions returns default options for retry operations
+// DefaultOptions returns default options for retry operations.
+// The default options include:
+//   - No logger (a no-op logger will be used)
+//   - A no-op tracer (no OpenTelemetry integration)
+//
+// Returns:
+//   - An Options instance with default values.
 func DefaultOptions() Options {
 	// Use no-op tracer by default to make OpenTelemetry dependency optional
 	return Options{
@@ -134,19 +222,48 @@ func DefaultOptions() Options {
 	}
 }
 
-// WithOtelTracer returns Options with an OpenTelemetry tracer
-// This allows users to opt-in to OpenTelemetry tracing if they need it
+// WithOtelTracer returns Options with an OpenTelemetry tracer.
+// This allows users to opt-in to OpenTelemetry tracing if they need it.
+//
+// Parameters:
+//   - tracer: An OpenTelemetry trace.Tracer instance.
+//
+// Returns:
+//   - A new Options instance with the provided OpenTelemetry tracer.
 func (o Options) WithOtelTracer(tracer trace.Tracer) Options {
 	o.Tracer = telemetry.NewOtelTracer(tracer)
 	return o
 }
 
-// Do executes the given function with retry logic using default options
+// Do executes the given function with retry logic using default options.
+// This is a convenience wrapper around DoWithOptions that uses DefaultOptions().
+//
+// Parameters:
+//   - ctx: The context for the operation. Can be used to cancel the retry operation.
+//   - fn: The function to execute with retry logic.
+//   - config: The retry configuration parameters.
+//   - isRetryable: A function that determines if an error is retryable.
+//
+// Returns:
+//   - The error from the last execution of the function, or nil if successful.
 func Do(ctx context.Context, fn RetryableFunc, config Config, isRetryable IsRetryableError) error {
 	return DoWithOptions(ctx, fn, config, isRetryable, DefaultOptions())
 }
 
-// DoWithOptions executes the given function with retry logic and custom options
+// DoWithOptions executes the given function with retry logic and custom options.
+// It will retry the function according to the provided configuration and retry condition.
+// The function will be retried if it returns an error and the isRetryable function returns true.
+// The retry operation can be canceled by canceling the context.
+//
+// Parameters:
+//   - ctx: The context for the operation. Can be used to cancel the retry operation.
+//   - fn: The function to execute with retry logic.
+//   - config: The retry configuration parameters.
+//   - isRetryable: A function that determines if an error is retryable.
+//   - options: Additional options for the retry operation, such as logging and tracing.
+//
+// Returns:
+//   - The error from the last execution of the function, or nil if successful.
 func DoWithOptions(ctx context.Context, fn RetryableFunc, config Config, isRetryable IsRetryableError, options Options) error {
 	// Create a span for the entire retry operation
 	var span telemetry.Span
@@ -318,17 +435,44 @@ func DoWithOptions(ctx context.Context, fn RetryableFunc, config Config, isRetry
 	return unexpectedErr
 }
 
-// Deprecated: Use errors.IsNetworkError instead
+// IsNetworkError checks if an error is a network-related error.
+//
+// Deprecated: Use errors.IsNetworkError instead.
+// This function is maintained for backward compatibility and will be removed in a future version.
+//
+// Parameters:
+//   - err: The error to check.
+//
+// Returns:
+//   - true if the error is a network-related error, false otherwise.
 func IsNetworkError(err error) bool {
 	return errors.IsNetworkError(err)
 }
 
-// Deprecated: Use errors.IsTimeout instead
+// IsTimeoutError checks if an error is a timeout error.
+//
+// Deprecated: Use errors.IsTimeout instead.
+// This function is maintained for backward compatibility and will be removed in a future version.
+//
+// Parameters:
+//   - err: The error to check.
+//
+// Returns:
+//   - true if the error indicates a timeout, false otherwise.
 func IsTimeoutError(err error) bool {
 	return errors.IsTimeout(err)
 }
 
-// Deprecated: Use errors.IsTransientError instead
+// IsTransientError checks if an error is a transient error that may be resolved by retrying.
+//
+// Deprecated: Use errors.IsTransientError instead.
+// This function is maintained for backward compatibility and will be removed in a future version.
+//
+// Parameters:
+//   - err: The error to check.
+//
+// Returns:
+//   - true if the error is likely transient and may be resolved by retrying, false otherwise.
 func IsTransientError(err error) bool {
 	return errors.IsTransientError(err)
 }

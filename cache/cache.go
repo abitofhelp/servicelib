@@ -17,25 +17,45 @@ import (
 	"go.uber.org/zap"
 )
 
-// Item represents a cached item with its value and expiration time
+// Item represents a cached item with its value and expiration time.
+// It is a generic struct that can hold any type of value along with its expiration timestamp.
 type Item[T any] struct {
-	Value      T
+	// Value is the cached data of type T
+	Value T
+	// Expiration is the Unix timestamp in nanoseconds when this item expires
 	Expiration int64
 }
 
-// Config contains cache configuration parameters
+// Config contains cache configuration parameters.
+// It defines the behavior of the cache, including whether it's enabled,
+// how long items are kept, the maximum size, and how often cleanup occurs.
 type Config struct {
-	// Enabled determines if the cache is enabled
+	// Enabled determines if the cache is enabled.
+	// If set to false, cache operations become no-ops.
 	Enabled bool
-	// TTL is the default time-to-live for cache items
+
+	// TTL is the default time-to-live for cache items.
+	// Items older than this duration will be automatically removed during cleanup.
 	TTL time.Duration
-	// MaxSize is the maximum number of items in the cache
+
+	// MaxSize is the maximum number of items in the cache.
+	// When this limit is reached, new items will cause old items to be evicted.
 	MaxSize int
-	// PurgeInterval is the interval at which expired items are purged
+
+	// PurgeInterval is the interval at which expired items are purged.
+	// A background goroutine runs at this interval to remove expired items.
 	PurgeInterval time.Duration
 }
 
-// DefaultConfig returns a default cache configuration
+// DefaultConfig returns a default cache configuration with reasonable values.
+// The default configuration includes:
+//   - Enabled: true (cache is enabled)
+//   - TTL: 5 minutes (items expire after 5 minutes)
+//   - MaxSize: 1000 (maximum of 1000 items in the cache)
+//   - PurgeInterval: 1 minute (expired items are purged every minute)
+//
+// Returns:
+//   - A Config instance with default values.
 func DefaultConfig() Config {
 	return Config{
 		Enabled:       true,
@@ -45,13 +65,28 @@ func DefaultConfig() Config {
 	}
 }
 
-// WithEnabled sets whether the cache is enabled
+// WithEnabled sets whether the cache is enabled.
+// If enabled is set to false, cache operations become no-ops.
+//
+// Parameters:
+//   - enabled: A boolean indicating whether the cache should be enabled.
+//
+// Returns:
+//   - A new Config instance with the updated Enabled value.
 func (c Config) WithEnabled(enabled bool) Config {
 	c.Enabled = enabled
 	return c
 }
 
-// WithTTL sets the default time-to-live for cache items
+// WithTTL sets the default time-to-live for cache items.
+// This determines how long items remain in the cache before they expire.
+// If a non-positive value is provided, it will be set to 1 millisecond.
+//
+// Parameters:
+//   - ttl: The time-to-live duration for cache items.
+//
+// Returns:
+//   - A new Config instance with the updated TTL value.
 func (c Config) WithTTL(ttl time.Duration) Config {
 	if ttl <= 0 {
 		ttl = 1 * time.Millisecond
@@ -60,7 +95,15 @@ func (c Config) WithTTL(ttl time.Duration) Config {
 	return c
 }
 
-// WithMaxSize sets the maximum number of items in the cache
+// WithMaxSize sets the maximum number of items in the cache.
+// When this limit is reached, new items will cause old items to be evicted.
+// If a non-positive value is provided, it will be set to 1.
+//
+// Parameters:
+//   - maxSize: The maximum number of items allowed in the cache.
+//
+// Returns:
+//   - A new Config instance with the updated MaxSize value.
 func (c Config) WithMaxSize(maxSize int) Config {
 	if maxSize <= 0 {
 		maxSize = 1
@@ -69,7 +112,15 @@ func (c Config) WithMaxSize(maxSize int) Config {
 	return c
 }
 
-// WithPurgeInterval sets the interval at which expired items are purged
+// WithPurgeInterval sets the interval at which expired items are purged.
+// A background goroutine runs at this interval to remove expired items.
+// If a non-positive value is provided, it will be set to 1 millisecond.
+//
+// Parameters:
+//   - purgeInterval: The interval between purge operations.
+//
+// Returns:
+//   - A new Config instance with the updated PurgeInterval value.
 func (c Config) WithPurgeInterval(purgeInterval time.Duration) Config {
 	if purgeInterval <= 0 {
 		purgeInterval = 1 * time.Millisecond
