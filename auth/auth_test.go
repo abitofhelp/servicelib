@@ -45,6 +45,34 @@ func TestNew(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, authInstance)
 
+	// Test with JWT remote validation enabled
+	remoteConfig := auth.DefaultConfig()
+	remoteConfig.JWT.SecretKey = "test-secret-key-that-is-at-least-32-chars"
+	remoteConfig.JWT.TokenDuration = 1 * time.Hour
+	remoteConfig.JWT.Issuer = "test-issuer"
+	remoteConfig.JWT.Remote.Enabled = true
+	remoteConfig.JWT.Remote.ValidationURL = "https://example.com/validate"
+	remoteConfig.JWT.Remote.ClientID = "test-client-id"
+	remoteConfig.JWT.Remote.ClientSecret = "test-client-secret"
+	remoteConfig.JWT.Remote.Timeout = 5 * time.Second
+
+	authInstance, err = auth.New(ctx, remoteConfig, logger)
+	assert.NoError(t, err)
+	assert.NotNil(t, authInstance)
+
+	// Test with invalid JWT remote validation configuration
+	invalidRemoteConfig := auth.DefaultConfig()
+	invalidRemoteConfig.JWT.SecretKey = "test-secret-key-that-is-at-least-32-chars"
+	invalidRemoteConfig.JWT.TokenDuration = 1 * time.Hour
+	invalidRemoteConfig.JWT.Issuer = "test-issuer"
+	invalidRemoteConfig.JWT.Remote.Enabled = true
+	invalidRemoteConfig.JWT.Remote.ValidationURL = "" // Empty validation URL should cause validation error
+	invalidRemoteConfig.JWT.Remote.Timeout = 0 // Zero timeout should cause validation error
+
+	authInstance, err = auth.New(ctx, invalidRemoteConfig, logger)
+	assert.Error(t, err)
+	assert.Nil(t, authInstance)
+
 	// Test with OIDC configuration
 	oidcConfig := auth.DefaultConfig()
 	oidcConfig.JWT.SecretKey = "test-secret-key-that-is-at-least-32-chars"
@@ -52,11 +80,28 @@ func TestNew(t *testing.T) {
 	oidcConfig.JWT.Issuer = "test-issuer"
 	oidcConfig.OIDC.IssuerURL = "https://example.com"
 	oidcConfig.OIDC.ClientID = "test-client-id"
+	oidcConfig.OIDC.ClientSecret = "test-client-secret"
+	oidcConfig.OIDC.RedirectURL = "https://example.com/callback"
+	oidcConfig.OIDC.Scopes = []string{"openid", "profile", "email"}
+	oidcConfig.OIDC.Timeout = 5 * time.Second
 
 	// Skip this test since it requires an external OIDC provider
 	// authInstance, err = auth.New(ctx, oidcConfig, logger)
 	// assert.NoError(t, err)
 	// assert.NotNil(t, authInstance)
+
+	// Test with invalid OIDC configuration
+	invalidOIDCConfig := auth.DefaultConfig()
+	invalidOIDCConfig.JWT.SecretKey = "test-secret-key-that-is-at-least-32-chars"
+	invalidOIDCConfig.JWT.TokenDuration = 1 * time.Hour
+	invalidOIDCConfig.JWT.Issuer = "test-issuer"
+	invalidOIDCConfig.OIDC.IssuerURL = "" // Empty issuer URL
+	invalidOIDCConfig.OIDC.ClientID = "test-client-id"
+	invalidOIDCConfig.OIDC.Timeout = 0 // Zero timeout
+
+	authInstance, err = auth.New(ctx, invalidOIDCConfig, logger)
+	assert.Error(t, err)
+	assert.Nil(t, authInstance)
 }
 
 // TestDefaultConfig tests the DefaultConfig function
@@ -381,4 +426,81 @@ func TestContextFunctions(t *testing.T) {
 	assert.False(t, ok)
 
 	assert.False(t, auth.IsAuthenticated(emptyCtx))
+}
+
+// TestValidateConfig tests the ValidateConfig function
+func TestValidateConfig(t *testing.T) {
+	// Test with valid configuration
+	validConfig := auth.DefaultConfig()
+	validConfig.JWT.SecretKey = "test-secret-key-that-is-at-least-32-chars"
+	validConfig.JWT.TokenDuration = 1 * time.Hour
+	validConfig.JWT.Issuer = "test-issuer"
+	validConfig.Service.AdminRoleName = "admin"
+	validConfig.Service.ReadOnlyRoleName = "reader"
+	validConfig.Service.ReadOperationPrefixes = []string{"read:", "get:"}
+
+	result := auth.ValidateConfig(validConfig)
+	assert.True(t, result.IsValid())
+	assert.Nil(t, result.Error())
+
+	// Test with invalid JWT configuration
+	invalidJWTConfig := auth.DefaultConfig()
+	invalidJWTConfig.JWT.SecretKey = "" // Empty secret key should cause validation error
+	invalidJWTConfig.JWT.TokenDuration = 0 // Zero duration should cause validation error
+	invalidJWTConfig.JWT.Issuer = "" // Empty issuer should cause validation error
+
+	result = auth.ValidateConfig(invalidJWTConfig)
+	assert.False(t, result.IsValid())
+	assert.NotNil(t, result.Error())
+
+	// Test with invalid JWT Remote configuration
+	invalidRemoteConfig := auth.DefaultConfig()
+	invalidRemoteConfig.JWT.SecretKey = "test-secret-key-that-is-at-least-32-chars"
+	invalidRemoteConfig.JWT.TokenDuration = 1 * time.Hour
+	invalidRemoteConfig.JWT.Issuer = "test-issuer"
+	invalidRemoteConfig.JWT.Remote.Enabled = true
+	invalidRemoteConfig.JWT.Remote.ValidationURL = "" // Empty validation URL should cause validation error
+	invalidRemoteConfig.JWT.Remote.Timeout = 0 // Zero timeout should cause validation error
+
+	result = auth.ValidateConfig(invalidRemoteConfig)
+	assert.False(t, result.IsValid())
+	assert.NotNil(t, result.Error())
+
+	// Test with invalid OIDC configuration
+	invalidOIDCConfig := auth.DefaultConfig()
+	invalidOIDCConfig.JWT.SecretKey = "test-secret-key-that-is-at-least-32-chars"
+	invalidOIDCConfig.JWT.TokenDuration = 1 * time.Hour
+	invalidOIDCConfig.JWT.Issuer = "test-issuer"
+	invalidOIDCConfig.OIDC.IssuerURL = "" // Empty issuer URL should cause validation error
+	invalidOIDCConfig.OIDC.ClientID = "test-client-id"
+	invalidOIDCConfig.OIDC.Timeout = 0 // Zero timeout should cause validation error
+
+	result = auth.ValidateConfig(invalidOIDCConfig)
+	assert.False(t, result.IsValid())
+	assert.NotNil(t, result.Error())
+
+	// Test with another invalid OIDC configuration (ClientID provided but IssuerURL missing)
+	invalidOIDCConfig2 := auth.DefaultConfig()
+	invalidOIDCConfig2.JWT.SecretKey = "test-secret-key-that-is-at-least-32-chars"
+	invalidOIDCConfig2.JWT.TokenDuration = 1 * time.Hour
+	invalidOIDCConfig2.JWT.Issuer = "test-issuer"
+	invalidOIDCConfig2.OIDC.IssuerURL = ""
+	invalidOIDCConfig2.OIDC.ClientID = "test-client-id" // ClientID provided but IssuerURL missing should cause validation error
+
+	result = auth.ValidateConfig(invalidOIDCConfig2)
+	assert.False(t, result.IsValid())
+	assert.NotNil(t, result.Error())
+
+	// Test with invalid Service configuration
+	invalidServiceConfig := auth.DefaultConfig()
+	invalidServiceConfig.JWT.SecretKey = "test-secret-key-that-is-at-least-32-chars"
+	invalidServiceConfig.JWT.TokenDuration = 1 * time.Hour
+	invalidServiceConfig.JWT.Issuer = "test-issuer"
+	invalidServiceConfig.Service.AdminRoleName = "" // Empty admin role name should cause validation error
+	invalidServiceConfig.Service.ReadOnlyRoleName = "" // Empty read-only role name should cause validation error
+	invalidServiceConfig.Service.ReadOperationPrefixes = []string{} // Empty read operation prefixes should cause validation error
+
+	result = auth.ValidateConfig(invalidServiceConfig)
+	assert.False(t, result.IsValid())
+	assert.NotNil(t, result.Error())
 }

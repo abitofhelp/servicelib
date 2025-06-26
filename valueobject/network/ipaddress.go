@@ -31,7 +31,8 @@ func NewIPAddress(ip string) (IPAddress, error) {
 		return "", errors.New("invalid IP address format")
 	}
 
-	return IPAddress(trimmedIP), nil
+	// Use the normalized string format from net.ParseIP
+	return IPAddress(parsedIP.String()), nil
 }
 
 // String returns the string representation of the IPAddress
