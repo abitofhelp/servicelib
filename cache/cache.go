@@ -129,17 +129,32 @@ func (c Config) WithPurgeInterval(purgeInterval time.Duration) Config {
 	return c
 }
 
-// Options contains additional options for the cache
+// Options contains additional options for the cache.
+// These options are not directly related to the cache behavior itself,
+// but provide additional functionality like logging, tracing, and identification.
 type Options struct {
-	// Logger is used for logging cache operations
+	// Logger is used for logging cache operations.
+	// If nil, a no-op logger will be used.
 	Logger *logging.ContextLogger
-	// Tracer is used for tracing cache operations
+
+	// Tracer is used for tracing cache operations.
+	// It provides integration with OpenTelemetry for distributed tracing.
 	Tracer telemetry.Tracer
-	// Name is the name of the cache
+
+	// Name is the name of the cache.
+	// This is useful for identifying the cache in logs and traces,
+	// especially when multiple caches are used in the same application.
 	Name string
 }
 
-// DefaultOptions returns default options for cache operations
+// DefaultOptions returns default options for cache operations.
+// The default options include:
+//   - No logger (a no-op logger will be used)
+//   - A no-op tracer (no OpenTelemetry integration)
+//   - Name: "default"
+//
+// Returns:
+//   - An Options instance with default values.
 func DefaultOptions() Options {
 	return Options{
 		Logger: nil,
