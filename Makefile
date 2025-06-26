@@ -159,11 +159,13 @@ test-package:
 coverage: test
 	@echo "Generating coverage report..."
 	$(GOCMD) tool cover -html=coverage.out -o coverage.html
+	$(GOCMD) tool cover -func=coverage.out
 
 # Generate test coverage report for integration tests
 coverage-integration: test-integration
 	@echo "Generating integration test coverage report..."
 	$(GOCMD) tool cover -html=integration_coverage.out -o integration_coverage.html
+	$(GOCMD) tool cover -func=integration_coverage.out
 
 # Run all tests (unit and integration) and generate a combined coverage report
 test-all:
