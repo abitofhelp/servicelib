@@ -163,19 +163,44 @@ func DefaultOptions() Options {
 	}
 }
 
-// WithLogger sets the logger for the cache
+// WithLogger sets the logger for the cache.
+// The logger is used to log cache operations, such as initialization,
+// evictions, and shutdown events.
+//
+// Parameters:
+//   - logger: A ContextLogger instance for logging cache operations.
+//
+// Returns:
+//   - A new Options instance with the updated Logger value.
 func (o Options) WithLogger(logger *logging.ContextLogger) Options {
 	o.Logger = logger
 	return o
 }
 
-// WithOtelTracer returns Options with an OpenTelemetry tracer
+// WithOtelTracer returns Options with an OpenTelemetry tracer.
+// This allows users to opt-in to OpenTelemetry tracing if they need it.
+// The tracer is used to create spans for cache operations, which can be
+// viewed in a distributed tracing system.
+//
+// Parameters:
+//   - tracer: An OpenTelemetry trace.Tracer instance.
+//
+// Returns:
+//   - A new Options instance with the provided OpenTelemetry tracer.
 func (o Options) WithOtelTracer(tracer trace.Tracer) Options {
 	o.Tracer = telemetry.NewOtelTracer(tracer)
 	return o
 }
 
-// WithName sets the name of the cache
+// WithName sets the name of the cache.
+// The name is used to identify the cache in logs and traces,
+// which is especially useful when multiple caches are used in the same application.
+//
+// Parameters:
+//   - name: A string identifier for the cache.
+//
+// Returns:
+//   - A new Options instance with the updated Name value.
 func (o Options) WithName(name string) Options {
 	o.Name = name
 	return o
