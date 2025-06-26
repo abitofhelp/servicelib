@@ -1,4 +1,6 @@
 ignore:
   - "EXAMPLES"
-  - "tools
+  - "tools"
   - "DOCS"
+
+fail_ci_if_error: true
