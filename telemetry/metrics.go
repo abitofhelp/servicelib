@@ -1,6 +1,13 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
-// Package telemetry provides functionality for monitoring and tracing application behavior.
+// Package telemetry provides functionality for collecting and exporting telemetry data,
+// including distributed tracing and metrics.
+//
+// This file contains metrics-specific components of the telemetry package, including
+// the MetricsProvider for collecting and exporting metrics, common metrics for HTTP,
+// database, and application operations, and utility functions for recording metrics.
+// It integrates with OpenTelemetry and Prometheus to provide a comprehensive metrics
+// collection and reporting system.
 package telemetry
 
 import (

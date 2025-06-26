@@ -1,5 +1,13 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
+// Package telemetry provides functionality for collecting and exporting telemetry data,
+// including distributed tracing and metrics.
+//
+// This file contains the tracing-specific components of the telemetry package,
+// including interfaces and implementations for creating and managing trace spans.
+// It provides abstractions over the underlying OpenTelemetry tracing implementation,
+// making it easier to use tracing throughout the application and to mock tracing
+// in tests.
 package telemetry
 
 import (
@@ -56,18 +64,50 @@ type Tracer interface {
 	Start(ctx context.Context, name string) (context.Context, Span)
 }
 
-// noopSpan is a no-op implementation of Span
+// noopSpan is a no-op implementation of Span.
+// This implementation satisfies the Span interface but does not perform any actual
+// tracing operations. It's used when tracing is disabled or in testing scenarios
+// where actual tracing is not desired.
 type noopSpan struct{}
 
+// End implements the Span.End method but does nothing.
+// This method is called when the operation represented by the span is finished.
 func (s *noopSpan) End() {}
 
+// SetAttributes implements the Span.SetAttributes method but does nothing.
+// This method would normally set attributes on the span to provide additional
+// context about the operation being traced.
+//
+// Parameters:
+//   - attributes: Key-value pairs that would be added as attributes to the span.
 func (s *noopSpan) SetAttributes(attributes ...attribute.KeyValue) {}
 
+// RecordError implements the Span.RecordError method but does nothing.
+// This method would normally mark the span as having encountered an error and
+// add error details to the span.
+//
+// Parameters:
+//   - err: The error that would be recorded.
+//   - opts: Additional options for the error event.
 func (s *noopSpan) RecordError(err error, opts ...trace.EventOption) {}
 
-// noopTracer is a no-op implementation of Tracer
+// noopTracer is a no-op implementation of Tracer.
+// This implementation satisfies the Tracer interface but does not perform any actual
+// tracing operations. It's used when tracing is disabled or in testing scenarios
+// where actual tracing is not desired.
 type noopTracer struct{}
 
+// Start implements the Tracer.Start method but returns a no-op span.
+// This method would normally create a new span with the given name and return
+// a context containing the span and the span itself.
+//
+// Parameters:
+//   - ctx: The parent context that would normally be used to create a child span.
+//   - name: The name of the operation that would be traced.
+//
+// Returns:
+//   - context.Context: The original context, unchanged.
+//   - Span: A no-op implementation of the Span interface.
 func (t *noopTracer) Start(ctx context.Context, name string) (context.Context, Span) {
 	return ctx, &noopSpan{}
 }
@@ -83,28 +123,66 @@ func NewNoopTracer() Tracer {
 	return &noopTracer{}
 }
 
-// otelSpan is an implementation of Span that wraps an OpenTelemetry span
+// otelSpan is an implementation of Span that wraps an OpenTelemetry span.
+// This implementation delegates all operations to the underlying OpenTelemetry span,
+// providing a bridge between our Span interface and the OpenTelemetry trace.Span type.
+// This allows the rest of the application to use our simplified Span interface while
+// still leveraging the full capabilities of OpenTelemetry.
 type otelSpan struct {
+	// span is the underlying OpenTelemetry span that this otelSpan wraps
 	span trace.Span
 }
 
+// End completes the span by calling End on the underlying OpenTelemetry span.
+// This should be called when the operation represented by the span is finished,
+// typically in a defer statement after creating a span.
 func (s *otelSpan) End() {
 	s.span.End()
 }
 
+// SetAttributes sets attributes on the underlying OpenTelemetry span.
+// Attributes provide additional context about the operation being traced,
+// such as request parameters, response codes, or other relevant information.
+//
+// Parameters:
+//   - attributes: Key-value pairs to add as attributes to the span.
 func (s *otelSpan) SetAttributes(attributes ...attribute.KeyValue) {
 	s.span.SetAttributes(attributes...)
 }
 
+// RecordError records an error on the underlying OpenTelemetry span.
+// This marks the span as having encountered an error and adds error details
+// to the span, making it easier to identify and debug failures in traces.
+//
+// Parameters:
+//   - err: The error to record.
+//   - opts: Additional options for the error event, such as timestamps or attributes.
 func (s *otelSpan) RecordError(err error, opts ...trace.EventOption) {
 	s.span.RecordError(err, opts...)
 }
 
-// otelTracer is an implementation of Tracer that uses OpenTelemetry
+// otelTracer is an implementation of Tracer that uses OpenTelemetry.
+// This implementation delegates all operations to the underlying OpenTelemetry tracer,
+// providing a bridge between our Tracer interface and the OpenTelemetry trace.Tracer type.
+// This allows the rest of the application to use our simplified Tracer interface while
+// still leveraging the full capabilities of OpenTelemetry.
 type otelTracer struct {
+	// tracer is the underlying OpenTelemetry tracer that this otelTracer wraps
 	tracer trace.Tracer
 }
 
+// Start creates a new span with the given name using the underlying OpenTelemetry tracer.
+// It returns a new context containing the span and the span itself wrapped in our Span interface.
+// The returned context should be passed to downstream operations to maintain the trace
+// context across function calls.
+//
+// Parameters:
+//   - ctx: The parent context, which may contain a parent span.
+//   - name: The name of the operation being traced, which should be descriptive of the operation.
+//
+// Returns:
+//   - context.Context: A new context containing the span.
+//   - Span: The newly created span wrapped in our Span interface.
 func (t *otelTracer) Start(ctx context.Context, name string) (context.Context, Span) {
 	ctx, span := t.tracer.Start(ctx, name)
 	return ctx, &otelSpan{span: span}

@@ -1,6 +1,12 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
-// Package telemetry provides functionality for monitoring and tracing application behavior.
+// Package telemetry provides functionality for collecting and exporting telemetry data,
+// including distributed tracing and metrics.
+//
+// This file contains HTTP-specific telemetry components, including middleware and
+// instrumentation for HTTP handlers and clients. It provides functions for adding
+// tracing to HTTP requests and responses, propagating trace context across service
+// boundaries, and recording span attributes and errors in HTTP handlers.
 package telemetry
 
 import (

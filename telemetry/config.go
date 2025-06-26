@@ -1,8 +1,12 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
-// Package telemetry provides functionality for monitoring and tracing application behavior.
-// It offers a unified interface for both metrics collection and distributed tracing
-// using OpenTelemetry and Prometheus.
+// Package telemetry provides functionality for collecting and exporting telemetry data,
+// including distributed tracing and metrics.
+//
+// This file contains the configuration structures and loading functions for the telemetry
+// package. It defines the configuration schema for all telemetry components, including
+// tracing, metrics, and OTLP exporters. The configuration can be loaded from a koanf
+// instance, and default values are provided for quick setup in development environments.
 package telemetry
 
 import (

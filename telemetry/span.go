@@ -1,6 +1,12 @@
 // Copyright (c) 2025 A Bit of Help, Inc.
 
-// Package telemetry provides functionality for monitoring and tracing application behavior.
+// Package telemetry provides functionality for collecting and exporting telemetry data,
+// including distributed tracing and metrics.
+//
+// This file contains utility functions for working with spans in the context.
+// It provides helper functions for retrieving and manipulating spans, which are
+// useful for testing, debugging, and integrating with other parts of the application
+// that need access to the current span.
 package telemetry
 
 import (
