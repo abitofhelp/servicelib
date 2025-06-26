@@ -2,13 +2,13 @@
 
 ## Overview
 
-This example demonstrates the basic_usage functionality of the ServiceLib config package.
+This example demonstrates the basic usage of the ServiceLib config package, showing how to create a custom configuration structure, use the GenericConfigAdapter, and access application and database configuration values through a unified interface.
 
 ## Features
 
-- **Feature 1**: Description of feature 1
-- **Feature 2**: Description of feature 2
-- **Feature 3**: Description of feature 3
+- **Custom Configuration Structure**: Create a custom configuration struct that implements required interfaces
+- **Configuration Adapter**: Use the GenericConfigAdapter to access configuration values
+- **Application and Database Settings**: Access application and database configuration through a unified interface
 
 ## Running the Example
 
@@ -20,42 +20,74 @@ go run main.go
 
 ## Code Walkthrough
 
-### Key Component 1
+### Custom Configuration Structure
 
-Description of the first key component in this example:
-
-```
-// Code snippet for key component 1
-```
-
-### Key Component 2
-
-Description of the second key component in this example:
+This example defines a custom configuration struct that implements the required interfaces for application and database configuration:
 
 ```
-// Code snippet for key component 2
+// MyConfig is a simple configuration struct that implements the required interfaces
+type MyConfig struct {
+    Version     string
+    Name        string
+    Environment string
+    DBType      string
+    DBConnStr   map[string]string
+}
+
+// GetAppVersion implements the AppConfigProvider interface
+func (c *MyConfig) GetAppVersion() string {
+    return c.Version
+}
+
+// Additional interface implementation methods...
 ```
 
-### Key Component 3
+### Configuration Adapter
 
-Description of the third key component in this example:
+The example uses the GenericConfigAdapter to provide a standardized way to access configuration values:
 
 ```
-// Code snippet for key component 3
+// Create a config adapter
+adapter := config.NewGenericConfigAdapter(myConfig).
+    WithAppName("MyApplication").
+    WithAppEnvironment("production").
+    WithDatabaseName("my_database")
+```
+
+### Accessing Configuration Values
+
+The example demonstrates how to retrieve application and database configuration values through the adapter:
+
+```
+// Get the app configuration
+appConfig := adapter.GetApp()
+fmt.Println("Application Version:", appConfig.GetVersion())
+fmt.Println("Application Name:", appConfig.GetName())
+fmt.Println("Application Environment:", appConfig.GetEnvironment())
+
+// Get the database configuration
+dbConfig := adapter.GetDatabase()
+fmt.Println("Database Type:", dbConfig.GetType())
+fmt.Println("Database Connection String:", dbConfig.GetConnectionString())
 ```
 
 ## Expected Output
 
 ```
-Expected output of the example when run
+Application Version: 1.0.0
+Application Name: MyApp
+Application Environment: development
+Database Type: postgres
+Database Connection String: postgres://user:password@localhost:5432/mydb
+Database Name: my_database
+Users Collection: users
 ```
 
 ## Related Examples
 
-
-- [app_config](../app_config/README.md) - Related example for app_config
-- [custom_adapter](../custom_adapter/README.md) - Related example for custom_adapter
-- [database_config](../database_config/README.md) - Related example for database_config
+- [app_config](../app_config/README.md) - Shows how to configure application-specific settings
+- [custom_adapter](../custom_adapter/README.md) - Demonstrates creating custom configuration adapters
+- [database_config](../database_config/README.md) - Illustrates database-specific configuration options
 
 ## Related Components
 

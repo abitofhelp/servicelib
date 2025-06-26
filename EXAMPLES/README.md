@@ -51,8 +51,6 @@ This directory contains a collection of examples demonstrating how to use the va
 ### Model
 - [Model Examples](./model/README.md) - Examples for model operations
 
-### Quickstart
-- [Quickstart Examples](./quickstart/README.md) - Examples for getting started quickly
 
 ### Rate Limiting
 - [Rate Limiting Examples](./rate/README.md) - Examples for rate limiting

@@ -2,13 +2,14 @@
 
 ## Overview
 
-This example demonstrates the app_config functionality of the ServiceLib config package.
+This example demonstrates how to implement and use the AppConfigProvider interface from the ServiceLib config package. It shows how to create a custom configuration struct that provides both standard application configuration and additional application-specific settings.
 
 ## Features
 
-- **Feature 1**: Description of feature 1
-- **Feature 2**: Description of feature 2
-- **Feature 3**: Description of feature 3
+- **Custom App Configuration**: Create a custom configuration struct that implements the AppConfigProvider interface
+- **Extended Functionality**: Add application-specific methods beyond the standard interface
+- **Feature Flags**: Implement and use feature flags to control application behavior
+- **Configuration Access**: Access configuration through both the standard interface and custom methods
 
 ## Running the Example
 
@@ -20,42 +21,97 @@ go run main.go
 
 ## Code Walkthrough
 
-### Key Component 1
+### Implementing AppConfigProvider Interface
 
-Description of the first key component in this example:
-
-```
-// Code snippet for key component 1
-```
-
-### Key Component 2
-
-Description of the second key component in this example:
+The example defines a custom configuration struct that implements the required AppConfigProvider interface:
 
 ```
-// Code snippet for key component 2
+// AppSettings is a custom configuration struct that implements the AppConfigProvider interface
+type AppSettings struct {
+    AppVersion     string
+    AppName        string
+    AppEnvironment string
+    LogLevel       string
+    Features       map[string]bool
+}
+
+// GetAppVersion implements the AppConfigProvider interface
+func (s *AppSettings) GetAppVersion() string {
+    return s.AppVersion
+}
+
+// GetAppName implements the AppConfigProvider interface
+func (s *AppSettings) GetAppName() string {
+    return s.AppName
+}
+
+// GetAppEnvironment implements the AppConfigProvider interface
+func (s *AppSettings) GetAppEnvironment() string {
+    return s.AppEnvironment
+}
 ```
 
-### Key Component 3
+### Adding Custom Methods
 
-Description of the third key component in this example:
+The example adds application-specific methods beyond the standard interface:
 
 ```
-// Code snippet for key component 3
+// Additional methods specific to AppSettings
+func (s *AppSettings) GetLogLevel() string {
+    return s.LogLevel
+}
+
+func (s *AppSettings) IsFeatureEnabled(featureName string) bool {
+    if enabled, ok := s.Features[featureName]; ok {
+        return enabled
+    }
+    return false
+}
+```
+
+### Accessing Configuration Values
+
+The example demonstrates how to access configuration through both the standard interface and custom methods:
+
+```
+// Create a config adapter
+adapter := config.NewGenericConfigAdapter(settings)
+
+// Get the app configuration through the adapter
+appConfig := adapter.GetApp()
+
+// Use the standard AppConfig interface methods
+fmt.Println("=== Application Configuration ===")
+fmt.Println("Version:", appConfig.GetVersion())
+fmt.Println("Name:", appConfig.GetName())
+fmt.Println("Environment:", appConfig.GetEnvironment())
+
+// Use the original settings object for additional functionality
+fmt.Println("\n=== Additional Settings ===")
+fmt.Println("Log Level:", settings.GetLogLevel())
+fmt.Println("Dark Mode Enabled:", settings.IsFeatureEnabled("darkMode"))
 ```
 
 ## Expected Output
 
 ```
-Expected output of the example when run
+=== Application Configuration ===
+Version: 2.1.0
+Name: FeatureApp
+Environment: staging
+
+=== Additional Settings ===
+Log Level: debug
+Dark Mode Enabled: true
+Beta Features Enabled: true
+Notifications Enabled: false
 ```
 
 ## Related Examples
 
-
-- [basic_usage](../basic_usage/README.md) - Related example for basic_usage
-- [custom_adapter](../custom_adapter/README.md) - Related example for custom_adapter
-- [database_config](../database_config/README.md) - Related example for database_config
+- [basic_usage](../basic_usage/README.md) - Demonstrates the basic usage of the configuration package with a custom configuration structure
+- [custom_adapter](../custom_adapter/README.md) - Shows how to create a custom configuration adapter that reads from environment variables
+- [database_config](../database_config/README.md) - Illustrates how to implement database-specific configuration
 
 ## Related Components
 

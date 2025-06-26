@@ -25,7 +25,125 @@ go get github.com/abitofhelp/servicelib
 
 ## Quick Start
 
-See the [Quick Start examples](./EXAMPLES/quickstart/README.md) for complete, runnable examples of how to use ServiceLib to build a basic microservice.
+### Basic HTTP Server
+
+Here's a simple example of creating an HTTP server with ServiceLib:
+
+```go
+package main
+
+import (
+	"context"
+	"log"
+	"net/http"
+
+	"github.com/abitofhelp/servicelib/logging"
+	"github.com/abitofhelp/servicelib/middleware"
+	"go.uber.org/zap"
+)
+
+func main() {
+	// Create a logger
+	logger, err := logging.NewLogger("info", true)
+	if err != nil {
+		log.Fatalf("Failed to initialize logger: %v", err)
+	}
+	defer logger.Sync()
+
+	// Create a context logger
+	contextLogger := logging.NewContextLogger(logger)
+
+	// Create a simple HTTP handler
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hello, ServiceLib!"))
+	})
+
+	// Add middleware for logging, metrics, and recovery
+	handler := middleware.Chain(
+		mux,
+		middleware.WithRequestID(context.Background()),
+		middleware.Logging(contextLogger),
+		middleware.Recovery(contextLogger),
+	)
+
+	// Start the server
+	contextLogger.Info(context.Background(), "Starting server", zap.String("address", ":8080"))
+	if err := http.ListenAndServe(":8080", handler); err != nil {
+		contextLogger.Fatal(context.Background(), "Server failed", zap.Error(err))
+	}
+}
+```
+
+### Error Handling
+
+ServiceLib provides a comprehensive error handling system:
+
+```go
+package main
+
+import (
+	"context"
+	"database/sql"
+	"fmt"
+	"net/http"
+
+	"github.com/abitofhelp/servicelib/errors"
+	errhttp "github.com/abitofhelp/servicelib/errors/http"
+	errlog "github.com/abitofhelp/servicelib/errors/log"
+	"github.com/abitofhelp/servicelib/logging"
+	"go.uber.org/zap"
+)
+
+// GetUserByID retrieves a user by ID with proper error handling
+func GetUserByID(ctx context.Context, logger *logging.ContextLogger, id string) (*User, error) {
+	// Validate input
+	if id == "" {
+		// Create a validation error
+		err := errors.NewValidationError("User ID is required", "id", nil)
+
+		// Log the error
+		errlog.LogError(ctx, logger, err)
+
+		return nil, err
+	}
+
+	// Simulate a database error
+	if id == "db-error" {
+		dbErr := sql.ErrNoRows
+		err := errors.NewDatabaseError("Failed to query user", "SELECT", "users", dbErr)
+
+		// Log the error
+		errlog.LogError(ctx, logger, err)
+
+		return nil, err
+	}
+
+	// Return a user
+	return &User{ID: id, Name: "John Doe"}, nil
+}
+
+// HTTP handler with error handling
+func GetUserHandler(w http.ResponseWriter, r *http.Request, service *UserService) {
+	// Get user ID from request
+	id := r.URL.Query().Get("id")
+
+	// Get user from service
+	user, err := service.GetUserByID(r.Context(), id)
+	if err != nil {
+		// Write error response with appropriate status code
+		errhttp.WriteError(w, err)
+		return
+	}
+
+	// Write success response
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, `{"id":"%s","name":"%s"}`, user.ID, user.Name)
+}
+```
+
+For more examples, see the [Examples directory](./EXAMPLES/README.md).
 
 ## Packages
 
