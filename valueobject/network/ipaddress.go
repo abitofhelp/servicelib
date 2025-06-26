@@ -36,8 +36,20 @@ func NewIPAddress(ip string) (IPAddress, error) {
 }
 
 // String returns the string representation of the IPAddress
+// For IPv4 addresses, it removes leading zeros from each segment
 func (ip IPAddress) String() string {
-	return string(ip)
+	ipStr := string(ip)
+
+	// If it's an IPv4 address, normalize it by removing leading zeros
+	if strings.Contains(ipStr, ".") {
+		parsedIP := net.ParseIP(ipStr)
+		if parsedIP != nil {
+			// If it's a valid IP, return the normalized form
+			return parsedIP.String()
+		}
+	}
+
+	return ipStr
 }
 
 // normalizeIPv4 removes leading zeros from each segment of an IPv4 address
@@ -91,9 +103,14 @@ func (ip IPAddress) Equals(other IPAddress) bool {
 	parsedThis := net.ParseIP(ipStr)
 	parsedOther := net.ParseIP(otherStr)
 
-	// If either IP can't be parsed, fall back to string comparison
+	// If both IPs can't be parsed, they're both invalid, so they're not equal
+	if parsedThis == nil && parsedOther == nil {
+		return false
+	}
+
+	// If only one IP can't be parsed, they're not equal
 	if parsedThis == nil || parsedOther == nil {
-		return ipStr == otherStr
+		return false
 	}
 
 	// For IPv4 addresses, convert to 4-byte representation for comparison
@@ -110,6 +127,8 @@ func (ip IPAddress) Equals(other IPAddress) bool {
 }
 
 // IsEmpty checks if the IPAddress is empty
+// An IPAddress is considered empty only if it's an empty string
+// Invalid IP addresses are not considered empty
 func (ip IPAddress) IsEmpty() bool {
 	return ip == ""
 }

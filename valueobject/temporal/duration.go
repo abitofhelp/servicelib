@@ -154,12 +154,14 @@ func (v Duration) Value() time.Duration {
 }
 
 // Hours returns the duration as a floating point number of hours.
-// This method is equivalent to time.Duration.Hours().
+// This method returns the hours with 4 decimal places of precision.
 //
 // Returns:
-//   - The duration in hours as a float64.
+//   - The duration in hours as a float64, rounded to 4 decimal places.
 func (v Duration) Hours() float64 {
-	return v.duration.Hours()
+	// Round to 4 decimal places
+	hours := v.duration.Hours()
+	return float64(int(hours*10000)) / 10000
 }
 
 // Minutes returns the duration as a floating point number of minutes.

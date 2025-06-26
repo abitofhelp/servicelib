@@ -54,12 +54,15 @@ func (tgs *TestableGracefulShutdown) HandleShutdownForTest() (context.Context, c
 	ctx, cancel := context.WithCancel(context.Background())
 
 	go func() {
+		// Create a local copy of the logger to avoid data races
+		tgs.loggerMu.Lock()
+		logger := tgs.logger
+		tgs.loggerMu.Unlock()
+
 		// Wait for a signal or done
 		select {
 		case sig := <-tgs.sigCh:
-			tgs.loggerMu.Lock()
-			tgs.logger.Info(ctx, "Received shutdown signal", zap.String("signal", sig.String()))
-			tgs.loggerMu.Unlock()
+			logger.Info(ctx, "Received shutdown signal", zap.String("signal", sig.String()))
 		case <-tgs.done:
 			// Test is done, exit goroutine
 			return
@@ -83,22 +86,18 @@ func (tgs *TestableGracefulShutdown) HandleShutdownForTest() (context.Context, c
 			wg.Add(1)
 			go func(i int, cb ShutdownCallback) {
 				defer wg.Done()
-				tgs.loggerMu.Lock()
-				tgs.logger.Info(ctx, "Executing shutdown callback", zap.Int("callback_index", i))
-				tgs.loggerMu.Unlock()
+				logger.Info(ctx, "Executing shutdown callback", zap.Int("callback_index", i))
 
 				err := cb(timeoutCtx)
 
-				tgs.loggerMu.Lock()
 				if err != nil {
-					tgs.logger.Error(ctx, "Shutdown callback failed",
+					logger.Error(ctx, "Shutdown callback failed",
 						zap.Int("callback_index", i),
 						zap.Error(err))
 				} else {
-					tgs.logger.Info(ctx, "Shutdown callback completed successfully",
+					logger.Info(ctx, "Shutdown callback completed successfully",
 						zap.Int("callback_index", i))
 				}
-				tgs.loggerMu.Unlock()
 			}(i, callback)
 		}
 
@@ -112,18 +111,12 @@ func (tgs *TestableGracefulShutdown) HandleShutdownForTest() (context.Context, c
 		// Wait for callbacks to complete, timeout, second signal, or done
 		select {
 		case <-callbacksDone:
-			tgs.loggerMu.Lock()
-			tgs.logger.Info(ctx, "All shutdown callbacks completed successfully")
-			tgs.loggerMu.Unlock()
+			logger.Info(ctx, "All shutdown callbacks completed successfully")
 		case <-timeoutCtx.Done():
-			tgs.loggerMu.Lock()
-			tgs.logger.Warn(ctx, "Graceful shutdown timed out, forcing exit")
-			tgs.loggerMu.Unlock()
+			logger.Warn(ctx, "Graceful shutdown timed out, forcing exit")
 		case sig := <-tgs.sigCh:
-			tgs.loggerMu.Lock()
-			tgs.logger.Warn(ctx, "Received second signal, forcing exit",
+			logger.Warn(ctx, "Received second signal, forcing exit",
 				zap.String("signal", sig.String()))
-			tgs.loggerMu.Unlock()
 		case <-tgs.done:
 			// Test is done, exit goroutine
 			return
