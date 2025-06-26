@@ -2,6 +2,10 @@
 [![codecov](https://codecov.io/gh/abitofhelp/servicelib/graph/badge.svg)](https://codecov.io/gh/abitofhelp/servicelib)
 [![Go Report Card](https://goreportcard.com/badge/github.com/abitofhelp/servicelib)](https://goreportcard.com/report/github.com/abitofhelp/servicelib)
 [![GoDoc](https://godoc.org/github.com/abitofhelp/servicelib?status.svg)](https://godoc.org/github.com/abitofhelp/servicelib)
+## Testing Coverage
+### Top Level represents the entire project; The bottom level represents individual files.
+### Click the image for more details.
+[![codecov](https://codecov.io/gh/abitofhelp/servicelib/graphs/icicle.svg)](https://codecov.io/gh/abitofhelp/servicelib)
 
 ## Overview
 
