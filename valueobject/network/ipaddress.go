@@ -42,6 +42,15 @@ func (ip IPAddress) String() string {
 
 	// If it's an IPv4 address, normalize it by removing leading zeros
 	if strings.Contains(ipStr, ".") {
+		// Use the normalizeIPv4 function to handle leading zeros
+		normalizedIP := normalizeIPv4(ipStr)
+
+		// If normalization worked, return the normalized form
+		if normalizedIP != ipStr {
+			return normalizedIP
+		}
+
+		// If normalization didn't change anything, try using net.ParseIP
 		parsedIP := net.ParseIP(ipStr)
 		if parsedIP != nil {
 			// If it's a valid IP, return the normalized form
