@@ -1,4 +1,7 @@
 # ServiceLib
+[![codecov](https://codecov.io/gh/abitofhelp/servicelib/graph/badge.svg)](https://codecov.io/gh/abitofhelp/servicelib)
+[![Go Report Card](https://goreportcard.com/badge/github.com/abitofhelp/servicelib)](https://goreportcard.com/report/github.com/abitofhelp/servicelib)
+[![GoDoc](https://godoc.org/github.com/abitofhelp/servicelib?status.svg)](https://godoc.org/github.com/abitofhelp/servicelib)
 
 ## Overview
 
