@@ -1,46 +1,27 @@
 # Dependency Injection Examples
 
-This directory contains examples demonstrating how to use the `di` package, which provides a container-based dependency injection system for Go applications.
+## Overview
+
+This directory contains examples demonstrating how to use the dependency injection components of the ServiceLib library. Each example is a complete, runnable application that showcases specific features and usage patterns.
 
 ## Examples
 
-### 1. Basic Usage Example
-
-[basic_usage/main.go](basic_usage/main.go)
-
-Demonstrates basic usage of the Container type, including:
-- Creating a container with context, logger, and configuration
-- Getting the context, logger, and configuration from the container
-
-### 2. Service Container Example
-
-[service_container/main.go](service_container/main.go)
-
-Demonstrates how to use the ServiceContainer type, including:
-- Implementing the Repository, DomainService, and ApplicationService interfaces
-- Implementing the Config interface with AppConfig and DatabaseConfig
-- Creating a service container with dependencies
-- Getting repositories, domain services, and application services from the container
-
-### 3. Generic Container Example
-
-[generic_container/main.go](generic_container/main.go)
-
-Demonstrates how to use the GenericAppContainer type, including:
-- Implementing repository, domain service, and application service initializers
-- Creating a generic container with dependencies
-- Getting repositories, domain services, and application services from the container
+- [Basic Usage](./basic_usage/README.md) - Basic DI container usage
+- [Generic Container](./generic_container/README.md) - Using the generic DI container
+- [Service Container](./service_container/README.md) - Using the service container
 
 ## Running the Examples
 
-To run any of the examples, use the `go run` command:
+Each example can be run from its directory using:
 
 ```bash
-go run basic_usage/main.go
-go run service_container/main.go
-go run generic_container/main.go
+go run main.go
 ```
 
-## Additional Resources
+## Related Components
 
-For more information about the di package, see the [di package documentation](../../di/README.md).
+- [DI Package](../../di/README.md) - The dependency injection package documentation.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file for details.

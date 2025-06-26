@@ -1,66 +1,28 @@
-# Validation Package Examples
+# Validation Examples
 
-This directory contains examples demonstrating how to use the `validation` package, which provides utilities for validating data in Go applications. The package offers a structured way to perform validations, collect validation errors, and report them in a consistent format.
+## Overview
+
+This directory contains examples demonstrating how to use the validation components of the ServiceLib library. Each example is a complete, runnable application that showcases specific features and usage patterns.
 
 ## Examples
 
-### 1. Basic Validation Example
-
-[basic_validation_example.go](basic_validation_example.go)
-
-Demonstrates basic validation functions for strings.
-
-Key concepts:
-- Creating a validation result
-- Using `Required` to validate that a value is not empty
-- Using `MinLength` and `MaxLength` to validate string length
-- Using `Pattern` to validate that a string matches a regular expression
-- Checking if validation passed with `IsValid()`
-
-### 2. Date Validation Example
-
-[date_validation_example.go](date_validation_example.go)
-
-Shows how to validate dates and date ranges.
-
-Key concepts:
-- Using `PastDate` to validate that a date is in the past
-- Using `ValidDateRange` to validate that a start date is before an end date
-- Handling validation errors for dates
-
-### 3. Collection Validation Example
-
-[collection_validation_example.go](collection_validation_example.go)
-
-Demonstrates validation of collections (slices).
-
-Key concepts:
-- Using `AllTrue` to check if all items in a collection satisfy a condition
-- Using `ValidateAll` to validate each item in a collection individually
-- Handling validation errors for collections
-- Validating different types of collections (strings, numbers)
-
-### 4. Custom Validation Example
-
-[custom_validation_example.go](custom_validation_example.go)
-
-Shows how to create custom validation for a struct.
-
-Key concepts:
-- Creating a validation function for a custom struct
-- Combining multiple validators for complex validation rules
-- Using `ValidateID` for ID validation
-- Adding custom validation logic
-- Returning validation errors as a standard error
+- [Basic Validation](./basic_validation_example/README.md) - Basic validation
+- [Collection Validation](./collection_validation_example/README.md) - Validating collections
+- [Custom Validation](./custom_validation_example/README.md) - Custom validation rules
+- [Date Validation](./date_validation_example/README.md) - Validating dates
 
 ## Running the Examples
 
-To run any of the examples, use the `go run` command:
+Each example can be run from its directory using:
 
 ```bash
-go run examples/validation/basic_validation_example.go
+go run main.go
 ```
 
-## Additional Resources
+## Related Components
 
-For more information about the validation package, see the [validation package documentation](../../validation/README.md).
+- [Validation Package](../../validation/README.md) - The validation package documentation.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file for details.

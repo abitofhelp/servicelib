@@ -1,19 +1,16 @@
-# Repository Module
-The Repository Module provides generic repository interfaces for entity persistence operations in Go applications. It implements the Repository Pattern, which is a key component of Domain-Driven Design (DDD) and Hexagonal Architecture.
-
+# Repository
 
 ## Overview
 
-Brief description of the repository and its purpose in the ServiceLib library.
+The Repository component provides a robust implementation of the Repository pattern for data access. It abstracts the details of data storage and retrieval, making it easier to switch between different data sources and to test your code.
 
 ## Features
 
-- **Generic Interfaces**: Type-safe repository interfaces using Go generics
-- **Hexagonal Architecture**: Supports ports and adapters pattern
-- **Domain-Driven Design**: Facilitates separation of domain and infrastructure concerns
-- **Repository Pattern**: Standardized approach to data access
-- **Repository Factory**: Interface for creating repositories
-
+- **Generic Implementation**: Works with any data type
+- **CRUD Operations**: Standard Create, Read, Update, Delete operations
+- **Transaction Support**: Support for transactions across multiple operations
+- **Query Building**: Fluent API for building queries
+- **Pagination**: Support for paginated results
 
 ## Installation
 
@@ -21,111 +18,114 @@ Brief description of the repository and its purpose in the ServiceLib library.
 go get github.com/abitofhelp/servicelib/repository
 ```
 
-
 ## Quick Start
 
-See the [Basic Repository example](../EXAMPLES/repository/basic_repository_example.go) for a complete, runnable example of how to use the Repository module.
-
+See the [Basic Repository example](../EXAMPLES/repository/basic_repository_example/README.md) for a complete, runnable example of how to use the repository component.
 
 ## Configuration
 
-See the [Configuration example](../EXAMPLES/repository/configuration_example.go) for a complete, runnable example of how to configure the repository.
+See the [Repository Factory example](../EXAMPLES/repository/repository_factory_example/README.md) for a complete, runnable example of how to configure the repository component.
 
 ## API Documentation
 
-### Basic Repository Implementation
-
-The `Repository` interface provides a generic interface for entity persistence operations.
-
-#### Basic Usage
-
-See the [Basic Repository example](../EXAMPLES/repository/basic_repository_example.go) for a complete, runnable example of how to implement and use a basic repository.
-
-### Repository Factory
-
-The `RepositoryFactory` interface provides a way to create and manage repositories for different entity types.
-
-#### Using Repository Factory
-
-See the [Repository Factory example](../EXAMPLES/repository/repository_factory_example.go) for a complete, runnable example of how to implement and use a repository factory.
-
-### Dependency Injection
-
-The Repository pattern works well with dependency injection, allowing for better testability and flexibility.
-
-#### Integration with Dependency Injection
-
-See the [Dependency Injection example](../EXAMPLES/repository/dependency_injection_example.go) for a complete, runnable example of how to use repositories with dependency injection.
-
-
 ### Core Types
 
-Description of the main types provided by the repository.
+The repository component provides several core types for implementing the Repository pattern.
 
-#### Type 1
+#### Repository
 
-Description of Type 1 and its purpose.
+The main interface that defines the Repository pattern.
 
-See the [Type 1 example](../EXAMPLES/repository/type1_example.go) for a complete, runnable example of how to use Type 1.
+```
+type Repository[T any, ID any] interface {
+    // Methods
+}
+```
+
+#### BaseRepository
+
+A base implementation of the Repository interface.
+
+```
+type BaseRepository[T any, ID any] struct {
+    // Fields
+}
+```
 
 ### Key Methods
 
-Description of the key methods provided by the repository.
+The repository component provides several key methods for implementing the Repository pattern.
 
-#### Method 1
+#### Create
 
-Description of Method 1 and its purpose.
+Creates a new entity.
 
-See the [Method 1 example](../EXAMPLES/repository/method1_example.go) for a complete, runnable example of how to use Method 1.
+```
+func (r *BaseRepository[T, ID]) Create(ctx context.Context, entity T) (T, error)
+```
+
+#### FindByID
+
+Finds an entity by its ID.
+
+```
+func (r *BaseRepository[T, ID]) FindByID(ctx context.Context, id ID) (T, error)
+```
+
+#### Update
+
+Updates an existing entity.
+
+```
+func (r *BaseRepository[T, ID]) Update(ctx context.Context, entity T) (T, error)
+```
+
+#### Delete
+
+Deletes an entity.
+
+```
+func (r *BaseRepository[T, ID]) Delete(ctx context.Context, entity T) error
+```
 
 ## Examples
 
-For complete, runnable examples, see the following files in the EXAMPLES directory:
+For complete, runnable examples, see the following directories in the EXAMPLES directory:
 
-- [Basic Usage](../EXAMPLES/repository/basic_usage_example.go) - Shows basic usage of the repository
-- [Advanced Configuration](../EXAMPLES/repository/advanced_configuration_example.go) - Shows advanced configuration options
-- [Error Handling](../EXAMPLES/repository/error_handling_example.go) - Shows how to handle errors
+- [Basic Repository](../EXAMPLES/repository/basic_repository_example/README.md) - Basic repository pattern
+- [Dependency Injection](../EXAMPLES/repository/dependency_injection_example/README.md) - DI with repositories
+- [Repository Factory](../EXAMPLES/repository/repository_factory_example/README.md) - Using repository factories
 
 ## Best Practices
 
-1. **Interface Segregation**: Keep repository interfaces focused on specific entity types.
-
-2. **Dependency Inversion**: Depend on repository interfaces, not concrete implementations.
-
-3. **Testability**: Use in-memory repository implementations for testing.
-
-4. **Transaction Management**: Consider adding transaction support for operations that span multiple repositories.
-
-5. **Error Handling**: Use domain-specific errors for repository operations.
-
-6. **Context Usage**: Always pass a context to repository methods for cancellation and timeout support.
-
-7. **Repository Factory**: Use a factory to create and manage repositories when dealing with multiple entity types.
-
-8. **Concurrency**: Ensure thread safety in repository implementations.
-
+1. **Use Interfaces**: Define repository interfaces for better testability
+2. **Use Transactions**: Use transactions for operations that need to be atomic
+3. **Handle Errors**: Properly handle repository errors
+4. **Use Context**: Pass context to repository methods for cancellation and timeouts
+5. **Use Pagination**: Use pagination for large result sets
 
 ## Troubleshooting
 
 ### Common Issues
 
-#### Issue 1
+#### Entity Not Found
 
-Description of issue 1 and how to resolve it.
+If an entity is not found, check that you're using the correct ID and that the entity exists in the data source.
 
-#### Issue 2
+#### Transaction Failures
 
-Description of issue 2 and how to resolve it.
+If transactions are failing, check that your data source supports transactions and that you're using them correctly.
 
 ## Related Components
 
-- [Component 1](../repository1/README.md) - Description of how this repository relates to Component 1
-- [Component 2](../repository2/README.md) - Description of how this repository relates to Component 2
+- [DB](../db/README.md) - Database access for repositories
+- [Errors](../errors/README.md) - Error handling for repositories
+- [DI](../di/README.md) - Dependency injection for repositories
 
 ## Contributing
 
-Contributions to this repository are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
+Contributions to this component are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.

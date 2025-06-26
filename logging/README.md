@@ -1,22 +1,16 @@
-# Logging Module
-The Logging Module provides structured logging with Zap for high-performance logging in Go applications. It wraps the zap logging library and adds features like trace ID extraction from context and context-aware logging methods.
-
+# Logging
 
 ## Overview
 
-The Logging module provides a comprehensive structured logging system for Go applications. It serves as a central component in the ServiceLib library for recording application events, errors, and diagnostic information. The module wraps the high-performance Zap logging library, adding features like context-aware logging, trace ID extraction, and standardized log formatting.
-
-This module is designed to integrate seamlessly with other ServiceLib components, providing consistent logging patterns across your application. It supports both development and production environments with appropriate log formatting and levels for each.
+The Logging component provides a structured logging solution for your services. It offers a consistent API for logging messages with different severity levels, structured context, and integration with popular logging backends.
 
 ## Features
 
-- **Log Levels**: Debug, Info, Warn, Error, Fatal
-- **Structured Logging**: Key-value pairs for better searchability
-- **Output Formats**: JSON, console
-- **Context-Aware Logging**: Log with context information including trace IDs
-- **Performance**: High-performance logging with minimal allocations
-- **Trace Integration**: Automatic extraction of trace IDs from OpenTelemetry context
-
+- **Structured Logging**: Log messages with structured context
+- **Multiple Severity Levels**: Debug, Info, Warn, Error, Fatal
+- **Context Integration**: Propagate context values to log entries
+- **Trace ID Support**: Automatically include trace IDs in log entries
+- **Multiple Backends**: Support for multiple logging backends
 
 ## Installation
 
@@ -24,176 +18,120 @@ This module is designed to integrate seamlessly with other ServiceLib components
 go get github.com/abitofhelp/servicelib/logging
 ```
 
-
 ## Quick Start
 
-See the [Basic Usage example](../EXAMPLES/logging/basic_usage/main.go) for a complete, runnable example of how to use the Logging module.
-
+See the [Basic Usage example](../EXAMPLES/logging/basic_usage/README.md) for a complete, runnable example of how to use the logging component.
 
 ## Configuration
 
-The logger can be configured with different log levels and output formats.
-
-See the [Basic Usage example](../EXAMPLES/logging/basic_usage/main.go) for a complete, runnable example of how to configure the logger.
-
-Available log levels:
-- `debug`: Detailed information for debugging
-- `info`: General operational information
-- `warn`: Warning events that might cause issues
-- `error`: Error events that might still allow the application to continue
-- `fatal`: Severe error events that cause the application to terminate
-
+See the [Context Aware Logging example](../EXAMPLES/logging/context_aware_logging/README.md) for a complete, runnable example of how to configure the logging component.
 
 ## API Documentation
 
-### Basic Logging
-
-The `NewLogger` function creates a new zap logger configured for either development or production use.
-
-#### Basic Usage
-
-See the [Basic Usage example](../EXAMPLES/logging/basic_usage/main.go) for a complete, runnable example of how to use the basic logging functionality.
-
-### Context-Aware Logging
-
-The `ContextLogger` struct provides context-aware logging methods that automatically extract trace information from the context.
-
-#### Context-Aware Logging Example
-
-See the [Context-Aware Logging example](../EXAMPLES/logging/context_aware_logging/main.go) for a complete, runnable example of how to use context-aware logging.
-
-### Trace Integration
-
-The `WithTraceID` function adds trace ID and span ID to the logger from the provided context.
-
-#### Adding Trace IDs to Logs
-
-See the [Trace ID example](../EXAMPLES/logging/trace_id/main.go) for a complete, runnable example of how to add trace IDs to logs.
-
-### Logger Interface
-
-The `Logger` interface defines the methods for context-aware logging.
-
-See the [Context-Aware Logging example](../EXAMPLES/logging/context_aware_logging/main.go) for a complete, runnable example of how to use the Logger interface.
-
-
 ### Core Types
 
-The logging module provides several core types for structured logging:
+The logging component provides several core types for logging.
 
 #### Logger
 
-The `Logger` interface defines the methods for context-aware logging. It provides methods for logging at different levels (Debug, Info, Warn, Error, Fatal) with context information.
+The main interface for logging.
 
-The interface includes methods like Debug(), Info(), Warn(), Error(), and Fatal(), all of which take a context and message, along with optional fields for structured logging.
+```
+type Logger interface {
+    // Methods
+}
+```
 
-See the [Context-Aware Logging example](../EXAMPLES/logging/context_aware_logging_example.go) for a complete, runnable example of how to use the Logger interface.
+#### Entry
 
-#### ContextLogger
+Represents a log entry.
 
-The `ContextLogger` struct implements the Logger interface and provides context-aware logging methods that automatically extract trace information from the context.
-
-The ContextLogger wraps a zap.Logger and adds functionality to extract trace IDs from the context and include them in log entries.
-
-See the [Context-Aware Logging example](../EXAMPLES/logging/context_aware_logging_example.go) for a complete, runnable example of how to use the ContextLogger.
+```
+type Entry struct {
+    // Fields
+}
+```
 
 ### Key Methods
 
-The logging module provides several key methods for structured logging:
+The logging component provides several key methods for logging.
 
-#### NewLogger
+#### Debug
 
-The `NewLogger` function creates a new zap logger configured for either development or production use.
-
-```
-func NewLogger(config Config) (*zap.Logger, error)
-```
-
-This function takes a Config struct that specifies the log level, output format, and other options. It returns a configured zap.Logger that can be used directly or wrapped in a ContextLogger.
-
-See the [Basic Usage example](../EXAMPLES/logging/basic_usage_example.go) for a complete, runnable example of how to use the NewLogger function.
-
-#### NewContextLogger
-
-The `NewContextLogger` function creates a new ContextLogger that wraps a zap.Logger.
+Logs a message at the Debug level.
 
 ```
-func NewContextLogger(logger *zap.Logger) *ContextLogger
+func (l *Logger) Debug(ctx context.Context, msg string, fields ...Field)
 ```
 
-This function takes a zap.Logger and returns a ContextLogger that provides context-aware logging methods.
+#### Info
 
-See the [Context-Aware Logging example](../EXAMPLES/logging/context_aware_logging_example.go) for a complete, runnable example of how to use the NewContextLogger function.
-
-#### WithTraceID
-
-The `WithTraceID` function adds trace ID and span ID to the logger from the provided context.
+Logs a message at the Info level.
 
 ```
-func WithTraceID(ctx context.Context, logger *zap.Logger) *zap.Logger
+func (l *Logger) Info(ctx context.Context, msg string, fields ...Field)
 ```
 
-This function takes a context and a zap.Logger, extracts trace information from the context, and returns a new logger with the trace information added as fields.
+#### Warn
 
-See the [Trace ID example](../EXAMPLES/logging/trace_id_example.go) for a complete, runnable example of how to use the WithTraceID function.
+Logs a message at the Warn level.
+
+```
+func (l *Logger) Warn(ctx context.Context, msg string, fields ...Field)
+```
+
+#### Error
+
+Logs a message at the Error level.
+
+```
+func (l *Logger) Error(ctx context.Context, msg string, fields ...Field)
+```
+
+#### Fatal
+
+Logs a message at the Fatal level and then calls os.Exit(1).
+
+```
+func (l *Logger) Fatal(ctx context.Context, msg string, fields ...Field)
+```
 
 ## Examples
 
-For complete, runnable examples, see the following files in the EXAMPLES directory:
+For complete, runnable examples, see the following directories in the EXAMPLES directory:
 
-- [Basic Usage](../EXAMPLES/logging/basic_usage_example.go) - Shows basic usage of the logging
-- [Advanced Configuration](../EXAMPLES/logging/advanced_configuration_example.go) - Shows advanced configuration options
-- [Error Handling](../EXAMPLES/logging/error_handling_example.go) - Shows how to handle errors
+- [Basic Usage](../EXAMPLES/logging/basic_usage/README.md) - Basic logging operations
+- [Context Aware Logging](../EXAMPLES/logging/context_aware_logging/README.md) - Context-aware logging
+- [Trace ID](../EXAMPLES/logging/trace_id/README.md) - Working with trace IDs
 
 ## Best Practices
 
-1. **Use Structured Logging**: Always use structured logging with key-value pairs instead of string formatting.
-
-2. **Include Context**: Always pass context to logging methods when available to include trace information.
-
-3. **Log Levels**: Use appropriate log levels for different types of information.
-
-4. **Error Logging**: When logging errors, always include the error object using `zap.Error(err)`.
-
-5. **Performance**: In hot paths, check if the log level is enabled before constructing expensive log messages.
-
-See the [Basic Usage example](../EXAMPLES/logging/basic_usage_example.go) for examples of these best practices.
-
+1. **Use Structured Logging**: Always use structured logging for better searchability
+2. **Include Context**: Always include context in log calls
+3. **Use Appropriate Levels**: Use appropriate log levels for different types of messages
+4. **Include Trace IDs**: Include trace IDs in log entries for distributed tracing
+5. **Handle Errors**: Log errors with appropriate context
 
 ## Troubleshooting
 
 ### Common Issues
 
-#### Logger Not Initialized
+#### Missing Context Values
 
-**Issue**: Attempting to use a logger that hasn't been properly initialized.
-
-**Solution**: Always check for errors when creating a logger and ensure that the logger is initialized before use.
-
-#### Log Messages Not Appearing
-
-**Issue**: Log messages are not appearing in the expected output.
-
-**Solution**: Check that the log level is set appropriately. For example, debug messages won't appear if the log level is set to info or higher.
+If context values are not appearing in log entries, ensure that you're using the correct context and that the values are set correctly.
 
 #### Performance Issues
 
-**Issue**: Logging is causing performance issues in the application.
-
-**Solution**: Use conditional logging for expensive operations, ensure that debug logging is disabled in production, and consider using sampling for high-volume logs.
-
+If you're experiencing performance issues with logging, consider reducing the log level or batching log entries.
 
 ## Related Components
 
-- [Telemetry](../telemetry/README.md) - The telemetry component uses the logging component for logging telemetry events.
-- [Middleware](../middleware/README.md) - The middleware component uses the logging component for request logging.
-- [Health](../health/README.md) - The health component uses the logging component for logging health check results.
-
+- [Context](../context/README.md) - Context utilities for logging
+- [Telemetry](../telemetry/README.md) - Telemetry integration for logging
 
 ## Contributing
 
 Contributions to this component are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
-
 
 ## License
 

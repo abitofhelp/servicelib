@@ -1,95 +1,30 @@
-# Middleware Package Examples
+# Middleware Examples
 
-This directory contains examples demonstrating how to use the `middleware` package, which provides HTTP middleware components for Go web applications. The package offers various middleware functions that can be chained together to add functionality such as logging, error handling, CORS support, and more to HTTP handlers.
+## Overview
+
+This directory contains examples demonstrating how to use the middleware components of the ServiceLib library. Each example is a complete, runnable application that showcases specific features and usage patterns.
 
 ## Examples
 
-### 1. Basic Usage Example
-
-[basic_usage/main.go](basic_usage/main.go)
-
-Demonstrates the basic setup and usage of the middleware package.
-
-Key concepts:
-- Creating a simple HTTP handler
-- Applying multiple middleware components
-- Chaining middleware together
-- Registering the handler with the HTTP server
-- Understanding middleware execution order
-
-### 2. CORS Example
-
-[cors/main.go](cors/main.go)
-
-Shows how to use Cross-Origin Resource Sharing (CORS) middleware.
-
-Key concepts:
-- Setting up CORS middleware
-- Configuring allowed origins, methods, and headers
-- Handling preflight requests
-- Securing API endpoints for cross-origin requests
-- Testing CORS functionality
-
-### 3. Error Handling Example
-
-[error_handling/main.go](error_handling/main.go)
-
-Demonstrates how to use error handling middleware.
-
-Key concepts:
-- Consistent error handling across endpoints
-- Converting errors to appropriate HTTP responses
-- Handling different error types
-- Customizing error responses
-- Maintaining clean error handling logic
-
-### 4. Logging Example
-
-[logging/main.go](logging/main.go)
-
-Shows how to use logging middleware for HTTP requests.
-
-Key concepts:
-- Logging HTTP request details
-- Recording response status and timing
-- Structured logging for requests
-- Correlating logs with request IDs
-- Configuring log levels for requests
-
-### 5. Recovery Example
-
-[recovery/main.go](recovery/main.go)
-
-Demonstrates how to use recovery middleware to handle panics.
-
-Key concepts:
-- Recovering from panics in HTTP handlers
-- Preventing server crashes
-- Logging panic information
-- Returning appropriate error responses
-- Maintaining application stability
-
-### 6. Timeout Example
-
-[timeout/main.go](timeout/main.go)
-
-Shows how to use timeout middleware to limit request processing time.
-
-Key concepts:
-- Setting request timeouts
-- Handling long-running requests
-- Canceling context on timeout
-- Preventing resource exhaustion
-- Improving service reliability
+- [Basic Usage](./basic_usage/README.md) - Basic middleware usage
+- [CORS](./cors/README.md) - CORS middleware
+- [Error Handling](./error_handling/README.md) - Error handling middleware
+- [Logging](./logging/README.md) - Logging middleware
+- [Recovery](./recovery/README.md) - Recovery middleware
+- [Timeout](./timeout/README.md) - Timeout middleware
 
 ## Running the Examples
 
-To run any of the examples, use the `go run` command:
+Each example can be run from its directory using:
 
 ```bash
-go run basic_usage/main.go
+go run main.go
 ```
 
-## Additional Resources
+## Related Components
 
-For more information about the middleware package, see the [middleware package documentation](../../middleware/README.md).
+- [Middleware Package](../../middleware/README.md) - The middleware package documentation.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file for details.

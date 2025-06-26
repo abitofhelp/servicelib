@@ -1,77 +1,16 @@
-# Circuit Breaker Package
-The `circuit` package provides a generic implementation of the circuit breaker pattern to protect against cascading failures when external dependencies are unavailable.
-
+# Circuit Breaker
 
 ## Overview
 
-The circuit breaker pattern is a design pattern used in modern software development to detect failures and encapsulate the logic of preventing a failure from constantly recurring during maintenance, temporary external system failure, or unexpected system difficulties.
-
-This implementation provides:
-
-- Generic support for any function that returns a value and an error
-- Configurable error thresholds, volume thresholds, and sleep windows
-- Support for OpenTelemetry tracing
-- Fluent interface for configuration
-- Thread-safe implementation
-- Support for fallback functions
-
-## Usage
-
-### Basic Usage
-
-```go
-import (
-    "context"
-    "github.com/abitofhelp/servicelib/circuit"
-    "github.com/abitofhelp/servicelib/logging"
-    "go.uber.org/zap"
-)
-
-// Create a circuit breaker
-cfg := circuit.DefaultConfig().
-    WithEnabled(true).
-    WithErrorThreshold(0.5).
-    WithVolumeThreshold(10)
-
-logger := logging.NewContextLogger(zap.NewNop())
-options := circuit.DefaultOptions().
-    WithName("my-service").
-    WithLogger(logger)
-
-cb := circuit.NewCircuitBreaker(cfg, options)
-
-// Execute a function with circuit breaking
-result, err := circuit.Execute(ctx, cb, "GetUserProfile", func(ctx context.Context) (UserProfile, error) {
-    // Call external service
-    return userService.GetProfile(ctx, userID)
-})
-```
-
-### With Fallback
-
-```go
-// Execute a function with circuit breaking and fallback
-result, err := circuit.ExecuteWithFallback(
-    ctx, 
-    cb, 
-    "GetUserProfile", 
-    func(ctx context.Context) (UserProfile, error) {
-        // Call external service
-        return userService.GetProfile(ctx, userID)
-    },
-    func(ctx context.Context, err error) (UserProfile, error) {
-        // Fallback function
-        return UserProfile{Name: "Default User"}, nil
-    },
-)
-```
-
+The Circuit Breaker component provides a robust implementation of the Circuit Breaker pattern for handling failures in distributed systems. It helps prevent cascading failures by temporarily disabling operations that are likely to fail.
 
 ## Features
 
-- **Feature 1**: Description of feature 1
-- **Feature 2**: Description of feature 2
-- **Feature 3**: Description of feature 3
+- **Failure Detection**: Automatically detects when operations are failing
+- **Automatic Recovery**: Automatically recovers after a specified sleep window
+- **Configurable Thresholds**: Customize error and volume thresholds
+- **Concurrent Operation Limiting**: Limit the number of concurrent operations
+- **Fallback Support**: Provide fallback mechanisms for when operations fail
 
 ## Installation
 
@@ -81,112 +20,123 @@ go get github.com/abitofhelp/servicelib/circuit
 
 ## Quick Start
 
-See the [Quick Start example](../EXAMPLES/circuit/quickstart_example.go) for a complete, runnable example of how to use the circuit.
+See the [Basic Usage example](../EXAMPLES/circuit/basic_usage/README.md) for a complete, runnable example of how to use the circuit breaker component.
 
 ## Configuration
 
-The circuit breaker can be configured using the `Config` struct and the fluent interface:
-
-```go
-cfg := circuit.DefaultConfig().
-    WithEnabled(true).                  // Enable/disable the circuit breaker
-    WithTimeout(5 * time.Second).       // Maximum time allowed for a request
-    WithMaxConcurrent(100).             // Maximum number of concurrent requests
-    WithErrorThreshold(0.5).            // Percentage of errors that will trip the circuit (0.0-1.0)
-    WithVolumeThreshold(10).            // Minimum number of requests before the error threshold is checked
-    WithSleepWindow(1 * time.Second)    // Time to wait before allowing a single request through in half-open state
-```
-
-## States
-
-The circuit breaker has three states:
-
-1. **Closed**: The circuit is closed and requests are allowed through.
-2. **Open**: The circuit is open and requests are not allowed through. All requests will immediately return an error.
-3. **Half-Open**: After the sleep window has elapsed, the circuit enters the half-open state, allowing a single request through to test if the dependency is healthy. If the request succeeds, the circuit will close; if it fails, the circuit will open again.
-
-## OpenTelemetry Integration
-
-The circuit breaker supports OpenTelemetry tracing:
-
-```go
-import (
-    "go.opentelemetry.io/otel/trace"
-)
-
-// Create a tracer
-tracer := otelTracer // Your OpenTelemetry tracer
-
-// Configure the circuit breaker with the tracer
-options := circuit.DefaultOptions().
-    WithName("my-service").
-    WithLogger(logger).
-    WithOtelTracer(tracer)
-
-cb := circuit.NewCircuitBreaker(cfg, options)
-```
-
-## Thread Safety
-
-The circuit breaker is thread-safe and can be used concurrently from multiple goroutines.
+See the [Custom Configuration example](../EXAMPLES/circuit/custom_configuration/README.md) for a complete, runnable example of how to configure the circuit breaker component.
 
 ## API Documentation
 
-
 ### Core Types
 
-Description of the main types provided by the circuit.
+The circuit breaker component provides several core types for implementing the Circuit Breaker pattern.
 
-#### Type 1
+#### CircuitBreaker
 
-Description of Type 1 and its purpose.
+The main type that implements the Circuit Breaker pattern.
 
-See the [Type 1 example](../EXAMPLES/circuit/type1_example.go) for a complete, runnable example of how to use Type 1.
+```
+type CircuitBreaker struct {
+    // Fields
+}
+```
+
+#### Config
+
+Configuration for the CircuitBreaker.
+
+```
+type Config struct {
+    Enabled         bool
+    Timeout         time.Duration
+    MaxConcurrent   int
+    ErrorThreshold  float64
+    VolumeThreshold int
+    SleepWindow     time.Duration
+}
+```
+
+#### State
+
+Represents the state of the circuit breaker.
+
+```
+type State int
+```
 
 ### Key Methods
 
-Description of the key methods provided by the circuit.
+The circuit breaker component provides several key methods for implementing the Circuit Breaker pattern.
 
-#### Method 1
+#### Execute
 
-Description of Method 1 and its purpose.
+Executes an operation with circuit breaking functionality.
 
-See the [Method 1 example](../EXAMPLES/circuit/method1_example.go) for a complete, runnable example of how to use Method 1.
+```
+func Execute[T any](ctx context.Context, cb *CircuitBreaker, operation string, fn func(ctx context.Context) (T, error)) (T, error)
+```
+
+#### ExecuteWithFallback
+
+Executes an operation with circuit breaking functionality and a fallback mechanism.
+
+```
+func ExecuteWithFallback[T any](ctx context.Context, cb *CircuitBreaker, operation string, fn func(ctx context.Context) (T, error), fallback func(ctx context.Context, err error) (T, error)) (T, error)
+```
+
+#### GetState
+
+Gets the current state of the circuit breaker.
+
+```
+func (cb *CircuitBreaker) GetState() State
+```
+
+#### Reset
+
+Resets the circuit breaker to its initial state.
+
+```
+func (cb *CircuitBreaker) Reset()
+```
 
 ## Examples
 
-For complete, runnable examples, see the following files in the EXAMPLES directory:
+For complete, runnable examples, see the following directories in the EXAMPLES directory:
 
-- [Basic Usage](../EXAMPLES/circuit/basic_usage_example.go) - Shows basic usage of the circuit
-- [Advanced Configuration](../EXAMPLES/circuit/advanced_configuration_example.go) - Shows advanced configuration options
-- [Error Handling](../EXAMPLES/circuit/error_handling_example.go) - Shows how to handle errors
+- [Basic Usage](../EXAMPLES/circuit/basic_usage/README.md) - Shows basic usage of the circuit breaker
+- [Custom Configuration](../EXAMPLES/circuit/custom_configuration/README.md) - Shows how to configure the circuit breaker
 
 ## Best Practices
 
-1. **Best Practice 1**: Description of best practice 1
-2. **Best Practice 2**: Description of best practice 2
-3. **Best Practice 3**: Description of best practice 3
+1. **Use Fallbacks**: Always provide fallback mechanisms for when operations fail
+2. **Configure Thresholds**: Configure error and volume thresholds based on your application's needs
+3. **Monitor States**: Monitor the state of your circuit breakers to detect issues
+4. **Use Timeouts**: Always set appropriate timeouts for your operations
+5. **Handle Errors**: Properly handle errors returned by the circuit breaker
 
 ## Troubleshooting
 
 ### Common Issues
 
-#### Issue 1
+#### Circuit Always Open
 
-Description of issue 1 and how to resolve it.
+If the circuit is always open, check that your error threshold and volume threshold are not too low.
 
-#### Issue 2
+#### Circuit Never Opens
 
-Description of issue 2 and how to resolve it.
+If the circuit never opens despite failures, check that your error threshold and volume threshold are not too high.
 
 ## Related Components
 
-- [Component 1](../circuit1/README.md) - Description of how this circuit relates to Component 1
-- [Component 2](../circuit2/README.md) - Description of how this circuit relates to Component 2
+- [Errors](../errors/README.md) - Error handling for circuit breaker operations
+- [Logging](../logging/README.md) - Logging for circuit breaker events
+- [Telemetry](../telemetry/README.md) - Telemetry for circuit breaker operations
 
 ## Contributing
 
-Contributions to this circuit are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
+Contributions to this component are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
 
 ## License
 

@@ -1,56 +1,27 @@
-# Model Package Examples
+# Model Examples
 
-This directory contains examples demonstrating how to use the `model` package, which provides utilities for working with data models in Go applications. The package offers functionality for deep copying objects, handling errors in model operations, and copying fields between structs.
+## Overview
+
+This directory contains examples demonstrating how to use the model components of the ServiceLib library. Each example is a complete, runnable application that showcases specific features and usage patterns.
 
 ## Examples
 
-### 1. Deep Copy Example
-
-[deep_copy_example.go](deep_copy_example.go)
-
-Demonstrates how to create deep copies of complex objects.
-
-Key concepts:
-- Creating deep copies of structs with nested objects
-- Handling slices, maps, and pointers during copying
-- Verifying independence between original and copied objects
-- Maintaining object relationships in copied structures
-- Error handling during the deep copy process
-
-### 2. Error Handling Example
-
-[error_handling_example.go](error_handling_example.go)
-
-Shows how to handle errors in model operations.
-
-Key concepts:
-- Handling validation errors
-- Working with domain-specific errors
-- Error wrapping and unwrapping
-- Structured error information
-- Error classification and handling strategies
-
-### 3. Field Copying Example
-
-[field_copying_example.go](field_copying_example.go)
-
-Demonstrates how to copy fields between structs.
-
-Key concepts:
-- Copying fields between different struct types
-- Handling field name mapping
-- Selective field copying
-- Type conversion during copying
-- Handling nested structures
+- [Deep Copy](./deep_copy/README.md) - Deep copying models
+- [Error Handling](./error_handling/README.md) - Handling model errors
+- [Field Copying](./field_copying/README.md) - Copying model fields
 
 ## Running the Examples
 
-To run any of the examples, use the `go run` command:
+Each example can be run from its directory using:
 
 ```bash
-go run examples/model/deep_copy_example.go
+go run main.go
 ```
 
-## Additional Resources
+## Related Components
 
-For more information about the model package, see the [model package documentation](../../model/README.md).
+- [Model Package](../../model/README.md) - The model package documentation.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file for details.

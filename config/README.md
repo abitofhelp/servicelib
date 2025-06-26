@@ -1,25 +1,16 @@
-# Configuration Package
+# Configuration
 
 ## Overview
 
-The `config` package provides a flexible configuration system that supports multiple sources and formats for Go applications. It allows you to manage application configuration in a hierarchical manner with support for various data sources.
-
+The Configuration component provides a flexible and extensible system for managing application configuration from multiple sources and formats. It supports environment variables, files, and remote configuration services.
 
 ## Features
 
-- **Multiple Sources**:
-  - YAML and JSON files
-  - Environment variables
-  - Command-line flags
-  - In-memory values
-
-- **Hierarchical Configuration**: Access nested values using dot notation
-- **Default Values**: Specify fallback values when configuration is missing
-- **Type Conversion**: Automatic conversion to the appropriate type
-- **Configuration Reloading**: Watch for changes and reload configuration
+- **Multiple Sources**: Load configuration from files, environment variables, and remote services
+- **Multiple Formats**: Support for JSON, YAML, TOML, and other formats
+- **Dynamic Reloading**: Automatically reload configuration when changes are detected
 - **Validation**: Validate configuration against schemas
-- **Adapters**: Easily create custom adapters for different configuration sources
-
+- **Defaults**: Provide default values for configuration options
 
 ## Installation
 
@@ -27,164 +18,105 @@ The `config` package provides a flexible configuration system that supports mult
 go get github.com/abitofhelp/servicelib/config
 ```
 
-
 ## Quick Start
 
-See the [Basic Usage example](../EXAMPLES/config/basic_usage_example.go) for a complete, runnable example of how to use the config package.
-
+See the [Basic Usage example](../EXAMPLES/config/basic_usage/README.md) for a complete, runnable example of how to use the configuration component.
 
 ## Configuration
 
-See the [Configuration example](../EXAMPLES/config/app_config_example.go) for a complete, runnable example of how to configure the config package.
-
+See the [Custom Adapter example](../EXAMPLES/config/custom_adapter/README.md) for a complete, runnable example of how to configure the configuration component.
 
 ## API Documentation
 
-
 ### Core Types
+
+The configuration component provides several core types for managing configuration.
 
 #### Config
 
-The `Config` interface provides methods for accessing configuration values.
+The main type that provides configuration functionality.
 
-See the [Basic Usage example](../EXAMPLES/config/basic_usage_example.go) for a complete, runnable example of how to use the Config interface.
-
-#### Options
-
-The `Options` struct provides configuration options for creating a new config instance.
-
-See the [Custom Adapter example](../EXAMPLES/config/custom_adapter_example.go) for a complete, runnable example of how to use the Options struct.
-
-
-### Key Methods
-
-#### New
-
-The `New` function creates a new configuration instance from the specified files.
-
-```go
-cfg, err := config.New("config.yaml", "env.yaml")
 ```
-
-See the [Basic Usage example](../EXAMPLES/config/basic_usage_example.go) for a complete, runnable example.
-
-#### NewWithOptions
-
-The `NewWithOptions` function creates a new configuration instance with the specified options.
-
-```go
-cfg, err := config.NewWithOptions(config.Options{
-    Files: []string{"config.yaml"},
-    EnvPrefix: "APP_",
-    EnvReplacer: "_",
-})
-```
-
-See the [Custom Adapter example](../EXAMPLES/config/custom_adapter_example.go) for a complete, runnable example.
-
-#### Get Methods
-
-The `Get*` methods retrieve configuration values of different types.
-
-```go
-// Get a string value
-apiKey := cfg.GetString("api.key")
-
-// Get an int value with default
-port := cfg.GetInt("server.port", 8080)
-
-// Get a boolean value
-debug := cfg.GetBool("logging.debug", false)
-
-// Get a duration value
-timeout := cfg.GetDuration("server.timeout", "30s")
-```
-
-See the [Basic Usage example](../EXAMPLES/config/basic_usage_example.go) for a complete, runnable example.
-
-#### Unmarshal
-
-The `Unmarshal` method binds configuration values to a struct.
-
-```go
-var appConfig AppConfig
-if err := cfg.Unmarshal(&appConfig); err != nil {
-    log.Fatalf("Failed to unmarshal configuration: %v", err)
+type Config struct {
+    // Fields
 }
 ```
 
-See the [App Config example](../EXAMPLES/config/app_config_example.go) for a complete, runnable example.
+#### Adapter
 
-#### Watch
+Interface for configuration adapters.
 
-The `Watch` method watches for configuration changes and calls the specified function when changes are detected.
-
-```go
-cfg.Watch(func() {
-    // Reload configuration when changes are detected
-})
+```
+type Adapter interface {
+    // Methods
+}
 ```
 
-See the [Basic Usage example](../EXAMPLES/config/basic_usage_example.go) for a complete, runnable example.
+### Key Methods
 
+The configuration component provides several key methods for managing configuration.
+
+#### Load
+
+Loads configuration from a source.
+
+```
+func (c *Config) Load(ctx context.Context, source string) error
+```
+
+#### Get
+
+Gets a configuration value.
+
+```
+func (c *Config) Get(ctx context.Context, key string) (interface{}, error)
+```
+
+#### Set
+
+Sets a configuration value.
+
+```
+func (c *Config) Set(ctx context.Context, key string, value interface{}) error
+```
 
 ## Examples
 
-For complete, runnable examples, see the following files in the examples directory:
+For complete, runnable examples, see the following directories in the EXAMPLES directory:
 
-- [Basic Usage](../EXAMPLES/config/basic_usage_example.go) - Shows basic usage of the config package
-- [App Config](../EXAMPLES/config/app_config_example.go) - Shows how to bind configuration to a struct
-- [Database Config](../EXAMPLES/config/database_config_example.go) - Shows how to configure database connections
-- [Custom Adapter](../EXAMPLES/config/custom_adapter_example.go) - Shows how to create a custom configuration adapter
-
+- [App Config](../EXAMPLES/config/app_config/README.md) - Application configuration
+- [Basic Usage](../EXAMPLES/config/basic_usage/README.md) - Basic configuration operations
+- [Custom Adapter](../EXAMPLES/config/custom_adapter/README.md) - Creating custom config adapters
+- [Database Config](../EXAMPLES/config/database_config/README.md) - Database configuration
 
 ## Best Practices
 
-1. **Use Environment Variables for Secrets**: Never store sensitive information like API keys or passwords in configuration files. Use environment variables instead.
-
-2. **Default Values**: Always provide sensible default values for configuration that might be missing.
-
-3. **Validation**: Validate configuration values to ensure they meet your requirements.
-
-4. **Configuration Hierarchy**: Use a hierarchical approach to organize your configuration.
-
-5. **Documentation**: Document all configuration options, including their purpose, type, and default values.
-
+1. **Use Environment Variables**: Use environment variables for sensitive configuration
+2. **Validate Configuration**: Always validate configuration against schemas
+3. **Provide Defaults**: Always provide default values for configuration options
+4. **Handle Errors**: Properly handle configuration errors
+5. **Use Typed Getters**: Use typed getters (GetString, GetInt, etc.) for type safety
 
 ## Troubleshooting
 
 ### Common Issues
 
-#### Missing Configuration Files
+#### Configuration Not Loading
 
-**Issue**: Configuration files are not found at the specified path.
-
-**Solution**: Ensure that the configuration files exist at the specified path. Use absolute paths or paths relative to the working directory.
+If configuration is not loading, check that the source exists and is accessible.
 
 #### Type Conversion Errors
 
-**Issue**: Type conversion fails when retrieving configuration values.
-
-**Solution**: Ensure that the configuration values are of the expected type. Use the appropriate Get* method for the value type.
-
-#### Environment Variables Not Applied
-
-**Issue**: Environment variables are not being applied to the configuration.
-
-**Solution**: Ensure that the environment variables are properly formatted with the correct prefix and separator. Check that the EnvPrefix and EnvReplacer options are set correctly.
-
+If you're getting type conversion errors, use typed getters (GetString, GetInt, etc.) instead of Get.
 
 ## Related Components
 
-- [Logging](../logging/README.md) - The logging component uses the config package for configuration.
-- [Database](../db/README.md) - The database component uses the config package for database configuration.
-- [Telemetry](../telemetry/README.md) - The telemetry component uses the config package for telemetry configuration.
-
+- [Logging](../logging/README.md) - Logging for configuration events
+- [Errors](../errors/README.md) - Error handling for configuration
 
 ## Contributing
 
 Contributions to this component are welcome! Please see the [Contributing Guide](../CONTRIBUTING.md) for more information.
-
 
 ## License
 

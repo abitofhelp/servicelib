@@ -1,56 +1,28 @@
-# Repository Package Examples
+# Repository Examples
 
-This directory contains examples demonstrating how to use the `repository` package, which provides utilities for implementing the repository pattern in Go applications. The repository pattern abstracts data access logic, making it easier to switch between different data storage implementations and improving testability.
+## Overview
+
+This directory contains examples demonstrating how to use the repository components of the ServiceLib library. Each example is a complete, runnable application that showcases specific features and usage patterns.
 
 ## Examples
 
-### 1. Basic Repository Example
-
-[basic_repository_example/main.go](basic_repository_example/main.go)
-
-Demonstrates the basic implementation and usage of a repository.
-
-Key concepts:
-- Creating a domain entity
-- Implementing a repository interface
-- Using an in-memory repository implementation
-- Performing basic CRUD operations
-- Using generics for type-safe repository operations
-
-### 2. Dependency Injection Example
-
-[dependency_injection_example/main.go](dependency_injection_example/main.go)
-
-Shows how to use dependency injection with repositories.
-
-Key concepts:
-- Injecting repository dependencies
-- Decoupling business logic from data access
-- Using interfaces for loose coupling
-- Testing with mock repositories
-- Configuring repositories at runtime
-
-### 3. Repository Factory Example
-
-[repository_factory_example/main.go](repository_factory_example/main.go)
-
-Demonstrates how to use a repository factory to create repositories.
-
-Key concepts:
-- Creating a repository factory
-- Managing multiple repository types
-- Centralizing repository creation logic
-- Configuring repositories based on application settings
-- Handling repository initialization
+- [Basic Repository](./basic_repository_example/README.md) - Basic repository pattern
+- [Dependency Injection](./dependency_injection_example/README.md) - DI with repositories
+- [Repository Factory](./repository_factory_example/README.md) - Using repository factories
 
 ## Running the Examples
 
-To run any of the examples, use the `go run` command:
+Each example can be run from its directory using:
 
 ```bash
-go run basic_repository_example/main.go
+go run main.go
 ```
 
-## Additional Resources
+## Related Components
 
-For more information about the repository package, see the [repository package documentation](../../repository/README.md).
+- [Repository Package](../../repository/README.md) - The repository package documentation.
+- [DI Package](../../di/README.md) - The dependency injection package documentation.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file for details.
