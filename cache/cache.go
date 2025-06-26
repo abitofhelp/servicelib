@@ -206,35 +206,92 @@ func (o Options) WithName(name string) Options {
 	return o
 }
 
-// Cache is a simple in-memory cache with expiration
+// Cache is a generic in-memory cache with expiration.
+// It provides thread-safe operations for storing and retrieving values of any type,
+// with automatic expiration and cleanup of expired items. The cache supports
+// configurable size limits with eviction strategies, and integrates with
+// OpenTelemetry for tracing and monitoring.
+//
+// Cache is implemented as a generic type, allowing it to store values of any type
+// while maintaining type safety.
 type Cache[T any] struct {
-	name             string
-	items            map[string]Item[T]
-	mu               sync.RWMutex
-	defaultTTL       time.Duration
-	maxSize          int
-	cleanupInterval  time.Duration
-	logger           *logging.ContextLogger
-	tracer           telemetry.Tracer
-	stopCleanup      chan bool
+	// name is the identifier for this cache instance
+	name string
+
+	// items is the map that stores the cached data
+	items map[string]Item[T]
+
+	// mu protects the items map for concurrent access
+	mu sync.RWMutex
+
+	// defaultTTL is the default time-to-live for cache items
+	defaultTTL time.Duration
+
+	// maxSize is the maximum number of items allowed in the cache
+	maxSize int
+
+	// cleanupInterval is how often the cleanup routine runs
+	cleanupInterval time.Duration
+
+	// logger is used for logging cache operations
+	logger *logging.ContextLogger
+
+	// tracer is used for tracing cache operations
+	tracer telemetry.Tracer
+
+	// stopCleanup is a channel used to signal the cleanup goroutine to stop
+	stopCleanup chan bool
+
+	// evictionStrategy determines how items are evicted when the cache is full
 	evictionStrategy EvictionStrategy
 }
 
-// EvictionStrategy defines the strategy for evicting items when the cache is full
+// EvictionStrategy defines the strategy for evicting items when the cache is full.
+// It determines which items are removed when the cache reaches its maximum size
+// and a new item needs to be added.
 type EvictionStrategy int
 
 const (
-	// LRU evicts the least recently used item
+	// LRU evicts the least recently used item.
+	// This strategy removes items that haven't been accessed for the longest time,
+	// which is often the most efficient approach for many caching scenarios.
 	LRU EvictionStrategy = iota
-	// LFU evicts the least frequently used item
+
+	// LFU evicts the least frequently used item.
+	// This strategy removes items that have been accessed the fewest times,
+	// which can be beneficial when access frequency is more important than recency.
 	LFU
-	// FIFO evicts the first item added to the cache
+
+	// FIFO evicts the first item added to the cache.
+	// This strategy implements a simple first-in, first-out queue,
+	// removing the oldest items regardless of how often they've been accessed.
 	FIFO
-	// Random evicts a random item
+
+	// Random evicts a random item.
+	// This strategy provides a simple and computationally inexpensive approach
+	// that can work well when access patterns are unpredictable.
 	Random
 )
 
-// NewCache creates a new cache with the given configuration
+// NewCache creates a new cache with the given configuration and options.
+// It initializes the cache with the specified parameters and starts a background
+// goroutine to periodically clean up expired items. If the cache is disabled
+// (config.Enabled is false), it returns nil and no cache operations will be performed.
+//
+// The function uses the provided logger and tracer from options, or creates
+// no-op versions if they are nil. It also logs the initialization process,
+// including the cache name, TTL, maximum size, and purge interval.
+//
+// Type Parameters:
+//   - T: The type of values to be stored in the cache.
+//
+// Parameters:
+//   - config: The configuration parameters for the cache.
+//   - options: Additional options for the cache, such as logging and tracing.
+//
+// Returns:
+//   - *Cache[T]: A new cache instance configured according to the provided parameters,
+//     or nil if the cache is disabled.
 func NewCache[T any](config Config, options Options) *Cache[T] {
 	if !config.Enabled {
 		if options.Logger != nil {
@@ -280,7 +337,18 @@ func NewCache[T any](config Config, options Options) *Cache[T] {
 	return cache
 }
 
-// Set adds an item to the cache with the default expiration time
+// Set adds an item to the cache with the default expiration time.
+// The item will be stored in the cache until it expires or is explicitly deleted.
+// If the cache is full and the key doesn't already exist, an existing item will
+// be evicted according to the cache's eviction strategy.
+//
+// This method is thread-safe and can be called concurrently from multiple goroutines.
+// If the cache is nil (which happens when the cache is disabled), this method is a no-op.
+//
+// Parameters:
+//   - ctx: The context for the operation, which can be used for tracing and cancellation.
+//   - key: The key under which to store the value.
+//   - value: The value to store in the cache.
 func (c *Cache[T]) Set(ctx context.Context, key string, value T) {
 	if c == nil {
 		return
@@ -313,7 +381,22 @@ func (c *Cache[T]) Set(ctx context.Context, key string, value T) {
 	span.SetAttributes(attribute.Int("cache.size", len(c.items)))
 }
 
-// SetWithTTL adds an item to the cache with a custom expiration time
+// SetWithTTL adds an item to the cache with a custom expiration time.
+// This method works like Set but allows specifying a custom time-to-live (TTL)
+// for the item, overriding the default TTL configured for the cache.
+//
+// The item will be stored in the cache until it expires according to the provided TTL
+// or is explicitly deleted. If the cache is full and the key doesn't already exist,
+// an existing item will be evicted according to the cache's eviction strategy.
+//
+// This method is thread-safe and can be called concurrently from multiple goroutines.
+// If the cache is nil (which happens when the cache is disabled), this method is a no-op.
+//
+// Parameters:
+//   - ctx: The context for the operation, which can be used for tracing and cancellation.
+//   - key: The key under which to store the value.
+//   - value: The value to store in the cache.
+//   - ttl: The time-to-live duration for this specific item.
 func (c *Cache[T]) SetWithTTL(ctx context.Context, key string, value T, ttl time.Duration) {
 	if c == nil {
 		return
@@ -347,7 +430,22 @@ func (c *Cache[T]) SetWithTTL(ctx context.Context, key string, value T, ttl time
 	span.SetAttributes(attribute.Int("cache.size", len(c.items)))
 }
 
-// Get retrieves an item from the cache
+// Get retrieves an item from the cache.
+// It returns the value and a boolean indicating whether the value was found.
+// If the key doesn't exist or the item has expired, the zero value of type T
+// and false are returned.
+//
+// This method is thread-safe and can be called concurrently from multiple goroutines.
+// If the cache is nil (which happens when the cache is disabled), this method returns
+// the zero value of type T and false.
+//
+// Parameters:
+//   - ctx: The context for the operation, which can be used for tracing and cancellation.
+//   - key: The key to look up in the cache.
+//
+// Returns:
+//   - T: The value associated with the key, or the zero value of type T if not found.
+//   - bool: true if the key was found and the item hasn't expired, false otherwise.
 func (c *Cache[T]) Get(ctx context.Context, key string) (T, bool) {
 	if c == nil {
 		var zero T
@@ -387,7 +485,16 @@ func (c *Cache[T]) Get(ctx context.Context, key string) (T, bool) {
 	return item.Value, true
 }
 
-// Delete removes an item from the cache
+// Delete removes an item from the cache.
+// This method removes the item with the specified key from the cache, if it exists.
+// If the key doesn't exist in the cache, this method is a no-op.
+//
+// This method is thread-safe and can be called concurrently from multiple goroutines.
+// If the cache is nil (which happens when the cache is disabled), this method is a no-op.
+//
+// Parameters:
+//   - ctx: The context for the operation, which can be used for tracing and cancellation.
+//   - key: The key of the item to remove from the cache.
 func (c *Cache[T]) Delete(ctx context.Context, key string) {
 	if c == nil {
 		return
@@ -416,7 +523,16 @@ func (c *Cache[T]) Delete(ctx context.Context, key string) {
 	)
 }
 
-// Clear removes all items from the cache
+// Clear removes all items from the cache.
+// This method removes all items from the cache, effectively resetting it to an empty state.
+// It creates a new empty map to replace the existing items map, allowing the garbage
+// collector to reclaim the memory used by the old items.
+//
+// This method is thread-safe and can be called concurrently from multiple goroutines.
+// If the cache is nil (which happens when the cache is disabled), this method is a no-op.
+//
+// Parameters:
+//   - ctx: The context for the operation, which can be used for tracing and cancellation.
 func (c *Cache[T]) Clear(ctx context.Context) {
 	if c == nil {
 		return
@@ -444,7 +560,16 @@ func (c *Cache[T]) Clear(ctx context.Context) {
 	)
 }
 
-// Size returns the number of items in the cache
+// Size returns the number of items in the cache.
+// This method counts all items currently in the cache, including those that may have
+// expired but haven't been removed by the cleanup process yet. For an accurate count
+// of non-expired items, you would need to implement a custom counting method.
+//
+// This method is thread-safe and can be called concurrently from multiple goroutines.
+// If the cache is nil (which happens when the cache is disabled), this method returns 0.
+//
+// Returns:
+//   - int: The number of items currently in the cache.
 func (c *Cache[T]) Size() int {
 	if c == nil {
 		return 0
@@ -484,7 +609,16 @@ func (c *Cache[T]) cleanup() {
 	}
 }
 
-// Shutdown stops the cleanup timer
+// Shutdown stops the cleanup timer and gracefully shuts down the cache.
+// This method should be called when the cache is no longer needed to ensure
+// that the background cleanup goroutine is properly terminated. It sends a signal
+// to the cleanup goroutine to stop and logs the shutdown process.
+//
+// This method is safe to call multiple times and from multiple goroutines.
+// If the cache is nil (which happens when the cache is disabled), this method is a no-op.
+//
+// It's recommended to call this method when the application is shutting down to prevent
+// goroutine leaks and ensure proper resource cleanup.
 func (c *Cache[T]) Shutdown() {
 	if c == nil {
 		return
@@ -511,7 +645,31 @@ func (c *Cache[T]) evictItem() {
 	}
 }
 
-// WithCache is a middleware that adds caching to a function
+// WithCache executes a function with caching.
+// This utility function implements a caching middleware pattern. It first tries to retrieve
+// the value from the cache using the provided key. If the value is found in the cache, it is
+// returned immediately without executing the function. If the value is not found, the function
+// is executed, and its result is stored in the cache before being returned.
+//
+// This pattern is useful for expensive operations that are called frequently with the same
+// parameters, such as database queries or API calls. The cached results use the default TTL
+// configured for the cache. For custom TTL, use WithCacheTTL instead.
+//
+// If the cache is nil (which happens when the cache is disabled), the function is executed
+// directly without any caching.
+//
+// Type Parameters:
+//   - T: The type of value to be cached and returned by the function.
+//
+// Parameters:
+//   - ctx: The context for the operation, which can be used for tracing and cancellation.
+//   - cache: The cache instance to use for storing and retrieving values.
+//   - key: The key under which to store and retrieve the value in the cache.
+//   - fn: The function to execute if the value is not found in the cache.
+//
+// Returns:
+//   - T: The value retrieved from the cache or returned by the function.
+//   - error: An error if the function execution fails, or nil if successful.
 func WithCache[T any](ctx context.Context, cache *Cache[T], key string, fn func(ctx context.Context) (T, error)) (T, error) {
 	if cache == nil {
 		return fn(ctx)
@@ -548,7 +706,34 @@ func WithCache[T any](ctx context.Context, cache *Cache[T], key string, fn func(
 	return value, nil
 }
 
-// WithCacheTTL is a middleware that adds caching with a custom TTL to a function
+// WithCacheTTL executes a function with caching and a custom time-to-live.
+// This utility function is similar to WithCache but allows specifying a custom TTL
+// for the cached result. It first tries to retrieve the value from the cache using
+// the provided key. If the value is found in the cache, it is returned immediately
+// without executing the function. If the value is not found, the function is executed,
+// and its result is stored in the cache with the specified TTL before being returned.
+//
+// This pattern is useful for expensive operations that are called frequently with the same
+// parameters, such as database queries or API calls. The custom TTL allows for fine-grained
+// control over how long results should be cached, which can be useful for data with
+// different freshness requirements.
+//
+// If the cache is nil (which happens when the cache is disabled), the function is executed
+// directly without any caching.
+//
+// Type Parameters:
+//   - T: The type of value to be cached and returned by the function.
+//
+// Parameters:
+//   - ctx: The context for the operation, which can be used for tracing and cancellation.
+//   - cache: The cache instance to use for storing and retrieving values.
+//   - key: The key under which to store and retrieve the value in the cache.
+//   - ttl: The time-to-live duration for the cached value.
+//   - fn: The function to execute if the value is not found in the cache.
+//
+// Returns:
+//   - T: The value retrieved from the cache or returned by the function.
+//   - error: An error if the function execution fails, or nil if successful.
 func WithCacheTTL[T any](ctx context.Context, cache *Cache[T], key string, ttl time.Duration, fn func(ctx context.Context) (T, error)) (T, error) {
 	if cache == nil {
 		return fn(ctx)

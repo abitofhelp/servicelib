@@ -19,19 +19,33 @@ import (
 	"go.uber.org/zap"
 )
 
-// State represents the state of the circuit breaker
+// State represents the state of the circuit breaker.
+// It defines the three possible states that a circuit breaker can be in:
+// closed (normal operation), open (failing, rejecting requests), or half-open (testing recovery).
 type State int
 
 const (
-	// Closed means the circuit is closed and requests are allowed through
+	// Closed indicates that the circuit is closed and requests are allowed through normally.
+	// This is the default state and represents normal operation.
 	Closed State = iota
-	// Open means the circuit is open and requests are not allowed through
+
+	// Open indicates that the circuit is open and requests are immediately rejected.
+	// This state is entered when the error threshold is exceeded, preventing further
+	// requests to a failing component.
 	Open
-	// HalfOpen means the circuit is allowing a limited number of requests through to test if the dependency is healthy
+
+	// HalfOpen indicates that the circuit is allowing a limited number of requests through
+	// to test if the dependency has recovered. This state is entered after the sleep window
+	// has elapsed since the circuit was opened.
 	HalfOpen
 )
 
-// String returns a string representation of the circuit breaker state
+// String returns a string representation of the circuit breaker state.
+// This method implements the fmt.Stringer interface, allowing State values
+// to be easily formatted in log messages and error reports.
+//
+// Returns:
+//   - A human-readable string representing the state: "Closed", "Open", "HalfOpen", or "Unknown".
 func (s State) String() string {
 	switch s {
 	case Closed:
@@ -45,23 +59,48 @@ func (s State) String() string {
 	}
 }
 
-// Config contains circuit breaker configuration parameters
+// Config contains circuit breaker configuration parameters.
+// It defines the behavior of the circuit breaker, including thresholds for
+// tripping the circuit, timeouts, and recovery behavior.
 type Config struct {
-	// Enabled determines if the circuit breaker is enabled
+	// Enabled determines if the circuit breaker is enabled.
+	// If set to false, the circuit breaker becomes a no-op and all requests are allowed through.
 	Enabled bool
-	// Timeout is the maximum time allowed for a request
+
+	// Timeout is the maximum time allowed for a request.
+	// Requests that exceed this timeout are considered failures.
 	Timeout time.Duration
-	// MaxConcurrent is the maximum number of concurrent requests allowed
+
+	// MaxConcurrent is the maximum number of concurrent requests allowed.
+	// This helps prevent resource exhaustion during high load.
 	MaxConcurrent int
-	// ErrorThreshold is the percentage of errors that will trip the circuit (0.0-1.0)
+
+	// ErrorThreshold is the percentage of errors that will trip the circuit (0.0-1.0).
+	// When the error rate exceeds this threshold, the circuit will open.
+	// For example, 0.5 means the circuit will open when 50% or more of requests fail.
 	ErrorThreshold float64
-	// VolumeThreshold is the minimum number of requests before the error threshold is checked
+
+	// VolumeThreshold is the minimum number of requests before the error threshold is checked.
+	// This prevents the circuit from opening due to a small number of failures.
 	VolumeThreshold int
-	// SleepWindow is the time to wait before allowing a single request through in half-open state
+
+	// SleepWindow is the time to wait before allowing a single request through in half-open state.
+	// After this duration has elapsed since the circuit opened, a test request will be allowed
+	// to determine if the dependency has recovered.
 	SleepWindow time.Duration
 }
 
-// DefaultConfig returns a default circuit breaker configuration
+// DefaultConfig returns a default circuit breaker configuration with reasonable values.
+// The default configuration includes:
+//   - Enabled: true (circuit breaker is enabled)
+//   - Timeout: 5 seconds (requests that take longer are considered failures)
+//   - MaxConcurrent: 100 (maximum of 100 concurrent requests)
+//   - ErrorThreshold: 0.5 (circuit opens when 50% or more of requests fail)
+//   - VolumeThreshold: 10 (minimum of 10 requests before checking error threshold)
+//   - SleepWindow: 1 second (wait 1 second before testing if dependency has recovered)
+//
+// Returns:
+//   - A Config instance with default values.
 func DefaultConfig() Config {
 	return Config{
 		Enabled:         true,
@@ -73,13 +112,28 @@ func DefaultConfig() Config {
 	}
 }
 
-// WithEnabled sets whether the circuit breaker is enabled
+// WithEnabled sets whether the circuit breaker is enabled.
+// If enabled is set to false, the circuit breaker becomes a no-op and all requests are allowed through.
+//
+// Parameters:
+//   - enabled: A boolean indicating whether the circuit breaker should be enabled.
+//
+// Returns:
+//   - A new Config instance with the updated Enabled value.
 func (c Config) WithEnabled(enabled bool) Config {
 	c.Enabled = enabled
 	return c
 }
 
-// WithTimeout sets the maximum time allowed for a request
+// WithTimeout sets the maximum time allowed for a request.
+// Requests that exceed this timeout are considered failures.
+// If a non-positive value is provided, it will be set to 1 millisecond.
+//
+// Parameters:
+//   - timeout: The maximum duration allowed for a request.
+//
+// Returns:
+//   - A new Config instance with the updated Timeout value.
 func (c Config) WithTimeout(timeout time.Duration) Config {
 	if timeout <= 0 {
 		timeout = 1 * time.Millisecond
@@ -88,7 +142,15 @@ func (c Config) WithTimeout(timeout time.Duration) Config {
 	return c
 }
 
-// WithMaxConcurrent sets the maximum number of concurrent requests allowed
+// WithMaxConcurrent sets the maximum number of concurrent requests allowed.
+// This helps prevent resource exhaustion during high load.
+// If a non-positive value is provided, it will be set to 1.
+//
+// Parameters:
+//   - maxConcurrent: The maximum number of concurrent requests allowed.
+//
+// Returns:
+//   - A new Config instance with the updated MaxConcurrent value.
 func (c Config) WithMaxConcurrent(maxConcurrent int) Config {
 	if maxConcurrent <= 0 {
 		maxConcurrent = 1
@@ -97,7 +159,17 @@ func (c Config) WithMaxConcurrent(maxConcurrent int) Config {
 	return c
 }
 
-// WithErrorThreshold sets the percentage of errors that will trip the circuit
+// WithErrorThreshold sets the percentage of errors that will trip the circuit.
+// When the error rate exceeds this threshold, the circuit will open.
+// The value should be between 0 and 1, where 0 means any error will trip the circuit,
+// and 1 means the circuit will never trip. If a value outside this range is provided,
+// it will be clamped to the valid range.
+//
+// Parameters:
+//   - errorThreshold: The error threshold as a decimal between 0 and 1.
+//
+// Returns:
+//   - A new Config instance with the updated ErrorThreshold value.
 func (c Config) WithErrorThreshold(errorThreshold float64) Config {
 	if errorThreshold < 0 {
 		errorThreshold = 0
@@ -108,7 +180,15 @@ func (c Config) WithErrorThreshold(errorThreshold float64) Config {
 	return c
 }
 
-// WithVolumeThreshold sets the minimum number of requests before the error threshold is checked
+// WithVolumeThreshold sets the minimum number of requests before the error threshold is checked.
+// This prevents the circuit from opening due to a small number of failures.
+// If a non-positive value is provided, it will be set to 1.
+//
+// Parameters:
+//   - volumeThreshold: The minimum number of requests required before checking the error threshold.
+//
+// Returns:
+//   - A new Config instance with the updated VolumeThreshold value.
 func (c Config) WithVolumeThreshold(volumeThreshold int) Config {
 	if volumeThreshold <= 0 {
 		volumeThreshold = 1
@@ -117,7 +197,17 @@ func (c Config) WithVolumeThreshold(volumeThreshold int) Config {
 	return c
 }
 
-// WithSleepWindow sets the time to wait before allowing a single request through in half-open state
+// WithSleepWindow sets the time to wait before allowing a single request through in half-open state.
+// After this duration has elapsed since the circuit opened, a test request will be allowed
+// to determine if the dependency has recovered. If the test request succeeds, the circuit
+// will close; if it fails, the circuit will remain open for another sleep window.
+// If a non-positive value is provided, it will be set to 1 millisecond.
+//
+// Parameters:
+//   - sleepWindow: The duration to wait before testing if the dependency has recovered.
+//
+// Returns:
+//   - A new Config instance with the updated SleepWindow value.
 func (c Config) WithSleepWindow(sleepWindow time.Duration) Config {
 	if sleepWindow <= 0 {
 		sleepWindow = 1 * time.Millisecond
@@ -126,17 +216,32 @@ func (c Config) WithSleepWindow(sleepWindow time.Duration) Config {
 	return c
 }
 
-// Options contains additional options for the circuit breaker
+// Options contains additional options for the circuit breaker.
+// These options are not directly related to the circuit breaker behavior itself,
+// but provide additional functionality like logging, tracing, and identification.
 type Options struct {
-	// Logger is used for logging circuit breaker operations
+	// Logger is used for logging circuit breaker operations.
+	// If nil, a no-op logger will be used.
 	Logger *logging.ContextLogger
-	// Tracer is used for tracing circuit breaker operations
+
+	// Tracer is used for tracing circuit breaker operations.
+	// It provides integration with OpenTelemetry for distributed tracing.
 	Tracer telemetry.Tracer
-	// Name is the name of the circuit breaker
+
+	// Name is the name of the circuit breaker.
+	// This is useful for identifying the circuit breaker in logs and traces,
+	// especially when multiple circuit breakers are used in the same application.
 	Name string
 }
 
-// DefaultOptions returns default options for circuit breaker operations
+// DefaultOptions returns default options for circuit breaker operations.
+// The default options include:
+//   - No logger (a no-op logger will be used)
+//   - A no-op tracer (no OpenTelemetry integration)
+//   - Name: "default"
+//
+// Returns:
+//   - An Options instance with default values.
 func DefaultOptions() Options {
 	return Options{
 		Logger: nil,
@@ -145,19 +250,46 @@ func DefaultOptions() Options {
 	}
 }
 
-// WithLogger sets the logger for the circuit breaker
+// WithLogger sets the logger for the circuit breaker.
+// The logger is used to log circuit breaker operations, such as state transitions,
+// request successes and failures, and initialization events.
+//
+// Parameters:
+//   - logger: A ContextLogger instance for logging circuit breaker operations.
+//
+// Returns:
+//   - A new Options instance with the updated Logger value.
 func (o Options) WithLogger(logger *logging.ContextLogger) Options {
 	o.Logger = logger
 	return o
 }
 
-// WithOtelTracer returns Options with an OpenTelemetry tracer
+// WithOtelTracer returns Options with an OpenTelemetry tracer.
+// This allows users to opt-in to OpenTelemetry tracing if they need it.
+// The tracer is used to create spans for circuit breaker operations, which can be
+// viewed in a distributed tracing system to understand the behavior and performance
+// of the circuit breaker.
+//
+// Parameters:
+//   - tracer: An OpenTelemetry trace.Tracer instance.
+//
+// Returns:
+//   - A new Options instance with the provided OpenTelemetry tracer.
 func (o Options) WithOtelTracer(tracer trace.Tracer) Options {
 	o.Tracer = telemetry.NewOtelTracer(tracer)
 	return o
 }
 
-// WithName sets the name of the circuit breaker
+// WithName sets the name of the circuit breaker.
+// The name is used to identify the circuit breaker in logs and traces,
+// which is especially useful when multiple circuit breakers are used in the same application
+// to protect different resources or operations.
+//
+// Parameters:
+//   - name: A string identifier for the circuit breaker.
+//
+// Returns:
+//   - A new Options instance with the updated Name value.
 func (o Options) WithName(name string) Options {
 	o.Name = name
 	return o
