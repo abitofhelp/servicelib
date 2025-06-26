@@ -2,7 +2,6 @@ codecov:
   notify:
     wait_for_ci: true
   require_ci_to_pass: true
-  fail_ci_if_error: true
 comment:
   behavior: default
   layout: 'reach,diff,flags,tree,reach'

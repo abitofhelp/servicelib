@@ -29,6 +29,9 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.txt
           slug: abitofhelp/servicelib
+          fail_ci_if_error: true
+          verbose: true
+
 
 
 
