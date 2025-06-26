@@ -26,6 +26,11 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.txt
-          fail_ci_ifconti_error: true
           slug: abitofhelp/servicelib
+
+
+
+
+
