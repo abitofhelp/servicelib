@@ -16,17 +16,22 @@ import (
 	"go.uber.org/zap"
 )
 
-// ContextKey is a type for context keys to avoid collisions
+// ContextKey is a type for context keys to avoid collisions.
+// Using a custom type for context keys helps prevent key collisions
+// when multiple packages store values in the context.
 type ContextKey string
 
 const (
-	// RequestIDKey is the key for the request ID in the context
+	// RequestIDKey is the key for the request ID in the context.
+	// This key is used to store and retrieve the unique identifier for each request.
 	RequestIDKey ContextKey = "request_id"
 
-	// StartTimeKey is the key for the request start time in the context
+	// StartTimeKey is the key for the request start time in the context.
+	// This key is used to store and retrieve the time when the request started processing.
 	StartTimeKey ContextKey = "start_time"
 
-	// UserIDKey is the key for the user ID in the context (for future auth)
+	// UserIDKey is the key for the user ID in the context (for future auth).
+	// This key is used to store and retrieve the ID of the authenticated user.
 	UserIDKey ContextKey = "user_id"
 )
 
@@ -42,7 +47,16 @@ func generateRequestID() string {
 	return fmt.Sprintf("req-%d-%d", time.Now().UnixNano(), randomNum)
 }
 
-// RequestID returns the request ID from the context
+// RequestID returns the request ID from the context.
+// This function safely extracts the request ID from the context, handling nil contexts
+// and type assertions. If the context is nil or doesn't contain a request ID,
+// an empty string is returned.
+//
+// Parameters:
+//   - ctx: The context from which to extract the request ID.
+//
+// Returns:
+//   - A string containing the request ID, or an empty string if not found.
 func RequestID(ctx context.Context) string {
 	if ctx == nil {
 		return ""
@@ -53,7 +67,16 @@ func RequestID(ctx context.Context) string {
 	return ""
 }
 
-// StartTime returns the request start time from the context
+// StartTime returns the request start time from the context.
+// This function safely extracts the start time from the context, handling nil contexts
+// and type assertions. If the context is nil or doesn't contain a start time,
+// a zero time is returned.
+//
+// Parameters:
+//   - ctx: The context from which to extract the start time.
+//
+// Returns:
+//   - A time.Time representing when the request started, or a zero time if not found.
 func StartTime(ctx context.Context) time.Time {
 	if ctx == nil {
 		return time.Time{}
@@ -64,7 +87,16 @@ func StartTime(ctx context.Context) time.Time {
 	return time.Time{}
 }
 
-// RequestDuration returns the duration since the request started
+// RequestDuration returns the duration since the request started.
+// This function calculates how long a request has been processing by comparing
+// the start time from the context with the current time. If the start time
+// is not found or is a zero time, a duration of 0 is returned.
+//
+// Parameters:
+//   - ctx: The context containing the request start time.
+//
+// Returns:
+//   - A time.Duration representing how long the request has been processing.
 func RequestDuration(ctx context.Context) time.Duration {
 	startTime := StartTime(ctx)
 	if startTime.IsZero() {
@@ -73,7 +105,20 @@ func RequestDuration(ctx context.Context) time.Duration {
 	return time.Since(startTime)
 }
 
-// WithRequestContext adds request context information to the request
+// WithRequestContext adds request context information to the request.
+// This middleware adds a unique request ID and start time to the request context.
+// If the request already has an X-Request-ID header, that value is used as the
+// request ID; otherwise, a new unique ID is generated. The request ID is also
+// added to the response headers for correlation.
+//
+// This middleware is typically one of the first in the chain, as it provides
+// context information that other middleware and handlers can use.
+//
+// Parameters:
+//   - next: The next handler in the middleware chain.
+//
+// Returns:
+//   - An http.Handler that wraps the next handler with request context functionality.
 func WithRequestContext(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Generate a request ID if not already present
@@ -94,7 +139,20 @@ func WithRequestContext(next http.Handler) http.Handler {
 	})
 }
 
-// WithTimeout adds a timeout to the request context
+// WithTimeout adds a timeout to the request context.
+// This middleware sets a maximum duration for the request to complete. If the request
+// takes longer than the specified timeout, it is canceled and a 504 Gateway Timeout
+// response is returned to the client.
+//
+// The middleware uses a goroutine to process the request and a select statement to
+// wait for either the request to complete or the timeout to expire. It uses a
+// synchronized response writer to avoid race conditions when writing the response.
+//
+// Parameters:
+//   - timeout: The maximum duration allowed for the request to complete.
+//
+// Returns:
+//   - A middleware function that adds timeout functionality to an HTTP handler.
 func WithTimeout(timeout time.Duration) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -141,7 +199,21 @@ func WithTimeout(timeout time.Duration) func(http.Handler) http.Handler {
 	}
 }
 
-// WithRecovery adds panic recovery to the request
+// WithRecovery adds panic recovery to the request.
+// This middleware catches any panics that occur during request processing and
+// converts them into 500 Internal Server Error responses. It also logs the panic
+// details, including the stack trace, to help with debugging.
+//
+// Without this middleware, a panic in a handler would crash the entire server.
+// With it, the panic is contained to just the current request, allowing the
+// server to continue handling other requests.
+//
+// Parameters:
+//   - logger: A context logger for logging panic details.
+//   - next: The next handler in the middleware chain.
+//
+// Returns:
+//   - An http.Handler that wraps the next handler with panic recovery functionality.
 func WithRecovery(logger *logging.ContextLogger, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
@@ -173,7 +245,21 @@ func WithRecovery(logger *logging.ContextLogger, next http.Handler) http.Handler
 	})
 }
 
-// WithLogging adds request logging
+// WithLogging adds request logging.
+// This middleware logs information about each request, including the HTTP method,
+// path, status code, and duration. It uses a response writer wrapper to capture
+// the status code of the response.
+//
+// The logging occurs after the request has been processed, so it includes the
+// final status code and the total time taken to process the request. This is
+// useful for monitoring and debugging.
+//
+// Parameters:
+//   - logger: A context logger for logging request details.
+//   - next: The next handler in the middleware chain.
+//
+// Returns:
+//   - An http.Handler that wraps the next handler with logging functionality.
 func WithLogging(logger *logging.ContextLogger, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Record start time
@@ -380,13 +466,24 @@ func WithContextCancellation(logger *logging.ContextLogger) func(next http.Handl
 
 // ApplyMiddleware applies all middleware to a handler in the recommended order.
 // This function provides a consistent way to apply middleware across different applications.
+// It applies the following middleware in order (outermost first):
+//  1. WithRequestContext - Adds request ID and timing information
+//  2. WithCORS - Adds CORS headers for cross-origin requests
+//  3. WithRecovery - Catches panics and converts them to 500 responses
+//  4. WithContextCancellation - Handles client disconnections
+//  5. WithLogging - Logs request details
+//  6. WithErrorHandling - Maps errors to appropriate HTTP responses
+//
+// The order is important for proper middleware chaining. For example, the request context
+// middleware is applied first so that all other middleware can access the request ID.
+// The recovery middleware is applied early to catch panics in other middleware.
 //
 // Parameters:
-//   - handler: The HTTP handler to wrap with middleware
-//   - logger: Logger for recording middleware events
+//   - handler: The HTTP handler to wrap with middleware.
+//   - logger: Logger for recording middleware events.
 //
 // Returns:
-//   - A wrapped HTTP handler with all middleware applied
+//   - A wrapped HTTP handler with all middleware applied in the recommended order.
 func ApplyMiddleware(handler http.Handler, logger *zap.Logger) http.Handler {
 	// Create a context logger from the zap logger
 	contextLogger := logging.NewContextLogger(logger)
