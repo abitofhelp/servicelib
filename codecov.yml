@@ -2,5 +2,4 @@ ignore:
   - "DOCS"
   - "EXAMPLES"
   - "tools"
-
 fail_ci_if_error: true
