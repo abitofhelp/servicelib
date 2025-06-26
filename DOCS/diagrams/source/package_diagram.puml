@@ -1,0 +1,124 @@
+@startuml Package Diagram
+
+' Define the styles
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam ArrowColor black
+skinparam PackageBorderColor black
+skinparam PackageBackgroundColor #FEFECE
+
+title ServiceLib Package Diagram
+
+' Define the packages based on the actual codebase
+package "auth" {
+}
+
+package "cache" {
+}
+
+package "circuit" {
+}
+
+package "config" {
+}
+
+package "context" {
+}
+
+package "date" {
+}
+
+package "db" {
+}
+
+package "di" {
+}
+
+package "errors" {
+}
+
+package "graphql" {
+}
+
+package "health" {
+}
+
+package "logging" {
+}
+
+package "middleware" {
+}
+
+package "model" {
+}
+
+package "rate" {
+}
+
+package "repository" {
+}
+
+package "retry" {
+}
+
+package "shutdown" {
+}
+
+package "signal" {
+}
+
+package "stringutil" {
+}
+
+package "telemetry" {
+}
+
+package "transaction" {
+}
+
+package "validation" {
+}
+
+package "valueobject" {
+}
+
+' Define the relationships based on typical dependencies
+middleware --> logging
+middleware --> errors
+middleware --> telemetry
+
+repository --> db
+repository --> errors
+repository --> transaction
+
+db --> errors
+db --> logging
+db --> telemetry
+
+telemetry --> logging
+telemetry --> errors
+
+errors --> logging
+
+auth --> errors
+auth --> logging
+
+health --> logging
+health --> errors
+
+retry --> errors
+retry --> logging
+
+circuit --> errors
+circuit --> logging
+
+cache --> errors
+cache --> logging
+
+transaction --> db
+transaction --> errors
+transaction --> logging
+
+validation --> errors
+
+@enduml

@@ -1,0 +1,78 @@
+@startuml Architecture Overview
+
+' Define the styles
+skinparam componentStyle uml2
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam ArrowColor black
+skinparam ComponentBorderColor black
+skinparam ComponentBackgroundColor #FEFECE
+skinparam PackageBorderColor black
+skinparam PackageBackgroundColor #FEFECE
+
+title ServiceLib Architecture Overview
+
+' Define the layers based on Clean Architecture
+package "Domain Layer" {
+  [Domain Model] as model
+  [Value Objects] as valueobject
+  [Domain Services] as domainServices
+  [Repository Interfaces] as repoInterfaces
+}
+
+package "Application Layer" {
+  [Use Cases] as useCases
+  [Application Services] as appServices
+  [Validation] as validation
+}
+
+package "Infrastructure Layer" {
+  [Repositories] as repositories
+  [Database Access] as db
+  [Caching] as cache
+  [External Services] as externalServices
+}
+
+package "Interface Layer" {
+  [Controllers] as controllers
+  [Middleware] as middleware
+  [GraphQL] as graphql
+  [Health Checks] as health
+}
+
+package "Cross-Cutting Concerns" {
+  [Logging] as logging
+  [Error Handling] as errors
+  [Telemetry] as telemetry
+  [Configuration] as config
+  [Authentication] as auth
+  [Dependency Injection] as di
+}
+
+' Define the relationships
+controllers --> useCases
+useCases --> domainServices
+useCases --> repoInterfaces
+domainServices --> model
+domainServices --> valueobject
+repositories --> repoInterfaces
+repositories --> db
+repositories --> cache
+
+' Cross-cutting concerns relationships
+logging --> controllers
+logging --> useCases
+logging --> repositories
+telemetry --> controllers
+telemetry --> useCases
+telemetry --> repositories
+errors --> controllers
+errors --> useCases
+errors --> repositories
+auth --> controllers
+di --> controllers
+di --> useCases
+di --> repositories
+di --> domainServices
+
+@enduml

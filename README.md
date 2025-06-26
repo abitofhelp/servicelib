@@ -179,6 +179,15 @@ ServiceLib is organized into the following packages:
 
 For complete, runnable examples of each component, see the [EXAMPLES](./EXAMPLES/README.md) directory.
 
+## Architecture Diagrams
+
+The following UML diagrams provide a visual representation of the ServiceLib architecture:
+
+- [Architecture Overview](./DOCS/diagrams/svg/Architecture%20Overview.svg) - High-level overview of the ServiceLib architecture based on Clean Architecture, DDD, and Hexagonal Architecture
+- [Package Diagram](./DOCS/diagrams/svg/Package%20Diagram.svg) - Diagram showing the packages in ServiceLib and their relationships
+- [HTTP Request Sequence](./DOCS/diagrams/svg/HTTP%20Request%20Sequence.svg) - Sequence diagram illustrating the HTTP request processing flow
+- [Errors Package Class Diagram](./DOCS/diagrams/svg/Errors%20Package%20Class%20Diagram.svg) - Class diagram for the errors package
+
 ## Contributing
 
 Contributions to ServiceLib are welcome! Please see the [Contributing Guide](./CONTRIBUTING.md) for more information.

@@ -1,0 +1,93 @@
+@startuml HTTP Request Sequence
+
+' Define the styles
+skinparam sequenceArrowThickness 2
+skinparam sequenceGroupBorderThickness 2
+skinparam sequenceGroupBorderColor black
+skinparam sequenceGroupBackgroundColor #FEFECE
+skinparam sequenceParticipantBorderThickness 2
+skinparam sequenceParticipantBorderColor black
+skinparam sequenceParticipantBackgroundColor #FEFECE
+
+title HTTP Request Processing Sequence
+
+actor Client
+participant "HTTP Server" as Server
+participant "Middleware Chain" as Middleware
+participant "Request ID Middleware" as RequestID
+participant "Logging Middleware" as LoggingMW
+participant "Recovery Middleware" as Recovery
+participant "Application Handler" as Handler
+participant "Context Logger" as Logger
+participant "Error Handler" as ErrorHandler
+participant "Database" as DB
+
+' Define the sequence
+Client -> Server: HTTP Request
+activate Server
+
+Server -> Middleware: Process Request
+activate Middleware
+
+Middleware -> RequestID: Add Request ID
+activate RequestID
+RequestID -> RequestID: Generate UUID
+RequestID -> RequestID: Add to Context
+RequestID --> Middleware: Request with ID
+deactivate RequestID
+
+Middleware -> LoggingMW: Log Request
+activate LoggingMW
+LoggingMW -> Logger: Log Request Details
+activate Logger
+Logger --> LoggingMW: Logged
+deactivate Logger
+LoggingMW --> Middleware: Logged Request
+deactivate LoggingMW
+
+Middleware -> Recovery: Handle Panics
+activate Recovery
+
+Recovery -> Handler: Process Request
+activate Handler
+
+Handler -> DB: Query Data
+activate DB
+DB --> Handler: Return Data
+deactivate DB
+
+alt Success
+    Handler --> Recovery: Success Response
+else Error
+    Handler -> ErrorHandler: Handle Error
+    activate ErrorHandler
+    ErrorHandler -> Logger: Log Error
+    activate Logger
+    Logger --> ErrorHandler: Logged
+    deactivate Logger
+    ErrorHandler --> Handler: Error Response
+    deactivate ErrorHandler
+    Handler --> Recovery: Error Response
+end
+
+deactivate Handler
+
+Recovery --> Middleware: Response
+deactivate Recovery
+
+Middleware -> LoggingMW: Log Response
+activate LoggingMW
+LoggingMW -> Logger: Log Response Details
+activate Logger
+Logger --> LoggingMW: Logged
+deactivate Logger
+LoggingMW --> Middleware: Logged Response
+deactivate LoggingMW
+
+Middleware --> Server: Final Response
+deactivate Middleware
+
+Server --> Client: HTTP Response
+deactivate Server
+
+@enduml

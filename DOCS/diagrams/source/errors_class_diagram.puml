@@ -1,0 +1,122 @@
+@startuml Errors Package Class Diagram
+
+' Define the styles
+skinparam classAttributeIconSize 0
+skinparam classBorderThickness 2
+skinparam classBorderColor black
+skinparam classBackgroundColor #FEFECE
+skinparam classArrowColor black
+skinparam classArrowThickness 2
+
+title ServiceLib Errors Package Class Diagram
+
+' Define the interfaces and classes
+interface "error" as GoError {
+  +Error() string
+}
+
+class "Error" as BaseError {
+  -code: string
+  -message: string
+  -details: map[string]interface{}
+  -cause: error
+  -stack: string
+  +Error() string
+  +Code() string
+  +Message() string
+  +Details() map[string]interface{}
+  +Cause() error
+  +Stack() string
+  +WithDetails(key string, value interface{}) Error
+}
+
+class "ValidationError" as ValidationError {
+  -field: string
+  +Field() string
+}
+
+class "NotFoundError" as NotFoundError {
+  -entity: string
+  -identifier: string
+  +Entity() string
+  +Identifier() string
+}
+
+class "DatabaseError" as DatabaseError {
+  -operation: string
+  -table: string
+  +Operation() string
+  +Table() string
+}
+
+class "AuthenticationError" as AuthenticationError {
+  -reason: string
+  +Reason() string
+}
+
+class "AuthorizationError" as AuthorizationError {
+  -resource: string
+  -action: string
+  +Resource() string
+  +Action() string
+}
+
+class "TimeoutError" as TimeoutError {
+  -duration: time.Duration
+  +Duration() time.Duration
+}
+
+class "ConflictError" as ConflictError {
+  -entity: string
+  -identifier: string
+  +Entity() string
+  +Identifier() string
+}
+
+class "ErrorHandler" as ErrorHandler {
+  +HandleError(err error) Response
+  +LogError(ctx context.Context, logger Logger, err error)
+  +WriteError(w http.ResponseWriter, err error)
+}
+
+' Define the relationships
+GoError <|-- BaseError
+BaseError <|-- ValidationError
+BaseError <|-- NotFoundError
+BaseError <|-- DatabaseError
+BaseError <|-- AuthenticationError
+BaseError <|-- AuthorizationError
+BaseError <|-- TimeoutError
+BaseError <|-- ConflictError
+
+ErrorHandler --> BaseError : handles
+
+' Define the functions
+class "Functions" as Functions {
+  +{static} NewError(code string, message string, cause error) Error
+  +{static} NewValidationError(message string, field string, cause error) ValidationError
+  +{static} NewNotFoundError(message string, entity string, identifier string, cause error) NotFoundError
+  +{static} NewDatabaseError(message string, operation string, table string, cause error) DatabaseError
+  +{static} NewAuthenticationError(message string, reason string, cause error) AuthenticationError
+  +{static} NewAuthorizationError(message string, resource string, action string, cause error) AuthorizationError
+  +{static} NewTimeoutError(message string, duration time.Duration, cause error) TimeoutError
+  +{static} NewConflictError(message string, entity string, identifier string, cause error) ConflictError
+  +{static} IsValidationError(err error) bool
+  +{static} IsNotFoundError(err error) bool
+  +{static} IsDatabaseError(err error) bool
+  +{static} IsAuthenticationError(err error) bool
+  +{static} IsAuthorizationError(err error) bool
+  +{static} IsTimeoutError(err error) bool
+  +{static} IsConflictError(err error) bool
+}
+
+Functions --> BaseError : creates
+Functions --> ValidationError : creates
+Functions --> NotFoundError : creates
+Functions --> DatabaseError : creates
+Functions --> AuthenticationError : creates
+Functions --> AuthorizationError : creates
+Functions --> TimeoutError : creates
+Functions --> ConflictError : creates
+
+@enduml
