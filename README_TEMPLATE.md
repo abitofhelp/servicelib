@@ -1,4 +1,4 @@
-# Component Name
+# ServiceLib Component
 
 ## Overview
 
@@ -37,6 +37,7 @@ Description of the main types provided by the component.
 Description of Type 1 and its purpose.
 
 ```
+// Example code for Type1
 type Type1 struct {
     // Fields
 }
@@ -47,6 +48,7 @@ type Type1 struct {
 Description of Type 2 and its purpose.
 
 ```
+// Example code for Type2
 type Type2 struct {
     // Fields
 }
@@ -61,6 +63,7 @@ Description of the key methods provided by the component.
 Description of Method 1 and its purpose.
 
 ```
+// Example code for Method1
 func Method1(param1 Type1) error
 ```
 
@@ -69,6 +72,7 @@ func Method1(param1 Type1) error
 Description of Method 2 and its purpose.
 
 ```
+// Example code for Method2
 func Method2(param1 Type1, param2 Type2) (Type2, error)
 ```
 

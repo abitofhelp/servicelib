@@ -24,12 +24,12 @@ go get github.com/abitofhelp/servicelib/valueobject
 
 ## Quick Start
 
-```go
+```
+// Example code for Quick Start
 package main
 
 import (
     "fmt"
-    
     "github.com/abitofhelp/servicelib/valueobject/contact"
     "github.com/abitofhelp/servicelib/valueobject/identification"
 )
@@ -41,14 +41,14 @@ func main() {
         fmt.Printf("Error creating email: %v\n", err)
         return
     }
-    
+
     // Create a UUID identifier
     id, err := identification.NewUUID()
     if err != nil {
         fmt.Printf("Error creating UUID: %v\n", err)
         return
     }
-    
+
     fmt.Printf("Email: %s\n", email)
     fmt.Printf("UUID: %s\n", id)
 }
@@ -64,7 +64,8 @@ The Value Object package is organized into several subpackages, each containing 
 
 Core interfaces and base implementations for value objects.
 
-```go
+```
+// Example code for ValueObject interface
 // ValueObject is the base interface for all value objects
 type ValueObject interface {
     // Equals checks if two value objects are equal
@@ -78,7 +79,8 @@ type ValueObject interface {
 
 Value objects related to visual appearance (color, style, etc.).
 
-```go
+```
+// Example code for Color value object
 // Color represents a color value object in hexadecimal format (#RRGGBB)
 type Color string
 
@@ -90,7 +92,8 @@ func NewColor(hexColor string) (Color, error)
 
 Value objects for contact information (email, phone, address, etc.).
 
-```go
+```
+// Example code for Email value object
 // Email represents an email address value object
 type Email string
 
@@ -102,7 +105,8 @@ func NewEmail(email string) (Email, error)
 
 Value objects for identifiers (UUID, custom IDs, etc.).
 
-```go
+```
+// Example code for UUID value object
 // UUID represents a UUID value object
 type UUID string
 
@@ -118,7 +122,8 @@ Most value objects implement the following methods:
 
 Creates a new value object with validation.
 
-```go
+```
+// Example code for New Constructor
 func NewX(value Type) (X, error)
 ```
 
@@ -126,7 +131,8 @@ func NewX(value Type) (X, error)
 
 Checks if two value objects are equal.
 
-```go
+```
+// Example code for Equals method
 func (x X) Equals(other X) bool
 ```
 
@@ -134,7 +140,8 @@ func (x X) Equals(other X) bool
 
 Validates the value object.
 
-```go
+```
+// Example code for Validate method
 func (x X) Validate() error
 ```
 
@@ -142,72 +149,26 @@ func (x X) Validate() error
 
 Returns the string representation of the value object.
 
-```go
+```
+// Example code for String method
 func (x X) String() string
 ```
 
 ## Examples
 
-For complete, runnable examples, see the following code snippets:
+For complete, runnable examples, see the following directories in the EXAMPLES directory:
 
-### Creating and Validating Value Objects
-
-```go
-// Create an email address value object
-email, err := contact.NewEmail("user@example.com")
-if err != nil {
-    // Handle validation error
-}
-
-// Create a UUID identifier
-id, err := identification.NewUUID()
-if err != nil {
-    // Handle error
-}
-
-// Create a date range
-dateRange, err := temporal.NewDateRange(startDate, endDate)
-if err != nil {
-    // Handle validation error
-}
-```
-
-### Comparing Value Objects
-
-```go
-// Create two email addresses
-email1, _ := contact.NewEmail("user@example.com")
-email2, _ := contact.NewEmail("user@example.com")
-email3, _ := contact.NewEmail("other@example.com")
-
-// Compare them
-fmt.Println(email1.Equals(email2)) // true
-fmt.Println(email1.Equals(email3)) // false
-```
-
-### Using Value Objects in Domain Models
-
-```go
-type User struct {
-    ID       identification.UUID
-    Email    contact.Email
-    Address  location.Address
-    Birthday temporal.Date
-}
-
-func NewUser(id identification.UUID, email contact.Email, address location.Address, birthday temporal.Date) (*User, error) {
-    user := &User{
-        ID:       id,
-        Email:    email,
-        Address:  address,
-        Birthday: birthday,
-    }
-    
-    // Additional validation if needed
-    
-    return user, nil
-}
-```
+- [Color](../EXAMPLES/valueobject/appearance/color_example/README.md) - Example of the Color value object
+- [Base](../EXAMPLES/valueobject/base/base_example/README.md) - Example of the Base value object
+- [Email](../EXAMPLES/valueobject/contact/email_example/README.md) - Example of the Email value object
+- [ID](../EXAMPLES/valueobject/identification/id_example/README.md) - Example of the ID value object
+- [Username](../EXAMPLES/valueobject/identification/username_example/README.md) - Example of the Username value object
+- [Coordinate](../EXAMPLES/valueobject/location/coordinate_example/README.md) - Example of the Coordinate value object
+- [File Size](../EXAMPLES/valueobject/measurement/filesize_example/README.md) - Example of the File Size value object
+- [Money](../EXAMPLES/valueobject/measurement/money_example/README.md) - Example of the Money value object
+- [IP Address](../EXAMPLES/valueobject/network/ipaddress_example/README.md) - Example of the IP Address value object
+- [URL](../EXAMPLES/valueobject/network/url_example/README.md) - Example of the URL value object
+- [Time](../EXAMPLES/valueobject/temporal/time_example/README.md) - Example of the Time value object
 
 ## Best Practices
 
@@ -225,7 +186,8 @@ func NewUser(id identification.UUID, email contact.Email, address location.Addre
 
 If you're getting validation errors when creating value objects, check that the input values meet the requirements:
 
-```go
+```
+// Example code for validation
 // This will fail validation
 email, err := contact.NewEmail("invalid-email")
 if err != nil {
@@ -243,7 +205,8 @@ if err != nil {
 
 Remember that value objects are immutable. To "change" a value object, create a new one:
 
-```go
+```
+// Example code for modifying value objects
 // Incorrect - trying to modify a value object
 // color.SetHex("#FF0000") // This method doesn't exist
 

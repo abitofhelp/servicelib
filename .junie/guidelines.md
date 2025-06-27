@@ -5,17 +5,21 @@ This project follows the following coding guidelines:
 * Any function requiring a context parameter must have a context.Context parameter as the first argument and use ContextLogger to log messages.
 * You must use Testify for assertions in tests.
 * You must use GoMock for mocking in tests.
-* You must not implement testing for the /examples folder.
+* You must not implement testing for the /examples and /tools folders.
 * Implement unit tests for each package and when a new Go file is added.  The target is a minimum of 80% coverage of statements.  
 * Unit tests should be fast, must exist in the same folder as the file being tested, and isolated from each other.
 * Implement integration tests for each package as needed to adhere to best practices, with a minimum of 80% coverage of statements.
 * Always use exhaustive error detection and handling, including retries and timeouts, where appropriate.
 * Always update .svg files when updating .puml files.
-* Always update the relevant.puml files whenever the architecture changes or code changes.
+* Always update the relevant.puml files whenever relevant content changes.
 * Always update the documentation whenever there are relevant architecture changes or code changes.  This includes /docs, and any relevant .md files throughout the packages in the codebase.
-* Do not embed examples in the documentation.  Rather, link to them in /examples.
-* All new or existing README.md files must adhere to the COMPONENT_README_TEMPLATE.md structure.
+* Do not embed examples in the documentation.  Rather, link to them in /examples/*.
+* All new or existing README.md files must adhere to the *_README_TEMPLATE.md template related to its use. 
 * Every package must have a README.md file, even if it is empty.
+* All quickstart examples must be embedded in the relevant README.md file.  Verify that there are no issues with embedding golang in the readme.md file.
+* Ensure that all readme.md files that use a template do not have any template filler data in them after generation or updating the readme.md.  Remove the offending data from the readme.md and replace it with actual data.  If no actual data exists, use "No Information Available".
+* Ensure that the hierarchy of readme.md files from the root is consistent and targets the correct readme.md files in the packages at the same level as /readme.md.
+* Ensure that all readme.md files that have links to examples are consistent and targets the correct example's readme.md file.
 
 The project must follow these godoc guidelines, which are based on best practices and conventions:
 1. Document Exported Identifiers:

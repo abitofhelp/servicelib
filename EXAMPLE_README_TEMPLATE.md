@@ -2,7 +2,7 @@
 
 ## Overview
 
-This example demonstrates the [example_name] functionality of the ServiceLib [component_name] package.
+This example demonstrates the [example_feature] functionality of the ServiceLib [component_name] package.
 
 ## Features
 
@@ -25,7 +25,10 @@ go run main.go
 Description of the first key component in this example:
 
 ```
-// Code snippet for key component 1
+// Example code for key component 1
+func ExampleFunction1() {
+    // Code implementation
+}
 ```
 
 ### Key Component 2
@@ -33,7 +36,10 @@ Description of the first key component in this example:
 Description of the second key component in this example:
 
 ```
-// Code snippet for key component 2
+// Example code for key component 2
+func ExampleFunction2() {
+    // Code implementation
+}
 ```
 
 ### Key Component 3
@@ -41,7 +47,10 @@ Description of the second key component in this example:
 Description of the third key component in this example:
 
 ```
-// Code snippet for key component 3
+// Example code for key component 3
+func ExampleFunction3() {
+    // Code implementation
+}
 ```
 
 ## Expected Output

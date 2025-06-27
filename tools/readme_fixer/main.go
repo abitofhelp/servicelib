@@ -45,10 +45,10 @@ go get github.com/abitofhelp/servicelib/component
 ` + "```" + `
 `,
 	"## Quick Start": `
-See the [Quick Start example](../EXAMPLES/component/quickstart_example.go) for a complete, runnable example of how to use the component.
+See the [Quick Start example](../EXAMPLES/component/basic_usage/README.md) for a complete, runnable example of how to use the component.
 `,
 	"## Configuration": `
-See the [Configuration example](../EXAMPLES/component/configuration_example.go) for a complete, runnable example of how to configure the component.
+See the [Configuration example](../EXAMPLES/component/custom_configuration/README.md) for a complete, runnable example of how to configure the component.
 `,
 	"## API Documentation": `
 `,
@@ -59,7 +59,23 @@ Description of the main types provided by the component.
 
 Description of Type 1 and its purpose.
 
-See the [Type 1 example](../EXAMPLES/component/type1_example.go) for a complete, runnable example of how to use Type 1.
+` + "```" + `
+// Example code for Type1
+type Type1 struct {
+    // Fields
+}
+` + "```" + `
+
+#### Type 2
+
+Description of Type 2 and its purpose.
+
+` + "```" + `
+// Example code for Type2
+type Type2 struct {
+    // Fields
+}
+` + "```" + `
 `,
 	"### Key Methods": `
 Description of the key methods provided by the component.
@@ -68,14 +84,27 @@ Description of the key methods provided by the component.
 
 Description of Method 1 and its purpose.
 
-See the [Method 1 example](../EXAMPLES/component/method1_example.go) for a complete, runnable example of how to use Method 1.
+` + "```" + `
+// Example code for Method1
+func Method1(param1 Type1) error
+` + "```" + `
+
+#### Method 2
+
+Description of Method 2 and its purpose.
+
+` + "```" + `
+// Example code for Method2
+func Method2(param1 Type1, param2 Type2) (Type2, error)
+` + "```" + `
 `,
 	"## Examples": `
-For complete, runnable examples, see the following files in the EXAMPLES directory:
+For complete, runnable examples, see the following directories in the EXAMPLES directory:
 
-- [Basic Usage](../EXAMPLES/component/basic_usage_example.go) - Shows basic usage of the component
-- [Advanced Configuration](../EXAMPLES/component/advanced_configuration_example.go) - Shows advanced configuration options
-- [Error Handling](../EXAMPLES/component/error_handling_example.go) - Shows how to handle errors
+- [Basic Usage](../EXAMPLES/component/basic_usage/README.md) - Shows basic usage of the component
+- [Custom Configuration](../EXAMPLES/component/custom_configuration/README.md) - Shows how to configure the component
+- [Advanced Usage](../EXAMPLES/component/advanced_usage/README.md) - Shows advanced usage of the component
+- [Integration](../EXAMPLES/component/integration/README.md) - Shows how to integrate the component with other components
 `,
 	"## Best Practices": `
 1. **Best Practice 1**: Description of best practice 1
