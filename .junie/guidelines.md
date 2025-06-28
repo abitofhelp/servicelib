@@ -20,6 +20,7 @@ This project follows the following coding guidelines:
 * Ensure that all readme.md files that use a template do not have any template filler data in them after generation or updating the readme.md.  Remove the offending data from the readme.md and replace it with actual data.  If no actual data exists, use "No Information Available".
 * Ensure that the hierarchy of readme.md files from the root is consistent and targets the correct readme.md files in the packages at the same level as /readme.md.
 * Ensure that all readme.md files that have links to examples are consistent and targets the correct example's readme.md file.
+* Standardize naming conventions between .puml files and .svg files to use underscores and lowercase.
 
 The project must follow these godoc guidelines, which are based on best practices and conventions:
 1. Document Exported Identifiers:
