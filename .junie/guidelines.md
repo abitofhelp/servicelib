@@ -21,8 +21,9 @@ This project follows the following coding guidelines:
 * Ensure that the hierarchy of readme.md files from the root is consistent and targets the correct readme.md files in the packages at the same level as /readme.md.
 * Ensure that all readme.md files that have links to examples are consistent and targets the correct example's readme.md file.
 * Standardize naming conventions between .puml files and .svg files to use underscores and lowercase.
+* All dependencies must point inward, never outward.
 
-The project must follow these godoc guidelines, which are based on best practices and conventions:
+  The project must follow these godoc guidelines, which are based on best practices and conventions:
 1. Document Exported Identifiers:
    Rule: Every exported identifier (functions, types, variables, constants) should have a doc comment.
    Reason: godoc generates documentation from these comments, and well-documented exported elements are crucial for understanding and using your package.
