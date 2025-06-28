@@ -20,7 +20,7 @@ go get github.com/abitofhelp/servicelib/transaction
 
 ## Quick Start
 
-See the [Quick Start example](../EXAMPLES/transaction/quickstart_example.go) for a complete, runnable example of how to use the transaction package.
+See the [Basic Usage example](../EXAMPLES/transaction/basic_usage_example/README.md) for a complete, runnable example of how to use the transaction package.
 
 ## Configuration
 
@@ -36,7 +36,7 @@ The transaction package provides several core types for managing distributed tra
 
 The Transaction type is the main struct in the saga subpackage that manages a sequence of operations and their rollbacks. It provides methods for adding operations and executing the transaction.
 
-See the [Transaction example](../EXAMPLES/transaction/saga/transaction_example.go) for a complete, runnable example of how to use the Transaction type.
+See the [Basic Saga example](../EXAMPLES/transaction/basic_saga_example/README.md) for a complete, runnable example of how to use the Transaction type.
 
 #### Operation
 
@@ -54,7 +54,7 @@ The transaction package provides several key methods for managing distributed tr
 
 The WithTransaction function is a helper function for executing a function within a transaction. It creates a new transaction, executes the provided function, and then executes the transaction.
 
-See the [WithTransaction example](../EXAMPLES/transaction/saga/with_transaction_example.go) for a complete, runnable example of how to use the WithTransaction function.
+See the [Basic Usage example](../EXAMPLES/transaction/basic_usage_example/README.md) for a complete, runnable example of how to use the WithTransaction function.
 
 #### AddOperation
 
@@ -66,12 +66,14 @@ The Execute method executes all operations in a transaction. If any operation fa
 
 ## Examples
 
-For complete, runnable examples, see the following files in the EXAMPLES directory:
+For complete, runnable examples, see the following directories in the EXAMPLES directory:
 
-- [Basic Usage](../EXAMPLES/transaction/basic_usage_example.go) - Shows basic usage of the transaction package
-- [Saga Pattern](../EXAMPLES/transaction/saga/saga_example.go) - Shows how to use the Saga pattern for distributed transactions
-- [Error Handling](../EXAMPLES/transaction/error_handling_example.go) - Shows how to handle errors in transactions
-- [Integration with Other Components](../EXAMPLES/transaction/integration_example.go) - Shows how to integrate with other components
+- [Basic Usage](../EXAMPLES/transaction/basic_usage_example/README.md) - Shows basic usage of the transaction package
+- [Basic Saga](../EXAMPLES/transaction/basic_saga_example/README.md) - Shows how to use the Saga pattern for distributed transactions
+- [Error Handling](../EXAMPLES/transaction/error_handling_example/README.md) - Shows how to handle errors in transactions
+- [Context Timeout](../EXAMPLES/transaction/context_timeout_example/README.md) - Shows how to handle context timeouts
+- [Custom Transaction](../EXAMPLES/transaction/custom_transaction_example/README.md) - Shows how to create custom transaction types
+- [Idempotent Operations](../EXAMPLES/transaction/idempotent_operations_example/README.md) - Shows how to create idempotent operations
 
 ## Best Practices
 

@@ -10,7 +10,7 @@
 # Project metadata
 PROJECT_NAME=servicelib
 VERSION=$(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
-GO_VERSION=1.24
+GO_VERSION=1.24.4
 
 # Go parameters
 GOCMD=go
@@ -49,13 +49,17 @@ GOLANGCI_LINT=golangci-lint
 GODOC=godoc
 GODOC_PORT=6060
 
+# PlantUML parameters
+PLANTUML=plantuml
+GENERATE_SVG=$(shell pwd)/tools/generate_svg.sh
+
 # Tools
 TOOLS_DIR=$(shell pwd)/tools
 TOOLS_BIN_DIR=$(TOOLS_DIR)/bin
 GOIMPORTS=$(TOOLS_BIN_DIR)/goimports
 GOFUMPT=$(TOOLS_BIN_DIR)/gofumpt
 
-.PHONY: all build build-darwin-amd64 build-darwin-arm64 build-windows-amd64 build-linux-amd64 build-linux-arm64 build-all clean test test-integration test-all test-package coverage coverage-integration coverage-package lint fmt vet tidy vendor generate generate-package security bench bench-package help check-go-version tools docs serve-docs ci pre-commit update-deps release validate-readme
+.PHONY: all build build-darwin-amd64 build-darwin-arm64 build-windows-amd64 build-linux-amd64 build-linux-arm64 build-all clean test test-integration test-all test-package coverage coverage-integration coverage-package lint fmt vet tidy vendor generate generate-package security bench bench-package help check-go-version tools docs serve-docs ci pre-commit update-deps release validate-readme generate-svg
 
 # ==================================================================================
 # Main targets
@@ -339,6 +343,28 @@ serve-docs:
 	@$(GODOC) -http=:$(GODOC_PORT)
 
 # ==================================================================================
+# PlantUML and SVG targets
+# ==================================================================================
+
+# Generate SVG files from PlantUML files
+generate-svg:
+	@echo "Generating SVG files from PlantUML files..."
+	@if ! command -v $(PLANTUML) > /dev/null; then \
+		echo "Error: PlantUML is not installed. Please install it first."; \
+		echo "On macOS: brew install plantuml"; \
+		echo "On Linux: apt-get install plantuml or equivalent"; \
+		echo "On Windows: choco install plantuml or equivalent"; \
+		exit 1; \
+	fi
+	@if [ ! -x "$(GENERATE_SVG)" ]; then \
+		echo "Making generate_svg.sh executable..."; \
+		chmod +x "$(GENERATE_SVG)"; \
+	fi
+	@echo "Running generate_svg.sh script..."
+	@"$(GENERATE_SVG)"
+	@echo "SVG files generated successfully."
+
+# ==================================================================================
 # CI/CD targets
 # ==================================================================================
 
@@ -360,6 +386,8 @@ release:
 	@make security
 	@echo "Updating dependencies..."
 	@make tidy
+	@echo "Generating SVG files from PlantUML files..."
+	@make generate-svg
 	@echo "Release $(VERSION) is ready!"
 	@echo "To complete the release, tag the repository:"
 	@echo "git tag -a v$(VERSION) -m 'Release $(VERSION)'"
@@ -401,6 +429,7 @@ help:
 	@echo "  generate-package   - Generate mocks for a specific package (PACKAGE=./path/to/package)"
 	@echo "  security           - Check for security vulnerabilities"
 	@echo "  validate-readme    - Validate README.md files against the template structure"
+	@echo "  generate-svg       - Generate SVG files from PlantUML files"
 	@echo "  bench              - Run benchmarks"
 	@echo "  bench-package      - Run benchmarks for a specific package (PACKAGE=./path/to/package)"
 	@echo "  docs               - Generate documentation"

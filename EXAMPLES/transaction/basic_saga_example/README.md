@@ -2,13 +2,14 @@
 
 ## Overview
 
-This example demonstrates the basic_saga_example functionality of the ServiceLib transaction package.
+This example demonstrates the Saga pattern for distributed transactions using the ServiceLib transaction package. It shows how to create a transaction that fails during execution, triggering the rollback of previously executed operations.
 
 ## Features
 
-- **Feature 1**: Description of feature 1
-- **Feature 2**: Description of feature 2
-- **Feature 3**: Description of feature 3
+- **Saga Pattern**: Implementation of the Saga pattern for distributed transactions
+- **Automatic Rollback**: Automatic rollback of operations when a transaction fails
+- **Error Handling**: Detailed error information when transactions fail
+- **Multiple Operations**: Adding multiple operations to a transaction
 
 ## Running the Example
 
@@ -20,34 +21,31 @@ go run main.go
 
 ## Code Walkthrough
 
-### Key Component 1
+### Transaction Creation
 
-Description of the first key component in this example:
+The example starts by creating a logger and a context, then uses the WithTransaction function to create and execute a transaction. The WithTransaction function takes a context, a logger, and a function that receives a transaction object.
 
-```
-// Code snippet for key component 1
-```
+### Adding Operations
 
-### Key Component 2
+The example adds three operations to the transaction, each with a corresponding rollback operation:
 
-Description of the second key component in this example:
+1. **User Creation**: Creates a user and defines a rollback operation to delete the user if a later operation fails.
+2. **Order Creation**: Creates an order and defines a rollback operation to delete the order if a later operation fails.
+3. **Payment Processing**: Processes a payment but intentionally fails with an error, triggering the rollback of the previous operations.
 
-```
-// Code snippet for key component 2
-```
+### Error Handling
 
-### Key Component 3
-
-Description of the third key component in this example:
-
-```
-// Code snippet for key component 3
-```
+The example handles the result of the transaction execution, printing an error message that includes details about the failed operation and the rollback operations.
 
 ## Expected Output
 
 ```
-Expected output of the example when run
+Creating user...
+Creating order...
+Processing payment...
+Rolling back order creation...
+Rolling back user creation...
+Transaction failed: transaction execution failed: transaction operation failed: payment processing failed
 ```
 
 ## Related Examples
