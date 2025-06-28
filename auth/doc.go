@@ -28,28 +28,28 @@
 //	config := auth.DefaultConfig()
 //	config.JWT.SecretKey = "your-secret-key"
 //	config.JWT.Issuer = "your-service"
-//	
+//
 //	authService, err := auth.New(ctx, config, logger)
 //	if err != nil {
 //	    log.Fatalf("Failed to create auth service: %v", err)
 //	}
-//	
+//
 //	// Use the middleware to protect routes
 //	router := http.NewServeMux()
 //	router.Handle("/api/", authService.Middleware()(apiHandler))
-//	
+//
 //	// Generate a token for a user
 //	token, err := authService.GenerateToken(ctx, "user123", []string{"admin"}, []string{"read:users"}, []string{})
 //	if err != nil {
 //	    log.Fatalf("Failed to generate token: %v", err)
 //	}
-//	
+//
 //	// Check if a user is authorized for an operation
 //	authorized, err := authService.IsAuthorized(ctx, "read:users")
 //	if err != nil {
 //	    log.Fatalf("Failed to check authorization: %v", err)
 //	}
-//	
+//
 //	// Get user information from context
 //	userID, err := authService.GetUserID(ctx)
 //	if err != nil {

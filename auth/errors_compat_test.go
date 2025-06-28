@@ -165,7 +165,9 @@ func TestGetErrorCode(t *testing.T) {
 		wrappedErr := auth.WithOp(tc.err, "operation")
 
 		// Check that the error code is preserved
-		if e, ok := wrappedErr.(interface{ GetCode() serviceErrors.ErrorCode }); ok {
+		if e, ok := wrappedErr.(interface {
+			GetCode() serviceErrors.ErrorCode
+		}); ok {
 			assert.Equal(t, tc.code, e.GetCode())
 		} else if tc.err.Error() == "standard error" {
 			// For standard errors, we can't check the code directly

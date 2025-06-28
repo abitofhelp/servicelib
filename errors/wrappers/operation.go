@@ -13,12 +13,12 @@ func OperationError(err error, operation string, format string, args ...interfac
 	if err == nil {
 		return nil
 	}
-	
+
 	msg := fmt.Sprintf(format, args...)
 	return withContext(err, operation, "", 0, map[string]interface{}{
-		"message": msg,
+		"message":   msg,
 		"operation": operation,
-		"package": utils.GetCallerPackage(1),
+		"package":   utils.GetCallerPackage(1),
 	})
 }
 

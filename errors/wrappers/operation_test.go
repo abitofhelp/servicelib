@@ -19,11 +19,11 @@ func TestOperationError(t *testing.T) {
 	// Test with standard error
 	originalErr := errors.New("original error")
 	err = OperationError(originalErr, "TestOperation", "test message")
-	
+
 	// Check that the error is a ContextualError
 	ce, ok := err.(*core.ContextualError)
 	assert.True(t, ok)
-	
+
 	// Check the error properties
 	assert.Equal(t, originalErr, ce.Original)
 	assert.Equal(t, "TestOperation", ce.Context.Operation)
@@ -33,11 +33,11 @@ func TestOperationError(t *testing.T) {
 
 	// Test with format string
 	err = OperationError(originalErr, "TestOperation", "test message with %s", "format")
-	
+
 	// Check that the error is a ContextualError
 	ce, ok = err.(*core.ContextualError)
 	assert.True(t, ok)
-	
+
 	// Check the error properties
 	assert.Equal(t, originalErr, ce.Original)
 	assert.Equal(t, "TestOperation", ce.Context.Operation)
@@ -48,11 +48,11 @@ func TestOperationError(t *testing.T) {
 func TestOperationNotFound(t *testing.T) {
 	// Test with standard parameters
 	err := OperationNotFound("TestOperation", "User", "123")
-	
+
 	// Check that the error is a ContextualError
 	ce, ok := err.(*core.ContextualError)
 	assert.True(t, ok)
-	
+
 	// Check the error properties
 	assert.Equal(t, core.ErrNotFound, ce.Original)
 	assert.Equal(t, "TestOperation", ce.Context.Operation)
@@ -65,11 +65,11 @@ func TestOperationNotFound(t *testing.T) {
 func TestOperationInvalidInput(t *testing.T) {
 	// Test with standard parameters
 	err := OperationInvalidInput("TestOperation", "Invalid input: %s", "test")
-	
+
 	// Check that the error is a ContextualError
 	ce, ok := err.(*core.ContextualError)
 	assert.True(t, ok)
-	
+
 	// Check the error properties
 	assert.Equal(t, core.ErrInvalidInput, ce.Original)
 	assert.Equal(t, "TestOperation", ce.Context.Operation)
@@ -83,11 +83,11 @@ func TestOperationInternal(t *testing.T) {
 	// Test with standard parameters
 	originalErr := errors.New("original error")
 	err := OperationInternal("TestOperation", originalErr, "Internal error: %s", "test")
-	
+
 	// Check that the error is a ContextualError
 	ce, ok := err.(*core.ContextualError)
 	assert.True(t, ok)
-	
+
 	// Check the error properties
 	assert.Equal(t, originalErr, ce.Original)
 	assert.Equal(t, "TestOperation", ce.Context.Operation)

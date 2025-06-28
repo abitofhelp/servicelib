@@ -23,7 +23,7 @@
 //	    appName := cfg.GetApp().GetName()
 //	    appVersion := cfg.GetApp().GetVersion()
 //	    dbConnStr := cfg.GetDatabase().GetConnectionString()
-//	
+//
 //	    fmt.Printf("Initializing %s v%s\n", appName, appVersion)
 //	    fmt.Printf("Connecting to database: %s\n", dbConnStr)
 //	}

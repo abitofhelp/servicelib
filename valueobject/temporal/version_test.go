@@ -359,7 +359,7 @@ func Test_comparePreRelease(t *testing.T) {
 
 func TestVersion_ToMap(t *testing.T) {
 	version, _ := NewVersion(1, 2, 3, "alpha", "build123")
-	
+
 	expected := map[string]interface{}{
 		"major":      1,
 		"minor":      2,
@@ -367,7 +367,7 @@ func TestVersion_ToMap(t *testing.T) {
 		"preRelease": "alpha",
 		"build":      "build123",
 	}
-	
+
 	assert.Equal(t, expected, version.ToMap())
 }
 

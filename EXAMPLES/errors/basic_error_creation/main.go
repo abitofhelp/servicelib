@@ -1,3 +1,6 @@
+//go:build ignore
+// +build ignore
+
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // This example demonstrates how to create different types of errors using the errors package.

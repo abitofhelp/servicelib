@@ -10,11 +10,11 @@ import (
 )
 
 const (
- // StandardDateFormat is the standard date format used throughout the application.
- // This format follows the RFC3339 standard (2006-01-02T15:04:05Z07:00),
- // which is both human-readable and machine-parsable, and includes
- // date, time, and timezone information.
- StandardDateFormat = time.RFC3339
+	// StandardDateFormat is the standard date format used throughout the application.
+	// This format follows the RFC3339 standard (2006-01-02T15:04:05Z07:00),
+	// which is both human-readable and machine-parsable, and includes
+	// date, time, and timezone information.
+	StandardDateFormat = time.RFC3339
 )
 
 // ParseDate parses a date string in the standard format (RFC3339).

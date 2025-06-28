@@ -32,20 +32,20 @@
 //	    logger := logging.NewContextLogger(zapLogger)
 //	    server := startServer()
 //	    db := connectToDatabase()
-//	
+//
 //	    // Define shutdown function
 //	    shutdownFunc := func() error {
 //	        // Close resources in reverse order of creation
 //	        serverErr := server.Shutdown(context.Background())
 //	        dbErr := db.Close()
-//	        
+//
 //	        // Return combined error if any
 //	        if serverErr != nil || dbErr != nil {
 //	            return fmt.Errorf("shutdown errors: server=%v, db=%v", serverErr, dbErr)
 //	        }
 //	        return nil
 //	    }
-//	
+//
 //	    // Wait for shutdown signal and execute cleanup
 //	    if err := shutdown.GracefulShutdown(context.Background(), logger, shutdownFunc); err != nil {
 //	        logger.Error(context.Background(), "Shutdown completed with errors", zap.Error(err))
@@ -60,27 +60,27 @@
 //	    logger := logging.NewContextLogger(zapLogger)
 //	    server := startServer()
 //	    db := connectToDatabase()
-//	
+//
 //	    // Define shutdown function
 //	    shutdownFunc := func() error {
 //	        // Close resources in reverse order of creation
 //	        serverErr := server.Shutdown(context.Background())
 //	        dbErr := db.Close()
-//	        
+//
 //	        // Return combined error if any
 //	        if serverErr != nil || dbErr != nil {
 //	            return fmt.Errorf("shutdown errors: server=%v, db=%v", serverErr, dbErr)
 //	        }
 //	        return nil
 //	    }
-//	
+//
 //	    // Set up graceful shutdown in the background
 //	    cancel, errCh := shutdown.SetupGracefulShutdown(context.Background(), logger, shutdownFunc)
 //	    defer cancel() // Ensure shutdown is triggered if main exits
-//	
+//
 //	    // Continue with application logic
 //	    // ...
-//	
+//
 //	    // Optionally wait for shutdown to complete and check for errors
 //	    if err := <-errCh; err != nil {
 //	        logger.Error(context.Background(), "Shutdown completed with errors", zap.Error(err))

@@ -6,8 +6,8 @@ package jwt
 
 import (
 	"context"
-	"fmt"
 	stderrors "errors" // Standard errors package with alias
+	"fmt"
 	"net/url"
 	"strconv"
 	"sync"

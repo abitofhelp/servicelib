@@ -322,8 +322,9 @@ func (t Temperature) Format(format string) string {
 
 // CompareTo compares this temperature with another and returns:
 // -1 if this < other
-//  0 if this == other
-//  1 if this > other
+//
+//	0 if this == other
+//	1 if this > other
 func (t Temperature) CompareTo(other Temperature) int {
 	// Convert both to Kelvin for comparison
 	tKelvin := t.ToKelvin().value

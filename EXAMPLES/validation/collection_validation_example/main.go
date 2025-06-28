@@ -1,3 +1,6 @@
+//go:build ignore
+// +build ignore
+
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of collection validation using the validation package

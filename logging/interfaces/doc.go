@@ -21,14 +21,14 @@
 //	// Function that depends on the Logger interface
 //	func ProcessData(ctx context.Context, logger interfaces.Logger, data []byte) error {
 //	    logger.Info(ctx, "Processing data", zap.Int("bytes", len(data)))
-//	    
+//
 //	    // Process data...
-//	    
+//
 //	    if err := validateData(data); err != nil {
 //	        logger.Error(ctx, "Data validation failed", zap.Error(err))
 //	        return err
 //	    }
-//	    
+//
 //	    logger.Debug(ctx, "Data processed successfully")
 //	    return nil
 //	}

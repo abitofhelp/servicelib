@@ -12,7 +12,7 @@ func withContext(err error, operation string, code core.ErrorCode, httpStatus in
 	if err == nil {
 		return nil
 	}
-	
+
 	if ce, ok := err.(*core.ContextualError); ok {
 		if operation != "" {
 			ce.Context.Operation = operation
@@ -33,14 +33,14 @@ func withContext(err error, operation string, code core.ErrorCode, httpStatus in
 		}
 		return ce
 	}
-	
+
 	return &core.ContextualError{
 		Original: err,
 		Context: core.ErrorContext{
-			Operation: operation,
-			Code:      code,
+			Operation:  operation,
+			Code:       code,
 			HTTPStatus: httpStatus,
-			Details:   details,
+			Details:    details,
 		},
 	}
 }
@@ -50,7 +50,7 @@ func WrapWithOperation(err error, operation string, format string, args ...inter
 	if err == nil {
 		return nil
 	}
-	
+
 	msg := fmt.Sprintf(format, args...)
 	return withContext(err, operation, "", 0, map[string]interface{}{"message": msg})
 }
@@ -60,6 +60,6 @@ func WithDetails(err error, details map[string]interface{}) error {
 	if err == nil {
 		return nil
 	}
-	
+
 	return withContext(err, "", "", 0, details)
 }

@@ -10,8 +10,8 @@ import (
 func BenchmarkContextualErrorCreation(b *testing.B) {
 	originalErr := errors.New("original error")
 	ctx := ErrorContext{
-		Operation: "create_user",
-		Code:      "INVALID_INPUT",
+		Operation:  "create_user",
+		Code:       "INVALID_INPUT",
 		HTTPStatus: 400,
 	}
 
@@ -27,8 +27,8 @@ func BenchmarkContextualErrorCreation(b *testing.B) {
 func BenchmarkErrorWrapping(b *testing.B) {
 	originalErr := errors.New("original error")
 	ctx := ErrorContext{
-		Operation: "create_user",
-		Code:      "INVALID_INPUT",
+		Operation:  "create_user",
+		Code:       "INVALID_INPUT",
 		HTTPStatus: 400,
 	}
 
@@ -45,8 +45,8 @@ func BenchmarkErrorWrapping(b *testing.B) {
 func BenchmarkErrorUnwrapping(b *testing.B) {
 	originalErr := errors.New("original error")
 	ctx := ErrorContext{
-		Operation: "create_user",
-		Code:      "INVALID_INPUT",
+		Operation:  "create_user",
+		Code:       "INVALID_INPUT",
 		HTTPStatus: 400,
 	}
 	err := &ContextualError{
@@ -63,11 +63,11 @@ func BenchmarkErrorUnwrapping(b *testing.B) {
 func BenchmarkErrorJSONMarshaling(b *testing.B) {
 	originalErr := errors.New("original error")
 	ctx := ErrorContext{
-		Operation: "create_user",
-		Code:      "INVALID_INPUT",
+		Operation:  "create_user",
+		Code:       "INVALID_INPUT",
 		HTTPStatus: 400,
 		Details: map[string]interface{}{
-			"field": "email",
+			"field":  "email",
 			"reason": "invalid format",
 		},
 	}

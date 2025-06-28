@@ -45,10 +45,10 @@ func TestWrapWithOperation(t *testing.T) {
 	existingCE := &core.ContextualError{
 		Original: originalErr,
 		Context: core.ErrorContext{
-			Operation: "ExistingOperation",
-			Code:      "EXISTING_CODE",
+			Operation:  "ExistingOperation",
+			Code:       "EXISTING_CODE",
 			HTTPStatus: 500,
-			Details:   map[string]interface{}{"existing": "value"},
+			Details:    map[string]interface{}{"existing": "value"},
 		},
 	}
 
@@ -97,10 +97,10 @@ func TestWithDetails(t *testing.T) {
 	existingCE := &core.ContextualError{
 		Original: originalErr,
 		Context: core.ErrorContext{
-			Operation: "ExistingOperation",
-			Code:      "EXISTING_CODE",
+			Operation:  "ExistingOperation",
+			Code:       "EXISTING_CODE",
 			HTTPStatus: 500,
-			Details:   map[string]interface{}{"existing": "value"},
+			Details:    map[string]interface{}{"existing": "value"},
 		},
 	}
 

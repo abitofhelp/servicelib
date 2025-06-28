@@ -141,7 +141,7 @@ func (s *Service) IsAuthorized(ctx context.Context, operation string) (bool, err
 	return false, err
 }
 
-	// IsAdmin checks if the user has admin role.
+// IsAdmin checks if the user has admin role.
 func (s *Service) IsAdmin(ctx context.Context) (bool, error) {
 	ctx, span := s.tracer.Start(ctx, "service.IsAdmin")
 	defer span.End()
@@ -165,7 +165,7 @@ func (s *Service) IsAdmin(ctx context.Context) (bool, error) {
 	return false, nil
 }
 
-	// HasRole checks if the user has a specific role.
+// HasRole checks if the user has a specific role.
 func (s *Service) HasRole(ctx context.Context, role string) (bool, error) {
 	ctx, span := s.tracer.Start(ctx, "service.HasRole")
 	defer span.End()
@@ -191,7 +191,7 @@ func (s *Service) HasRole(ctx context.Context, role string) (bool, error) {
 	return false, nil
 }
 
-	// GetUserID retrieves the user ID from the context.
+// GetUserID retrieves the user ID from the context.
 func (s *Service) GetUserID(ctx context.Context) (string, error) {
 	userID, ok := middleware.GetUserID(ctx)
 	if !ok {
@@ -203,7 +203,7 @@ func (s *Service) GetUserID(ctx context.Context) (string, error) {
 	return userID, nil
 }
 
-	// GetUserRoles retrieves the user roles from the context.
+// GetUserRoles retrieves the user roles from the context.
 func (s *Service) GetUserRoles(ctx context.Context) ([]string, error) {
 	roles, ok := middleware.GetUserRoles(ctx)
 	if !ok {

@@ -11,10 +11,10 @@ import (
 // It is different from RetryError in the infra package, which is used internally by the retry package
 // to indicate that all retry attempts have been exhausted.
 type RetryableError struct {
-	Original error
-	Attempts int
+	Original    error
+	Attempts    int
 	MaxAttempts int
-	RetryAfter int64 // milliseconds
+	RetryAfter  int64 // milliseconds
 }
 
 // Error returns the error message
@@ -35,10 +35,10 @@ func (e *RetryableError) IsRetryable() bool {
 // NewRetryableError creates a new retryable error
 func NewRetryableError(err error, attempts, maxAttempts int, retryAfter int64) *RetryableError {
 	return &RetryableError{
-		Original:   err,
-		Attempts:   attempts,
+		Original:    err,
+		Attempts:    attempts,
 		MaxAttempts: maxAttempts,
-		RetryAfter: retryAfter,
+		RetryAfter:  retryAfter,
 	}
 }
 

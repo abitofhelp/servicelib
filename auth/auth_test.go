@@ -20,7 +20,7 @@ func TestNew(t *testing.T) {
 	logger := zap.NewNop()
 	ctx := context.Background()
 
- // Test with valid configuration
+	// Test with valid configuration
 	config := auth.DefaultConfig()
 	config.JWT.SecretKey = "test-secret-key-that-is-at-least-32-chars"
 	config.JWT.TokenDuration = 1 * time.Hour
@@ -67,7 +67,7 @@ func TestNew(t *testing.T) {
 	invalidRemoteConfig.JWT.Issuer = "test-issuer"
 	invalidRemoteConfig.JWT.Remote.Enabled = true
 	invalidRemoteConfig.JWT.Remote.ValidationURL = "" // Empty validation URL should cause validation error
-	invalidRemoteConfig.JWT.Remote.Timeout = 0 // Zero timeout should cause validation error
+	invalidRemoteConfig.JWT.Remote.Timeout = 0        // Zero timeout should cause validation error
 
 	authInstance, err = auth.New(ctx, invalidRemoteConfig, logger)
 	assert.Error(t, err)
@@ -445,9 +445,9 @@ func TestValidateConfig(t *testing.T) {
 
 	// Test with invalid JWT configuration
 	invalidJWTConfig := auth.DefaultConfig()
-	invalidJWTConfig.JWT.SecretKey = "" // Empty secret key should cause validation error
+	invalidJWTConfig.JWT.SecretKey = ""    // Empty secret key should cause validation error
 	invalidJWTConfig.JWT.TokenDuration = 0 // Zero duration should cause validation error
-	invalidJWTConfig.JWT.Issuer = "" // Empty issuer should cause validation error
+	invalidJWTConfig.JWT.Issuer = ""       // Empty issuer should cause validation error
 
 	result = auth.ValidateConfig(invalidJWTConfig)
 	assert.False(t, result.IsValid())
@@ -460,7 +460,7 @@ func TestValidateConfig(t *testing.T) {
 	invalidRemoteConfig.JWT.Issuer = "test-issuer"
 	invalidRemoteConfig.JWT.Remote.Enabled = true
 	invalidRemoteConfig.JWT.Remote.ValidationURL = "" // Empty validation URL should cause validation error
-	invalidRemoteConfig.JWT.Remote.Timeout = 0 // Zero timeout should cause validation error
+	invalidRemoteConfig.JWT.Remote.Timeout = 0        // Zero timeout should cause validation error
 
 	result = auth.ValidateConfig(invalidRemoteConfig)
 	assert.False(t, result.IsValid())
@@ -496,8 +496,8 @@ func TestValidateConfig(t *testing.T) {
 	invalidServiceConfig.JWT.SecretKey = "test-secret-key-that-is-at-least-32-chars"
 	invalidServiceConfig.JWT.TokenDuration = 1 * time.Hour
 	invalidServiceConfig.JWT.Issuer = "test-issuer"
-	invalidServiceConfig.Service.AdminRoleName = "" // Empty admin role name should cause validation error
-	invalidServiceConfig.Service.ReadOnlyRoleName = "" // Empty read-only role name should cause validation error
+	invalidServiceConfig.Service.AdminRoleName = ""                 // Empty admin role name should cause validation error
+	invalidServiceConfig.Service.ReadOnlyRoleName = ""              // Empty read-only role name should cause validation error
 	invalidServiceConfig.Service.ReadOperationPrefixes = []string{} // Empty read operation prefixes should cause validation error
 
 	result = auth.ValidateConfig(invalidServiceConfig)

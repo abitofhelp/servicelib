@@ -348,9 +348,9 @@ func (c *RemoteClient) ValidateToken(ctx context.Context, tokenString string) (*
 	if resp.StatusCode != http.StatusOK {
 		wrappedErr := errors.WithContext(errors.ErrInvalidToken, "status", resp.Status)
 		wrappedErr = errors.WithContext(wrappedErr, "response", string(respBody))
-		c.logger.Debug(ctx, "Validation request returned non-OK status", 
-			zap.Error(wrappedErr), 
-			zap.String("status", resp.Status), 
+		c.logger.Debug(ctx, "Validation request returned non-OK status",
+			zap.Error(wrappedErr),
+			zap.String("status", resp.Status),
 			zap.String("response", string(respBody)))
 		return nil, wrappedErr
 	}

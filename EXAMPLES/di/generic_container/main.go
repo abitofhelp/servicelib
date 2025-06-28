@@ -1,3 +1,6 @@
+//go:build ignore
+// +build ignore
+
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example of using the generic container from the dependency injection package

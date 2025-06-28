@@ -33,7 +33,7 @@
 //	    Password  string // Sensitive field
 //	    CreatedAt time.Time
 //	}
-//	
+//
 //	// DTO for API responses
 //	type UserDTO struct {
 //	    ID        string
@@ -43,7 +43,7 @@
 //	    // Password is omitted for security
 //	    CreatedAt time.Time
 //	}
-//	
+//
 //	// Copy fields from domain model to DTO
 //	user := &User{
 //	    ID:        "123",
@@ -53,13 +53,13 @@
 //	    Password:  "secret",
 //	    CreatedAt: time.Now(),
 //	}
-//	
+//
 //	userDTO := &UserDTO{}
 //	err := model.CopyFields(userDTO, user)
 //	if err != nil {
 //	    log.Fatalf("Failed to copy fields: %v", err)
 //	}
-//	
+//
 //	// userDTO now contains all matching fields from user (except Password)
 //
 // Example usage for creating a deep copy of an object:
@@ -73,13 +73,13 @@
 //	    Password:  "secret",
 //	    CreatedAt: time.Now(),
 //	}
-//	
+//
 //	copiedUser := &User{}
 //	err := model.DeepCopy(copiedUser, originalUser)
 //	if err != nil {
 //	    log.Fatalf("Failed to create deep copy: %v", err)
 //	}
-//	
+//
 //	// copiedUser is now a complete copy of originalUser
 //	// Modifying copiedUser will not affect originalUser
 //

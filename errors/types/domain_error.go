@@ -66,9 +66,9 @@ func (e *DomainError) Is(target error) bool {
 func New(op, code, message string, original error) *DomainError {
 	return &DomainError{
 		Original: original,
-		Code:    code,
-		Message: message,
-		Op:      op,
+		Code:     code,
+		Message:  message,
+		Op:       op,
 	}
 }
 

@@ -145,7 +145,7 @@ func TestRealMiddlewareWithOIDC(t *testing.T) {
 	// Skip this test in normal runs since it requires external OIDC provider
 	t.Skip("Skipping test that requires external OIDC provider")
 
- // Create a real JWT service
+	// Create a real JWT service
 	jwtConfig := jwt.Config{
 		SecretKey:     "test-secret-that-is-at-least-32-chars",
 		TokenDuration: 1 * time.Hour,

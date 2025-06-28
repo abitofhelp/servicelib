@@ -22,28 +22,28 @@
 //
 //	// Create a logger
 //	logger := logging.NewContextLogger("my-service")
-//	
+//
 //	// Set up graceful shutdown with a 30-second timeout
 //	ctx, gs := signal.SetupSignalHandler(30*time.Second, logger)
-//	
+//
 //	// Register shutdown callbacks
 //	gs.RegisterCallback(func(ctx context.Context) error {
 //	    logger.Info(ctx, "Closing database connection...")
 //	    return db.Close()
 //	})
-//	
+//
 //	gs.RegisterCallback(func(ctx context.Context) error {
 //	    logger.Info(ctx, "Stopping HTTP server...")
 //	    return server.Shutdown(ctx)
 //	})
-//	
+//
 //	// Start your application
 //	server := startServer()
-//	
+//
 //	// Wait for shutdown signal
 //	<-ctx.Done()
 //	logger.Info(ctx, "Shutdown signal received, stopping application...")
-//	
+//
 //	// The registered callbacks will be executed automatically
 //	// when a shutdown signal is received
 //
@@ -51,14 +51,14 @@
 //
 //	// Just wait for a shutdown signal
 //	ctx := signal.WaitForShutdown(30*time.Second, logger)
-//	
+//
 //	// Start your application
 //	server := startServer()
-//	
+//
 //	// Wait for shutdown signal
 //	<-ctx.Done()
 //	logger.Info(ctx, "Shutdown signal received, stopping application...")
-//	
+//
 //	// Perform shutdown manually
 //	server.Shutdown(context.Background())
 package signal

@@ -30,7 +30,7 @@ type ShutdownCallback func(ctx context.Context) error
 // termination signals, and ensuring that shutdown procedures complete
 // within a specified timeout.
 type GracefulShutdown struct {
-	timeout    time.Duration     // Maximum time to wait for shutdown callbacks
+	timeout    time.Duration          // Maximum time to wait for shutdown callbacks
 	logger     *logging.ContextLogger // Logger for shutdown events
 	callbacks  []ShutdownCallback     // Registered shutdown callbacks
 	callbackMu sync.Mutex             // Mutex for thread-safe callback registration
@@ -86,12 +86,12 @@ func (gs *GracefulShutdown) RegisterCallback(callback ShutdownCallback) {
 //
 // This method starts a goroutine that listens for OS signals and initiates
 // the shutdown process when a signal is received. The shutdown process includes:
-//   1. Canceling the returned context to notify the application
-//   2. Creating a timeout context for shutdown callbacks
-//   3. Executing all registered callbacks concurrently
-//   4. Waiting for callbacks to complete or timeout
-//   5. Logging the shutdown progress
-//   6. Exiting the application when complete
+//  1. Canceling the returned context to notify the application
+//  2. Creating a timeout context for shutdown callbacks
+//  3. Executing all registered callbacks concurrently
+//  4. Waiting for callbacks to complete or timeout
+//  5. Logging the shutdown progress
+//  6. Exiting the application when complete
 //
 // The method handles multiple signals appropriately - if a second signal is
 // received while shutdown is in progress, it forces an immediate exit.
@@ -210,17 +210,17 @@ func WaitForShutdown(timeout time.Duration, logger *logging.ContextLogger) conte
 // Typical usage:
 //
 //	ctx, gs := signal.SetupSignalHandler(30*time.Second, logger)
-//	
+//
 //	// Register shutdown callbacks
 //	gs.RegisterCallback(func(ctx context.Context) error {
 //	    return db.Close()
 //	})
-//	
+//
 //	// Start your application...
-//	
+//
 //	// Wait for shutdown signal
 //	<-ctx.Done()
-//	
+//
 //	// Perform any additional shutdown procedures not registered as callbacks...
 //
 // Parameters:

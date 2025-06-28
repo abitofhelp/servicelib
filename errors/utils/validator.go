@@ -3,8 +3,8 @@
 package utils
 
 import (
-	"github.com/abitofhelp/servicelib/errors/core"
 	"fmt"
+	"github.com/abitofhelp/servicelib/errors/core"
 )
 
 // ErrorCodeValidator validates error codes

@@ -22,10 +22,10 @@
 //
 //	// Get database connection string with a default value
 //	dbConnString := env.GetEnv("DATABASE_URL", "postgres://localhost:5432/mydb")
-//	
+//
 //	// Get application port with a default value
 //	port := env.GetEnv("PORT", "8080")
-//	
+//
 //	// Get log level with a default value
 //	logLevel := env.GetEnv("LOG_LEVEL", "info")
 //

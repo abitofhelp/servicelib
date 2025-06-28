@@ -35,7 +35,7 @@ type Middleware func(http.Handler) http.Handler
 //	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 //	    w.Write([]byte("Hello, World!"))
 //	})
-//	
+//
 //	// Apply middleware in order: logging, then recovery, then request ID
 //	wrappedHandler := middleware.Chain(handler,
 //	    middleware.WithRequestID(context.Background()),

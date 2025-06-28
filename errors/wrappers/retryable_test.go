@@ -14,10 +14,10 @@ func TestRetryableError_Error(t *testing.T) {
 	// Create a retryable error
 	originalErr := errors.New("original error")
 	err := &RetryableError{
-		Original:   originalErr,
-		Attempts:   1,
+		Original:    originalErr,
+		Attempts:    1,
 		MaxAttempts: 3,
-		RetryAfter: 1000,
+		RetryAfter:  1000,
 	}
 
 	// Test the Error method
@@ -29,10 +29,10 @@ func TestRetryableError_Unwrap(t *testing.T) {
 	// Create a retryable error
 	originalErr := errors.New("original error")
 	err := &RetryableError{
-		Original:   originalErr,
-		Attempts:   1,
+		Original:    originalErr,
+		Attempts:    1,
 		MaxAttempts: 3,
-		RetryAfter: 1000,
+		RetryAfter:  1000,
 	}
 
 	// Test the Unwrap method
@@ -43,10 +43,10 @@ func TestRetryableError_Unwrap(t *testing.T) {
 func TestRetryableError_IsRetryable(t *testing.T) {
 	// Create a retryable error with attempts < maxAttempts
 	err1 := &RetryableError{
-		Original:   errors.New("original error"),
-		Attempts:   1,
+		Original:    errors.New("original error"),
+		Attempts:    1,
 		MaxAttempts: 3,
-		RetryAfter: 1000,
+		RetryAfter:  1000,
 	}
 
 	// Test the IsRetryable method with attempts < maxAttempts
@@ -54,10 +54,10 @@ func TestRetryableError_IsRetryable(t *testing.T) {
 
 	// Create a retryable error with attempts = maxAttempts
 	err2 := &RetryableError{
-		Original:   errors.New("original error"),
-		Attempts:   3,
+		Original:    errors.New("original error"),
+		Attempts:    3,
 		MaxAttempts: 3,
-		RetryAfter: 1000,
+		RetryAfter:  1000,
 	}
 
 	// Test the IsRetryable method with attempts = maxAttempts
@@ -65,10 +65,10 @@ func TestRetryableError_IsRetryable(t *testing.T) {
 
 	// Create a retryable error with attempts > maxAttempts
 	err3 := &RetryableError{
-		Original:   errors.New("original error"),
-		Attempts:   4,
+		Original:    errors.New("original error"),
+		Attempts:    4,
 		MaxAttempts: 3,
-		RetryAfter: 1000,
+		RetryAfter:  1000,
 	}
 
 	// Test the IsRetryable method with attempts > maxAttempts
@@ -97,11 +97,11 @@ func TestWrapAsRetryable(t *testing.T) {
 	// Test with standard error
 	originalErr := errors.New("original error")
 	err = WrapAsRetryable(originalErr, 1, 3, 1000)
-	
+
 	// Check that the error is a RetryableError
 	re, ok := err.(*RetryableError)
 	assert.True(t, ok)
-	
+
 	// Check the error properties
 	assert.Equal(t, originalErr, re.Original)
 	assert.Equal(t, 1, re.Attempts)
@@ -119,10 +119,10 @@ func TestIsRetryableError(t *testing.T) {
 
 	// Test with retryable error
 	re := &RetryableError{
-		Original:   errors.New("original error"),
-		Attempts:   1,
+		Original:    errors.New("original error"),
+		Attempts:    1,
 		MaxAttempts: 3,
-		RetryAfter: 1000,
+		RetryAfter:  1000,
 	}
 	assert.True(t, IsRetryableError(re))
 }

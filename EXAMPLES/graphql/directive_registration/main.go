@@ -1,3 +1,6 @@
+//go:build ignore
+// +build ignore
+
 // Copyright (c) 2025 A Bit of Help, Inc.
 
 // Example demonstrating how to register the @isAuthorized directive in a GraphQL server

@@ -111,10 +111,10 @@ func TestStringValueObject_Value(t *testing.T) {
 
 func TestStringValueObject_WithValue(t *testing.T) {
 	tests := []struct {
-		name        string
+		name         string
 		initialValue string
-		newValue    string
-		expected    string
+		newValue     string
+		expected     string
 	}{
 		{"Change value", "test", "new", "new"},
 		{"Change to empty", "test", "", ""},
@@ -125,10 +125,10 @@ func TestStringValueObject_WithValue(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			vo := NewStringValueObject(tt.initialValue)
 			newVo := vo.WithValue(tt.newValue)
-			
+
 			// Original should be unchanged
 			assert.Equal(t, tt.initialValue, vo.Value())
-			
+
 			// New should have new value
 			assert.Equal(t, tt.expected, newVo.Value())
 		})

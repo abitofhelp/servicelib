@@ -33,17 +33,17 @@
 //	func NewEmail(value string) (*Email, error) {
 //	    // Create the value object
 //	    email := &Email{}
-//	    
+//
 //	    // Initialize with validation
 //	    if err := email.Init(value); err != nil {
 //	        return nil, err
 //	    }
-//	    
+//
 //	    // Additional validation
 //	    if !strings.Contains(value, "@") {
 //	        return nil, errors.New("invalid email format")
 //	    }
-//	    
+//
 //	    return email, nil
 //	}
 //

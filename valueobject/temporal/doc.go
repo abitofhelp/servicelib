@@ -18,22 +18,22 @@
 //
 //   - Duration: Represents a duration of time
 //     Example:
-//       duration, err := temporal.NewDuration(5 * time.Minute)
+//     duration, err := temporal.NewDuration(5 * time.Minute)
 //
 //   - Time: Represents a specific point in time
 //     Example:
-//       timeVO, err := temporal.NewTime(time.Now())
+//     timeVO, err := temporal.NewTime(time.Now())
 //
 //   - Version: Represents a semantic version (major.minor.patch)
 //     Example:
-//       version, err := temporal.NewVersion(1, 2, 3)
+//     version, err := temporal.NewVersion(1, 2, 3)
 //
 // Best practices when working with temporal value objects:
-//   1. Never modify temporal value objects; always create new ones
-//   2. Always validate input when creating temporal value objects
-//   3. Use the provided comparison methods instead of comparing fields directly
-//   4. Be aware of time zone implications when working with time value objects
-//   5. Use the provided formatting methods for consistent output
+//  1. Never modify temporal value objects; always create new ones
+//  2. Always validate input when creating temporal value objects
+//  3. Use the provided comparison methods instead of comparing fields directly
+//  4. Be aware of time zone implications when working with time value objects
+//  5. Use the provided formatting methods for consistent output
 //
 // Example usage:
 //

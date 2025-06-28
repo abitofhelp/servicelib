@@ -82,9 +82,9 @@ func TestErrorCodeMapper_ToCategory(t *testing.T) {
 
 func TestErrorCodeMapper_ToMessage(t *testing.T) {
 	tests := []struct {
-		name   string
-		code   core.ErrorCode
-		msg    string
+		name string
+		code core.ErrorCode
+		msg  string
 	}{
 		{
 			name: "not found",

@@ -13,22 +13,22 @@ import (
 
 func TestContextualError_Error(t *testing.T) {
 	tests := []struct {
-		name     string
+		name      string
 		operation string
-		original error
-		want     string
+		original  error
+		want      string
 	}{
 		{
-			name:     "with operation",
+			name:      "with operation",
 			operation: "create_user",
 			original:  errors.New("failed to create user"),
-			want:     "create_user: failed to create user",
+			want:      "create_user: failed to create user",
 		},
 		{
-			name:     "without operation",
+			name:      "without operation",
 			operation: "",
 			original:  errors.New("failed to create user"),
-			want:     "failed to create user",
+			want:      "failed to create user",
 		},
 	}
 
@@ -81,11 +81,11 @@ func TestContextualError_HTTPStatus(t *testing.T) {
 
 func TestContextualError_MarshalJSON(t *testing.T) {
 	ctx := ErrorContext{
-		Operation: "create_user",
-		Code:      "INVALID_INPUT",
+		Operation:  "create_user",
+		Code:       "INVALID_INPUT",
 		HTTPStatus: 400,
 		Details: map[string]interface{}{
-			"field": "email",
+			"field":  "email",
 			"reason": "invalid format",
 		},
 	}

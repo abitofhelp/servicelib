@@ -22,8 +22,8 @@ type ErrorType string
 
 // Standard error types
 const (
-	DomainErrorType    ErrorType = "DOMAIN_ERROR"
-	ValidationErrorType ErrorType = "VALIDATION_ERROR"
-	RepositoryErrorType ErrorType = "REPOSITORY_ERROR"
+	DomainErrorType      ErrorType = "DOMAIN_ERROR"
+	ValidationErrorType  ErrorType = "VALIDATION_ERROR"
+	RepositoryErrorType  ErrorType = "REPOSITORY_ERROR"
 	ApplicationErrorType ErrorType = "APPLICATION_ERROR"
 )

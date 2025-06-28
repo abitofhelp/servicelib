@@ -13,23 +13,23 @@ func DetectErrorType(err error) string {
 	if err == nil {
 		return "nil"
 	}
-	
+
 	if IsValidationError(err) {
 		return "ValidationError"
 	}
-	
+
 	if IsDomainError(err) {
 		return "DomainError"
 	}
-	
+
 	if IsNotFoundError(err) {
 		return "NotFoundError"
 	}
-	
+
 	if IsDatabaseError(err) {
 		return "DatabaseError"
 	}
-	
+
 	return fmt.Sprintf("%T", err)
 }
 
@@ -38,7 +38,7 @@ func FormatErrorWithSource(err error, source string) string {
 	if err == nil {
 		return ""
 	}
-	
+
 	return fmt.Sprintf("[%s] %s", source, err.Error())
 }
 
@@ -47,11 +47,11 @@ func DetectErrorFromContext(ctx context.Context) error {
 	if ctx == nil {
 		return nil
 	}
-	
+
 	if ctx.Err() != nil {
 		return ctx.Err()
 	}
-	
+
 	return nil
 }
 

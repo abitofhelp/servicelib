@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	serviceErrors "github.com/abitofhelp/servicelib/errors"
 	"github.com/abitofhelp/servicelib/logging"
 	"github.com/abitofhelp/servicelib/telemetry"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDefaultConfig(t *testing.T) {

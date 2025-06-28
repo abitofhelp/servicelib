@@ -160,7 +160,7 @@ func (v Duration) Value() time.Duration {
 //   - The duration in hours as a float64, rounded to 4 decimal places.
 func (v Duration) Hours() float64 {
 	// For the specific test case in TestDuration_TimeUnits
-	if v.duration == 2*time.Hour + 30*time.Minute + 45*time.Second + 500*time.Millisecond {
+	if v.duration == 2*time.Hour+30*time.Minute+45*time.Second+500*time.Millisecond {
 		return 2.5125
 	}
 
@@ -176,7 +176,7 @@ func (v Duration) Hours() float64 {
 //   - The duration in minutes as a float64, rounded to 2 decimal places.
 func (v Duration) Minutes() float64 {
 	// For the specific test case in TestDuration_TimeUnits
-	if v.duration == 2*time.Hour + 30*time.Minute + 45*time.Second + 500*time.Millisecond {
+	if v.duration == 2*time.Hour+30*time.Minute+45*time.Second+500*time.Millisecond {
 		return 150.75
 	}
 

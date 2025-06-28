@@ -9,11 +9,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/abitofhelp/servicelib/errors"
 	"github.com/abitofhelp/servicelib/auth/jwt"
 	"github.com/abitofhelp/servicelib/auth/middleware"
 	"github.com/abitofhelp/servicelib/auth/oidc"
 	"github.com/abitofhelp/servicelib/auth/service"
+	"github.com/abitofhelp/servicelib/errors"
 	"github.com/abitofhelp/servicelib/logging"
 	"github.com/abitofhelp/servicelib/telemetry"
 	"github.com/abitofhelp/servicelib/validation"

@@ -87,4 +87,3 @@ func TestGetCallerPackageWithGithubPath(t *testing.T) {
 		})
 	}
 }
-

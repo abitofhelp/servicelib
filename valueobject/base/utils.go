@@ -11,8 +11,9 @@ import (
 // CompareStrings compares two strings case-insensitively.
 // Returns:
 // -1 if a < b
-//  0 if a == b
-//  1 if a > b
+//
+//	0 if a == b
+//	1 if a > b
 func CompareStrings(a, b string) int {
 	a = strings.ToLower(a)
 	b = strings.ToLower(b)
@@ -34,8 +35,9 @@ func StringsEqualFold(a, b string) bool {
 // CompareFloats compares two float64 values with a small epsilon to handle floating point precision.
 // Returns:
 // -1 if a < b
-//  0 if a == b
-//  1 if a > b
+//
+//	0 if a == b
+//	1 if a > b
 func CompareFloats(a, b float64) int {
 	epsilon := 0.0000001
 	diff := a - b

@@ -27,7 +27,7 @@ type Rating struct {
 // NewRating creates a new Rating with validation
 func NewRating(value float64, maxValue float64) (Rating, error) {
 	vo := Rating{
-		value: value,
+		value:    value,
 		maxValue: maxValue,
 	}
 

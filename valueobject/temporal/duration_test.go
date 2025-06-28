@@ -114,7 +114,7 @@ func TestDuration_String(t *testing.T) {
 		},
 		{
 			name:     "Only Seconds",
-			duration: 45*time.Second,
+			duration: 45 * time.Second,
 			expected: "45s",
 		},
 	}

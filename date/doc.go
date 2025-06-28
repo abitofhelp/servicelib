@@ -25,28 +25,28 @@
 //	if err != nil {
 //	    log.Fatalf("Failed to parse date: %v", err)
 //	}
-//	
+//
 //	// Working with the parsed date
 //	if parsedDate.After(time.Now()) {
 //	    fmt.Println("The date is in the future")
 //	}
-//	
+//
 //	// Formatting a date
 //	formattedDate := date.FormatDate(parsedDate)
 //	fmt.Println("Formatted date:", formattedDate)
-//	
+//
 //	// Working with optional dates
 //	var optionalDateStr *string
 //	// optionalDateStr is nil
 //	optionalDate, _ := date.ParseOptionalDate(optionalDateStr)
 //	// optionalDate will be nil
-//	
+//
 //	// Setting a value
 //	dateValue := "2023-05-20T10:15:00Z"
 //	optionalDateStr = &dateValue
 //	optionalDate, _ = date.ParseOptionalDate(optionalDateStr)
 //	// optionalDate will contain the parsed date
-//	
+//
 //	// Formatting an optional date
 //	formattedOptional := date.FormatOptionalDate(optionalDate)
 //	// formattedOptional will be a pointer to the formatted string
