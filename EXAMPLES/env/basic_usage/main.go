@@ -3,7 +3,17 @@
 
 // Copyright (c) 2025 A Bit of Help, Inc.
 
-// Example of basic usage of the env package
+// Package main demonstrates the basic usage of the env package.
+//
+// This example shows how to use the env package to retrieve environment variables
+// with fallback values. It demonstrates:
+// - Getting environment variables with default values
+// - Handling missing environment variables
+// - Working with sensitive information like API keys
+//
+// The env package provides a simple and consistent way to access environment
+// variables across your application, making configuration management easier
+// and more reliable.
 package main
 
 import (

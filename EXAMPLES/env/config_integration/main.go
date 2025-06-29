@@ -3,7 +3,17 @@
 
 // Copyright (c) 2025 A Bit of Help, Inc.
 
-// Example of integrating environment variables with a configuration structure
+// Package main demonstrates how to integrate environment variables with a configuration structure.
+//
+// This example shows a more advanced usage of the env package by:
+// - Creating a configuration structure to hold application settings
+// - Loading environment variables into the configuration structure
+// - Validating the configuration values
+// - Handling complex types like slices from environment variables
+//
+// This pattern is useful for applications that need to manage multiple
+// configuration values in a structured way, while still allowing for
+// easy configuration through environment variables.
 package main
 
 import (
@@ -13,17 +23,42 @@ import (
 	"github.com/abitofhelp/servicelib/env"
 )
 
-// AppConfig holds the application configuration
+// AppConfig holds the application configuration settings loaded from environment variables.
+//
+// This struct centralizes all configuration settings in one place, making it easier
+// to manage and access application configuration. Each field corresponds to a
+// specific environment variable with a default value.
+//
+// Using a struct for configuration provides several benefits:
+// - Type safety for configuration values
+// - Centralized documentation of available settings
+// - Easy validation of the entire configuration
+// - Simple passing of configuration to different parts of the application
 type AppConfig struct {
-	ServerPort  string
-	DatabaseURL string
-	LogLevel    string
-	APIKey      string
-	Environment string
-	Features    []string
+	ServerPort  string   // Port the server will listen on (from SERVER_PORT)
+	DatabaseURL string   // Connection string for the database (from DATABASE_URL)
+	LogLevel    string   // Logging level: debug, info, warn, error (from LOG_LEVEL)
+	APIKey      string   // API key for external service authentication (from API_KEY)
+	Environment string   // Application environment: development, testing, staging, production (from APP_ENV)
+	Features    []string // Enabled features as a slice of strings (from comma-separated FEATURES)
 }
 
-// LoadConfig loads the application configuration from environment variables
+// LoadConfig loads the application configuration from environment variables.
+//
+// This function retrieves values from environment variables using the env package
+// and populates an AppConfig struct with those values. If an environment variable
+// is not set, it uses the specified default value.
+//
+// For the FEATURES environment variable, it expects a comma-separated list of
+// feature names, which it splits into a slice of strings.
+//
+// Returns:
+//   - An AppConfig struct populated with values from environment variables
+//
+// Example usage:
+//
+//	config := LoadConfig()
+//	fmt.Printf("Server will run on port: %s\n", config.ServerPort)
 func LoadConfig() AppConfig {
 	// Load features from a comma-separated environment variable
 	featuresStr := env.GetEnv("FEATURES", "basic,standard")
@@ -39,7 +74,27 @@ func LoadConfig() AppConfig {
 	}
 }
 
-// Validate validates the configuration
+// Validate checks the configuration values for correctness and returns any validation errors.
+//
+// This method performs several validation checks on the AppConfig:
+// - Ensures required fields like APIKey are not empty
+// - Validates that LogLevel is one of the allowed values
+// - Confirms that Environment is a valid environment name
+//
+// Having a dedicated validation method allows for complex validation logic
+// that can't be expressed through simple type constraints.
+//
+// Returns:
+//   - A slice of strings containing error messages, or an empty slice if validation passes
+//
+// Example usage:
+//
+//	config := LoadConfig()
+//	errors := config.Validate()
+//	if len(errors) > 0 {
+//	    fmt.Println("Configuration errors:", errors)
+//	    os.Exit(1)
+//	}
 func (c *AppConfig) Validate() []string {
 	var errors []string
 

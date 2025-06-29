@@ -22,6 +22,7 @@ This project follows the following coding guidelines:
 * Ensure that all readme.md files that have links to examples are consistent and targets the correct example's readme.md file.
 * Standardize naming conventions between .puml files and .svg files to use underscores and lowercase.
 * All dependencies must point inward, never outward.
+* All date and time strings must be in RFC3339 format.
 
   The project must follow these godoc guidelines, which are based on best practices and conventions:
 1. Document Exported Identifiers:

@@ -3,7 +3,17 @@
 
 // Copyright (c) 2025 A Bit of Help, Inc.
 
-// Example usage of creating an Auth instance
+// Package main demonstrates how to create and configure an Auth instance.
+//
+// This example shows the basic steps to initialize the authentication system:
+// - Creating a logger for the auth system to use
+// - Setting up a configuration with appropriate security settings
+// - Initializing the auth instance with the configuration
+//
+// The auth package provides a comprehensive authentication and authorization
+// system that can be used to secure your application's endpoints and resources.
+// This example focuses on the initial setup, which is the foundation for all
+// other authentication features.
 package main
 
 import (

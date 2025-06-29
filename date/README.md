@@ -6,7 +6,7 @@ The Date component provides utilities for working with dates and times in a stan
 
 ## Features
 
-- **Standardized Date Format**: Uses RFC3339 as the standard date format throughout the application
+- **Standardized Date Format**: Uses RFC3339 as the standard date format throughout an application
 - **Date Parsing**: Parse date strings into time.Time objects with proper error handling
 - **Date Formatting**: Format time.Time objects as strings in the standard format
 - **Optional Date Support**: Handle nullable dates with pointer-based functions
