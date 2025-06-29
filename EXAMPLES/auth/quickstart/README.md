@@ -2,13 +2,14 @@
 
 ## Overview
 
-This example demonstrates the quickstart functionality of the ServiceLib auth package.
+This example demonstrates how to quickly set up authentication and authorization using the ServiceLib auth package. It shows the basic steps to create an auth instance, use auth middleware, and perform authorization checks.
 
 ## Features
 
-- **Feature 1**: Description of feature 1
-- **Feature 2**: Description of feature 2
-- **Feature 3**: Description of feature 3
+- **Auth Configuration**: Set up auth configuration with JWT secret key
+- **Auth Middleware**: Protect HTTP endpoints with auth middleware
+- **Authorization Checks**: Check if users are authorized to perform operations
+- **User Context**: Access user information from the request context
 
 ## Running the Example
 
@@ -20,35 +21,59 @@ go run main.go
 
 ## Code Walkthrough
 
-### Key Component 1
+### Auth Configuration and Instance Creation
 
-Description of the first key component in this example:
+This example starts by creating an auth configuration with a JWT secret key and then creating an auth instance:
 
+```go
+// Create a configuration
+config := auth.DefaultConfig()
+config.JWT.SecretKey = "your-secret-key-that-is-at-least-32-characters-long"
+
+// Create an auth instance
+authInstance, err := auth.New(ctx, config, logger)
+if err != nil {
+    logger.Fatal("Failed to create auth instance", zap.Error(err))
+}
 ```
-// Code snippet for key component 1
+
+### Auth Middleware
+
+The example shows how to use the auth middleware to protect an HTTP endpoint:
+
+```go
+http.Handle("/", authInstance.Middleware()(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+    // Handler code
+})))
 ```
 
-### Key Component 2
+### Authorization Checks
 
-Description of the second key component in this example:
+The example demonstrates how to check if a user is authorized to perform an operation:
 
-```
-// Code snippet for key component 2
-```
+```go
+// Check if the user is authorized to perform an operation
+authorized, err := authInstance.IsAuthorized(r.Context(), "read:resource")
+if err != nil {
+    http.Error(w, "Authorization error", http.StatusInternalServerError)
+    return
+}
 
-### Key Component 3
-
-Description of the third key component in this example:
-
-```
-// Code snippet for key component 3
+if !authorized {
+    http.Error(w, "Forbidden", http.StatusForbidden)
+    return
+}
 ```
 
 ## Expected Output
 
+When you run the example and access the HTTP endpoint with a valid JWT token that has the "read:resource" permission, you should see:
+
 ```
-Expected output of the example when run
+Hello, [user-id]
 ```
+
+Where [user-id] is the ID of the authenticated user. If the token is invalid or the user doesn't have the required permission, you'll see an error message.
 
 ## Related Examples
 

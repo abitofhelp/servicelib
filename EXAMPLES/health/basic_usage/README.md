@@ -2,13 +2,14 @@
 
 ## Overview
 
-This example demonstrates the basic_usage functionality of the ServiceLib health package.
+This example demonstrates how to set up a basic health check endpoint using the ServiceLib health package. It shows how to create a health check provider, configure it, and register it with an HTTP server.
 
 ## Features
 
-- **Feature 1**: Description of feature 1
-- **Feature 2**: Description of feature 2
-- **Feature 3**: Description of feature 3
+- **Health Check Provider**: Implement a custom health check provider
+- **Configuration Integration**: Integrate with the config package for application and database information
+- **HTTP Endpoint**: Expose a health check endpoint via HTTP
+- **Structured Health Information**: Return structured health information in the response
 
 ## Running the Example
 
@@ -20,35 +21,78 @@ go run main.go
 
 ## Code Walkthrough
 
-### Key Component 1
+### Health Check Provider Implementation
 
-Description of the first key component in this example:
+The example implements a custom health check provider that satisfies the health.HealthCheckProvider interface:
 
+```go
+// MyHealthProvider implements the health.HealthCheckProvider interface
+type MyHealthProvider struct{}
+
+// GetRepositoryFactory returns a mock repository factory
+func (p *MyHealthProvider) GetRepositoryFactory() any {
+    // In a real application, this would return an actual repository factory
+    // For this example, we'll just return a non-nil value
+    return &struct{}{}
+}
 ```
-// Code snippet for key component 1
+
+### Configuration Setup
+
+The example sets up configuration objects that implement the required interfaces:
+
+```go
+// MyConfig implements the config.Config interface
+type MyConfig struct{}
+
+// GetApp returns the application configuration
+func (c *MyConfig) GetApp() config.AppConfig {
+    return &MyAppConfig{}
+}
+
+// GetDatabase returns the database configuration
+func (c *MyConfig) GetDatabase() config.DatabaseConfig {
+    return &MyDatabaseConfig{}
+}
 ```
 
-### Key Component 2
+### Health Check Handler Creation and Registration
 
-Description of the second key component in this example:
+The example creates a health check handler and registers it with an HTTP server:
 
-```
-// Code snippet for key component 2
-```
+```go
+// Create a health check provider
+provider := &MyHealthProvider{}
 
-### Key Component 3
+// Create a configuration
+cfg := &MyConfig{}
 
-Description of the third key component in this example:
+// Create a health check handler
+healthHandler := health.NewHandler(provider, logger, cfg)
 
-```
-// Code snippet for key component 3
+// Register the health check handler
+http.HandleFunc("/health", healthHandler)
 ```
 
 ## Expected Output
 
+When you run the example and access the health check endpoint at http://localhost:8080/health, you should see a JSON response similar to:
+
+```json
+{
+  "status": "UP",
+  "version": "1.0.0",
+  "name": "my-service",
+  "environment": "development",
+  "database": {
+    "status": "UP",
+    "type": "postgres",
+    "name": "mydb"
+  }
+}
 ```
-Expected output of the example when run
-```
+
+Note: The example doesn't actually start the HTTP server, but it shows how to set up the health check endpoint.
 
 ## Related Examples
 

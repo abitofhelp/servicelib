@@ -2,13 +2,14 @@
 
 ## Overview
 
-This example demonstrates the cors functionality of the ServiceLib middleware package.
+This example demonstrates how to use the CORS (Cross-Origin Resource Sharing) middleware from the ServiceLib middleware package to enable cross-origin requests to your API endpoints.
 
 ## Features
 
-- **Feature 1**: Description of feature 1
-- **Feature 2**: Description of feature 2
-- **Feature 3**: Description of feature 3
+- **CORS Middleware**: Apply CORS headers to API responses
+- **Request Context**: Add request context to handlers
+- **API Endpoint**: Create a simple JSON API endpoint
+- **Preflight Requests**: Handle OPTIONS preflight requests automatically
 
 ## Running the Example
 
@@ -20,34 +21,51 @@ go run main.go
 
 ## Code Walkthrough
 
-### Key Component 1
+### API Handler
 
-Description of the first key component in this example:
+Create a simple API handler that returns a JSON response:
 
-```
-// Code snippet for key component 1
-```
+```go
+apiHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+    // Set content type
+    w.Header().Set("Content-Type", "application/json")
 
-### Key Component 2
-
-Description of the second key component in this example:
-
-```
-// Code snippet for key component 2
+    // Return a simple JSON response
+    w.Write([]byte(`{"message":"This is a CORS-enabled API endpoint"}`))
+})
 ```
 
-### Key Component 3
+### CORS Middleware
 
-Description of the third key component in this example:
+Apply the CORS middleware to the API handler:
 
+```go
+// Apply CORS middleware to the handler
+corsHandler := middleware.WithCORS(apiHandler)
 ```
-// Code snippet for key component 3
+
+### Request Context
+
+Register the handler with request context:
+
+```go
+// Register the handler with request context
+http.Handle("/api", middleware.WithRequestContext(corsHandler))
 ```
 
 ## Expected Output
 
+When you run the example, you'll see instructions for testing the CORS functionality:
+
 ```
-Expected output of the example when run
+Server starting on :8080
+API endpoint: http://localhost:8080/api
+
+To test CORS, you can use curl:
+  curl -H "Origin: http://example.com" -v http://localhost:8080/api
+
+Or test a preflight request:
+  curl -H "Origin: http://example.com" -H "Access-Control-Request-Method: POST" -H "Access-Control-Request-Headers: Content-Type" -X OPTIONS -v http://localhost:8080/api
 ```
 
 ## Related Examples
